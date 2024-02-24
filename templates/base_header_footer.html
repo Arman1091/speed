@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>SPEED Services d'usinage</title>
+  <meta content="SPEED Services usinage : Usineur de plaques plastiques et panneaux composites pour professionnels sur Marseille, Montpellier, Avignon, Sisteron, Lyon, Corse et régions PACA, Occitanie et Auvergne Rhone Alpes. Choix des matières, éventail des couleurs, gamme de formats et approvisionnement rapide." name="description">
+  <meta content="decoupe, usinage, Plexi, Marseille, Montpellier, Sisteron, Lyon, Avignon, Occitanie, PACA, Auvergne, rhone, alpes, corse, NEWBOND, HYLITE, recyclable, ecologique,  VISCOM, PVC, Expansé, PPA, PMMA, Coulé, Perspex, Extrudé, Polycarbonate  " name="keywords">
+  
+  <!-- <meta property="og:title" content="SPEED Services d'usinage Marseille, Montpellier, ..." />
+  <meta property="og:description" content="SPEED Services d'usinage : Usineur de plaques plastiques et panneaux composites pour professionnels sur Marseille, Montpellier, Avignon, Sisteron, Lyon, Corse et régions PACA, Occitanie et Auvergne Rhone Alpes. Choix des matières, éventail des couleurs, gamme de formats et approvisionnement rapide."/>
+  <meta property="og:image" content="https://www.speed-plastiques.fr/img/logo.png"/>
+  <meta property="og:url" content="https://www.speed-plastiques.fr/index.html"/>
+  <meta property="og:type" content="website" /> -->
+
+  <!-- Favicons -->
+  <link   href="{{ url_for('static', filename= 'img/logo/logo.png') }}" rel="icon">
+  <link  href="{{ url_for('static', filename= 'img/logo/logo.png') }}" rel="apple-touch-icon"> 
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> -->
+  <!-- Vendor CSS Files -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">  -->
+  <link href="{{ url_for('static', filename= 'includes/css/all.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename= 'includes/css/animate.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename= 'includes/css/aos.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename= 'includes/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename= 'includes/css/bootstrap-icons.css') }}" rel="stylesheet"> 
+  <link href="{{ url_for('static', filename= 'includes/css/boxicons.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename= 'includes/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename= 'includes/css/swiper-bundle.min.css') }}" rel="stylesheet">
+   <!-- Template Main CSS File -->
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+
+  <!-- Template Main CSS File -->
+
+</head>
+
+<body>
+  {% block body %}
+  {% endblock %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+  <script src="{{url_for('static', filename='includes/js/purecounter_vanilla.js')}}"></script>
+  <script src="{{url_for('static', filename='includes/js/aos.js')}}"></script>
+  <script src="{{url_for('static', filename='includes/js/bootstrap.bundle.min.js')}}"></script>
+  <script src="{{url_for('static', filename='includes/js/glightbox.min.js')}}"></script>
+  <script src="{{url_for('static', filename='includes/js/swiper-bundle.min.js')}}"></script>
+
+  <!-- Template Main JS File -->
+  <script src="{{url_for('static', filename='js/script.js')}}"></script>
+</body>
+
+</html>

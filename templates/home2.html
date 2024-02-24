@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block contenue %}
+<div id="usinage_container" class="container " style="margin-top: 20vh;">
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="mt-5">
+                <label for="matiere"><strong>Choisissez une matiere</strong></label>
+                <select id="matiere" class="form-select mt-1" aria-label="Default select example" style="width: 60%;">
+
+                    {% for item in eps %}
+                    <option value='{{ item[1].value}}'>{{ item[1].value}}</option>
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+            <div class="mt-5">
+                <label for="type_matiere"><strong>Choisissez type de la matiere</strong></label>
+                <select id="type_matiere" class="form-select mt-1" aria-label="Default select example" style="width: 60%;">
+
+                    {% for item in eps %}
+                    <option value='{{ item[1].value}}'>{{ item[1].value}}</option>
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+            <div class="mt-5">
+                <label for="type_usinage"><strong>Choisissez type d'usinage'</strong></label>
+                <select id="type_usinage" class="form-select mt-1" aria-label="Default select example" style="width: 60%;">
+
+                    {% for item in eps %}
+                    <option value='{{ item[1].value}}'>{{ item[1].value}}</option>
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+            <div class="mt-5">
+                <label for="epp"><strong>L'épaisseur de la matiere</strong></label>
+                <select id="epp" class="form-select mt-1" aria-label="Default select example" style="width: 60%;">
+
+                    {% for item in eps %}
+                    <option value='{{ item[1].value}}'>{{ item[1].value}}</option>
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+
+
+            <!-- <h3>Remplissez les chambs</h3> -->
+
+            <!-- <div class="accordion" id="accordionExample">
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Accordion Item #2
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the second item's accordion body.</strong> It is hidden by default,
+                                until the collapse plugin adds the appropriate classes that we use to style each
+                                element. These classes control the overall appearance, as well as the showing and
+                                hiding via CSS transitions. You can modify any of this with custom CSS or overriding
+                                our default variables. It's also worth noting that just about any HTML can go within
+                                the <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- HTML -->
+
+            <div id="drop-area" class="mt-4">
+                <h3 class="drop-text">Glissez et déposez un fichier DXF ici</h3>
+                <input type="file" id="fileInput" accept=".dxf" />
+                <div id="result-container"></div>
+            </div>
+            <div class="mt-2">
+                <a href="{{ url_for('static', filename= 'files/fact.pdf') }}" download>Télécharger le devis <img src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}" alt="Logo de MDN" style="width: 35px;" />
+                </a>
+            </div>
+            <div class="row mt-5">
+                <div class="col-6 bg-light">
+                    <p><strong>prix total:</strong></p>
+
+                </div>
+                <div class="col-3 bg-light">
+                    <p>HT</p>
+
+                    <p> <strong id="prix_lin_ht">0</strong>€</p>
+
+                </div>
+                <div class="col-3 bg-light">
+                    <p>TTC</p>
+
+                    <p> <strong id="prix_lin_ttc">0</strong>€</p>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+            <iframe class="img_usinage" src="{{ url_for('static', filename= 'img/usinage/matiers/'+matiere+'.jpg') }}"
+                style="height: 55vh;width: 80%;margin-left: 10%;"></iframe>
+            <!-- <img class="img_usinage" src="{{ url_for('static', filename= 'img/usinage/matiers/'+matiere+'.jpg') }}" alt="Los Angeles "
+             style="height: 45vh;width: 80%;margin-left: 25px;">  -->
+        </div>
+        <div class="row mt-3">
+            <div class="accordion col-md-6" id="accordionExample">
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                La structure de prix
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <p>Prix matériel</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong id="prix_mat_ht">0€ </strong>&nbsp;HT</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong id="prix_mat_ttc">0€ </strong>&nbsp; TTC</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <p>Frais de découpe</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong id="frais_decoup_ht">3.5€ </strong>&nbsp;HT</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong id="frais_decoup_ttc">4.5€ </strong>&nbsp;TTC</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <p>Supplément de forme</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong>Gratuit </strong></p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong>Gratuit </strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3 text-center">
+                <a class=" btn btn-primary btn-block bg-success mails"
+                    href="mailto:agence.lyon@speed-plastiques.fr">Envoyer usinage</a>
+            </div>
+            <!-- <div class="mt-4">
+                <button class=" bg-primary">Telecharger le devis</button>
+            </div> -->
+            <div>
+
+
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
