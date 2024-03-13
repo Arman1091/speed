@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask,redirect,url_for
 
 class Role(db.Model):
     __tablename__ = 'role'
@@ -223,6 +224,7 @@ class Type(db.Model):
     rel_type_bridge = relationship("Bridge", backref = "type")
 
     #property
+    
     def _data (self):
         return{
             'id':self.id,
@@ -304,9 +306,10 @@ class Bridge(db.Model):
 
 
 
-def get_data(matiere,name):
-    result =[]
-    filtered = db.session.query(Matiere,Type,Epaisseur, Bridge,Type_usinage).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(name = matiere).join(Type, Type.id == Bridge.type_id ).filter_by(name = name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).all() 
+def get_epaisseurs(matiere_id,type_id):
+
+    return db.session.query(Epaisseur).join(Bridge,Bridge.epaisseur_id== Epaisseur.id ).filter(Bridge.matiere_id == matiere_id, Bridge.type_id == type_id).all() 
+    
     # if matiere == "Pvc":
     #     filtered = db.session.query(Matiere,Type,Epaisseur, Bridge,Type_usinage).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(name = mt_name).join(Type, Type.id == Bridge.type_id ).filter_by(name = name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).all() 
     # elif matiere == "Newbond":
@@ -315,19 +318,20 @@ def get_data(matiere,name):
     #            filtered = db.session.query(Matiere,Type,Epaisseur, Bridge,Type_usinage).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(name = mt_name).join(Type, Type.id == Bridge.type_id ).filter_by(name = name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).all() 
     # elif matiere == "Polycarbonat":
     #            filtered = db.session.query(Matiere,Type,Epaisseur, Bridge,Type_usinage).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(name = mt_name).join(Type, Type.id == Bridge.type_id ).filter_by(name = name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).all() 
-    for row in  filtered : 
-            result.append(row._data) 
+    # for row in  filtered : 
+    #         result.append(row._data) 
 
     return result
 
 
 
 def get_prix(mt,mt_name, epaisseur,type_usinage):
+    print(type_usinage)
     result =[]
     
     # filtered = db.session.query(Pvc_bridge.prix_limeaire,Pvc_bridge.prix_matiere  ).join(Epaisseur,Epaisseur.id==Pvc_bridge.epaisseur_id).filter_by(value = epaisseur).join(Pvc, Pvc.id == Pvc_bridge.pvc_id ).filter_by(name = mt_name).first()
-    filtered = db.session.query(Bridge.prix_limeaire,Bridge.prix_matiere ).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(name = mt).join(Type, Type.id == Bridge.type_id ).filter_by(name = mt_name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).filter_by(id = epaisseur).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).filter_by(id = type_usinage).first() 
-       
+    filtered = db.session.query(Bridge.prix_limeaire,Bridge.prix_matiere ).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(id = mt).join(Type, Type.id == Bridge.type_id ).filter_by(id = mt_name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).filter_by(id = epaisseur).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).filter_by(id = type_usinage).first() 
+    print(filtered)
     # r= Pvc.query.all()
     # bridge_name = matiere+'_briddge'
     # print(bridge_name)
@@ -346,25 +350,124 @@ def get_clients(current_user):
         return result
 
 def get_en_attentes(current_user):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(Client_data,Commande.client_id== Client_data.client_id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="en_attente").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="en_attente").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    
     result = []
     for row in  data : 
         result.append(row._data) 
     return result
-
+def get_all_attentes():
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="en_attente").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    
+    result = []
+    for row in  data : 
+        result.append(row._data) 
+    return result
+    
+def get_en_attente_by_id(id):
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Client_data.ville,Client_data.cp,Client_data.addresse,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).filter(Commande.id ==id).first() 
+    
+    result = []
+   
+    result.append(data._data) 
+    return data
 def change_confirmer(changed_id):
     current_commande = Commande.query.filter_by(id= changed_id).first()
     current_commande.statut_id=2
     db.session.commit()
+def change_livré(changed_id):
+    current_commande = Commande.query.filter_by(id= changed_id).first()
+    current_commande.statut_id=4
+    db.session.commit()
 
 def get_confirmes(current_user):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(Client_data,Commande.client_id== Client_data.client_id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="confirmé").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="confirmé").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
     result = []
     for row in  data : 
         result.append(row._data) 
     return result
+def get_all_confirmes():
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="confirmé").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    result = []
+    for row in  data : 
+        result.append(row._data) 
+    return result
+
+def get_usinés(current_user):
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="usiné").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    result = []
+    for row in  data : 
+        result.append(row._data) 
+    return result
+def get_all_usinés():
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username,User.username).join(Client,Commande.client_id== Client.id ).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="usiné").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    result = []
+    for row in  data : 
+        result.append(row._data) 
+    return result
+
+def get_livré(current_user):
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="livré").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    result = []
+    for row in  data : 
+        result.append(row._data) 
+    return result
+def get_all_livré():
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="livré").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    result = []
+    for row in  data : 
+        result.append(row._data) 
+    return result
+
+def get_confirmé_by_id(id):
+    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client_data.name,Client_data.ville,Client_data.cp,Client_data.addresse,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).join(Client_data,Commande.client_id== Client_data.client_id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).filter(Commande.id ==id).first() 
+    
+    result = []
+   
+    result.append(data._data) 
+    return data
 
 def change_usiner(changed_id):
     current_commande = Commande.query.filter_by(id= changed_id).first()
     current_commande.statut_id=3
     db.session.commit()
+def  supprimer_commande_attente(id):
+    row_to_delete = Commande.query.get(id)
+    if row_to_delete:
+        # Delete the row
+        db.session.delete(row_to_delete)
+        db.session.commit()
+         # Redirect to another route or page after deletion
+    else:
+        return "Row not found", 404
+        
+
+def  supprimer_commande_confirmé(id):
+    row_to_delete = Commande.query.get(id)
+    if row_to_delete:
+        # Delete the row
+        db.session.delete(row_to_delete)
+        db.session.commit()
+         # Redirect to another route or page after deletion
+    else:
+        return "Row not found", 404
+
+def  supprimer_commande_usiné(id):
+    row_to_delete = Commande.query.get(id)
+    if row_to_delete:
+        # Delete the row
+        db.session.delete(row_to_delete)
+        db.session.commit()
+         # Redirect to another route or page after deletion
+    else:
+        return "Row not found", 404
+
+         
+def get_types_by_matiere(mat_id):
+    return db.session.query(Type).join(Bridge,Bridge.type_id== Type.id ).filter(Bridge.matiere_id == mat_id).all() 
+
+def get_types_usinage(mat_id, type_id, epp_id):
+    return db.session.query(Type_usinage).join(Bridge,Bridge.usinage_id== Type_usinage.id ).filter(Bridge.matiere_id == mat_id, Bridge.type_id == type_id,Bridge.epaisseur_id== epp_id).all()
+
+def get_client_detailles_by_id(client_id):
+    return db.session.query(Client,Client_data).join(Client_data,Client_data.client_id == Client.id).filter(Client.id == client_id).first() 

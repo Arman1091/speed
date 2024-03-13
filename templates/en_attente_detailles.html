@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+
+{% block contenue %}
+
+<div id="usinage_container" class="container ">
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div id="perso_detailles" class="row">
+                <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
+                    <p id="mt_name">{{name}}</p>
+                    </h1> -->
+                <div class="row  ">
+                    <div class="col col-md-4">
+                        <h5>Représentant:</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <h5  class="text-info text-start"> {{data[16]}}</h5>
+                    </div>
+                </div>
+                <!-- <div class="row  ">
+                    <div class="col col-md-4">
+                        <h5>Client:</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <h5 class="text-secondary">shgfdhsdgs dsgsd sd</h5>
+                    </div>
+                
+                </div> -->
+            </div>
+            <div class="row border border-success mt-3" style="padding: 10px; border-radius: 5px;">
+                <h3 class=" mt-4 text-center">Adresse de livraison</h3>
+                <h5 class="mt-4 text-dark"><strong> {{data[6]}}</strong></h5>
+                <div>
+                    <div>
+                        
+                        <input  type="text" value=  '{{data[9]}}' style="width: 100%">
+                        <!-- <input type="text" value="AVENUE DE JAQUES" style="width: 70%;"> -->
+                    </div>
+                    <div class="mt-3">
+                        <input type="text" class="text-center" value={{data[8]}} style="width: 25%; border-radius: 1px;">
+                        <input type="text" value='{{data[7]}}' style="width: 65%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- HTML -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <button id="file_btn_attente" type="button"
+                        class=" case_btn btn  active-case border  border-secondary  "
+                        style="padding-left: 20px;padding-right: 20px"><i class="bi bi-folder fs-1"></i>
+                        <p>Fichier</p>
+                    </button>
+
+                </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <span id="tcrg_dxf" confirm onclick="telecharger_pdf('{{user.username}}')">Télécharger le DXF <img
+                            src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}" alt="Logo de pdf"
+                            style="width: 35px;" />
+                    </span>
+                </div>
+                <!-- <div class="col-4">
+                    <button id="text_btn_attante" type="button" class="case_btn btn  border  border-secondary  "
+                        style="padding-left: 20px;padding-right: 20px"><i class="bi bi-fonts fs-1"></i>
+                        <p>Text</p>
+                    </button>
+
+                </div> -->
+
+
+            </div>
+            <section class="intro mt-4">
+                <div class="bg-image h-100" style="background-color: #6095F0;">
+                    <div class="mask d-flex align-items-center h-100">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-12">
+                                    <div class="card shadow-2-strong" style="background-color: #f5f7fa;">
+                                        <div class="card-header">
+                                            <h4 class="text-center">Commande detailles</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-borderless mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">MATIERE</th>
+                                                            <th scope="col">TYPE</th>
+                                                            <th scope="col">EPAISSEUR</th>
+                                                            <th scope="col">QTE</th>
+                                                            <th scope="col">FIN</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+
+                                                            <td id="matiere_detailles">{{data[0]}}</td>
+                                                            <td id="matiere_type_detailles">{{data[1]}}</td>
+                                                            <td id="epp_detailles">{{data[12]}} mm</td>
+                                                            <td id="qte_detailles">{{data[13]}}</td>
+                                                            <td
+                                                                class="d-flex justify-content-center align-content-center">
+
+                                                                <input type="date" value= {{data[5]}}
+                                                                    class="form-control" id="dateeInput" name="date">
+
+
+
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- <tr>
+                                      <th scope="row">
+                                        <div class="form-check">
+                                          <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault5" checked/>
+                                        </div>
+                                      </th>
+                                      <td>Charde Marshall</td>
+                                      <td>Regional Director</td>
+                                      <td>36</td>
+                                      <td>San Francisco</td>
+                                      <td>
+                                        <button type="button" class="btn btn-danger btn-sm px-3">
+                                          <i class="fas fa-times"></i>
+                                        </button>
+                                      </td>
+                                    </tr> -->
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div id="total_prix_detaille"
+                                                class=" mt-5  d-flex justify-content-between align-items-center">
+                                                <div class="bg-light col-4">
+                                                    <h5><strong>Total prix:</strong></h5>
+
+                                                </div>
+                                                <div
+                                                    class=" col-4 bg-light d-flex flex-column align-items-center align-content-center">
+
+                                                    <div>
+                                                        <h6>HT</h6>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-center align-items-center">
+                                                        <input  class="text-center" id="prix_detaille_ht" value={{prix_total_ht}} style="width: 60%; max-width: 120px;min-width: 30px; "><span>€</span>
+                                                    </div>
+
+
+                                                </div>
+                                                <div
+                                                    class=" col-4 bg-light d-flex flex-column align-items-center align-content-center">
+
+                                                    <div>
+                                                        <h6>TTC</h6>
+                                                    </div>
+
+                                                    <div class="col-4 d-flex justify-content-center align-items-center" style="width: 100%;">
+                                                        <input class="text-center" id="prix_detaille_ttc" value={{prix_total_ttc}}  style="width: 60%; max-width: 120px;min-width: 30px;"><span>€</span>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- <div>
+                <label class="mt-3" for="qte"><strong>Qte</strong></label>
+                <input id="qte" value=1 min="1">
+            </div> -->
+
+            <div id="prix_detailles" class="row   mt-3">
+
+                <div class="accordion" id="accordionAttente">
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseAttente" aria-expanded="false"
+                                    aria-controls="collapseAttente">
+                                    Description
+                                </button>
+                            </h2>
+                            <div id="collapseAttente" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                data-bs-parent="#accordionAttente">
+                                <div class="accordion-body">
+                                    <div>
+                                        <div class="p-2 border-2 border-primary border-radius-2">
+                                            <h4 class="text-success ">{{data[16]}}</h4>
+                                            <textarea output="outputText" class="form-control" rows=5 wrap=on
+                                                readonly>dsdffffffffffffffffffffffff sdfffffffffffff dfffffffff dfffffffffffffffffffffffffffffffsdsd</textarea>
+                                        </div>
+
+                                    </div>
+
+                                    <div>
+                                        <h6>Votre message</h6>
+                                        <textarea name="message" class="form-control" rows="3" wrap=on
+                                            placeholder="floor/door lock code/etc."></textarea>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="mt-4">
+                    <button class=" bg-primary">Telecharger le devis</button>
+                </div> -->
+            </div>
+        </div>
+
+
+        <div class="col-md-6">
+            <iframe class="img_usinage mt-5" src="{{ url_for('static', filename= 'img/usinage/matiers/Pvc.jpg') }}"
+                style="height: 55vh;width: 30%;margin-left: 5%; position: fixed;"></iframe>
+
+        </div>
+
+
+
+        <div id="envoi_div" class="container">
+
+            <div class="mb-3">
+                <label for="dateInput" class="form-label">Date de livraison:</label>
+                <input type="date" class="form-control" id="dateInput" name="date">
+            </div>
+            <div class="mb-3">
+                <select id="cient_select" class="form-select custom-select" aria-label="Default select example">
+                    <!-- <option selected>Select une slient</option> -->
+                    {% for item in clients %}
+
+                    <option value='{{ item[1].id}}'>{{ item[2].name}}</option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+
+
+
+        </div>
+        
+        <div class="d-flex justify-content-center align-items-center mt-5">
+            <button type="button" class="btn btn-success" onclick="confirmation(' {{data[15]}}')">Confirmer</button>
+            <button type="button" class="btn btn-danger" style="margin-left: 10px;" onclick="supprimer_attente(' {{data[15]}}')" >Suprimer</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
