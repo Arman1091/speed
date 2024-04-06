@@ -2,7 +2,7 @@ from flask import Flask,Blueprint, render_template,request,jsonify,flash,send_fi
 
 # from controllers import matiere
 # from models.models import Pvc
-from models  import models
+# from models  import models
 
 from models.models   import User, Matiere,get_epaisseurs,get_prix, get_clients,get_en_attentes, get_en_attente_by_id, get_confirmes,get_usinés,get_livré,get_confirmé_by_id,change_confirmer, change_usiner, change_livré,supprimer_commande_attente,supprimer_commande_confirmé,supprimer_commande_usiné,get_types_by_matiere,get_types_usinage,Matiere,Commande,get_all_attentes,get_all_confirmes,get_all_usinés,get_all_livré
 from flask_login import login_user, login_required, logout_user, current_user

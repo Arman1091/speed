@@ -6,6 +6,8 @@ from flask_login import UserMixin
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask,redirect,url_for
+from sqlalchemy.types import Boolean, String
+import sqlalchemy
 
 class Role(db.Model):
     __tablename__ = 'role'
@@ -25,7 +27,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username=db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String, unique=True)
+    email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255), nullable=False, server_default='')
     role_id = db.Column(db.Integer , ForeignKey('role.id'),nullable=False)
     rel_user_client = relationship("Client", backref = "user")
@@ -78,6 +80,7 @@ class Client_data(db.Model):
     name = db.Column(db.String(80), nullable=False)
     ville = db.Column(db.String(80), nullable=False)
     cp = db.Column(db.Integer(), nullable=False)
+    numero = db.Column(db.Integer(), nullable=True)
     addresse = db.Column(db.String(256), nullable=False)
     
       #property
@@ -88,7 +91,8 @@ class Client_data(db.Model):
             'name':self.name,
             'ville':self.ville,
             'cp':self.cp,
-            'addresse':self.adressse
+            'addresse':self.adressse,
+            'numero':self.numero
         }
     def save (self):
         db.session.add (self)
@@ -137,17 +141,26 @@ class Commande(db.Model):
     count = db.Column(db.Integer ,default=1,nullable=False)
     prix_matiere = db.Column(db.Float , nullable=False)
     prix_limeaire = db.Column(db.Float, nullable=False)
-    name_dxf = db.Column(db.String(256), nullable=False )
+    name_dxf = db.Column(db.String(256), nullable=True )
+    text = db.Column(db.String(256), nullable=True )
     description_commercial_responsable = db.Column(db.String(1000), nullable=True)
     description_responsable_comercial = db.Column(db.String(1000), nullable=True)
-    description_responsable_usinage = db.Column(db.String(1000), nullable=True)
     date_envoi = db.Column(Date, nullable=False)
     date_confirmation = db.Column(Date, nullable=True)
     date_usinage = db.Column(Date, nullable=True)
     date_fin = db.Column(Date, nullable=False)
-    responsable_user = db.Column(db.String(100),nullable=True )
-    usinage_user = db.Column(db.String(100),nullable=True )
-    assistante_user = db.Column(db.String(100),nullable=True )
+    responsable = db.Column(db.String(100),nullable=True )
+    assistante = db.Column(db.String(100),nullable=True )
+    is_livr = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.true())
+    ville_livr = db.Column(db.String(80), nullable=True)
+    cp_livr = db.Column(db.Integer(), nullable=True)
+    numero_livr = db.Column(db.Integer(), nullable=True)
+    addresse_livr = db.Column(db.String(256), nullable=True)
+    is_vu_attente = db.Column(db.Boolean(),server_default=sqlalchemy.sql.expression.false())
+    is_vu_confirmé = db.Column(db.Boolean(),server_default=sqlalchemy.sql.expression.false())
+    is_vu_usiné = db.Column(db.Boolean(),server_default=sqlalchemy.sql.expression.false())
+    is_form = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.true())
+
 
     
       #property
@@ -167,15 +180,23 @@ class Commande(db.Model):
             'name_dxf':self.name_dxf,
             'description_commercial_responsable':description_commercial_responsable,
             'description_responsable_comercial': description_responsable_comercial,
-            'description_responsable_usinage':description_responsable_usinage,
             'date_envoi':self.date_envoi,
             'date_confirmation':self.date_confirmation, 
             'date_usinage':self.date_usinage,
             'date_fin':self.date_fin,
-            'responsable_user':responsable_user,
-            'usinage_user':usinage_user,
-            'assistante_user':assistante_user
+            'responsable':self.responsable,
+            'assistante':self.assistante,
+            'is_livr':self.is_livr,
+            'ville_livr':self.ville_livr,
+            'cp_livr':self.cp_livr,
+            'numero_livr':self.numero_livr,
+            'addresse_livr':self.addresse_livr,
+            'is_vu_attente':self.is_vu_attente,
+            'is_vu_confirmé': self.is_vu_confirmé,
+            'is_vu_usiné':self.is_vu_usiné,
+            'is_form':self.is_form
         }
+    
     
     def save (self):
         db.session.add (self)
@@ -203,7 +224,7 @@ class Matiere(db.Model):
     id = db.Column(db.Integer, primary_key=True , autoincrement=True)
     name = db.Column(db.String(50), nullable=False )
     rel_matiere_bridge = relationship("Bridge", backref = "matiere")
-   
+    rel_matiere_bridge = relationship("BridgeLettres", backref = "matiere")
 
     #property
     def get_all_matiere():
@@ -252,6 +273,7 @@ class Epaisseur(db.Model):
     value = db.Column(db.Integer, nullable=False, unique=True)
     rel_essaisseur_bridge = relationship("Bridge", backref = "epaisseur")
     rel_essaisseur_commande = relationship("Commande", backref = "epaisseur")
+    rel_essaisseur_commande = relationship("BridgeLettres", backref = "epaisseur")
 
     #property
     def _data (self):
@@ -279,7 +301,21 @@ class Type_usinage(db.Model):
         db.session.add (self)
         db.session.commit()
 
+class Hauteur(db.Model):
+    __tablename__ = "hauteur"
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
+    value = db.Column(db.Integer, nullable=False)
+    rel_essaisseur_commande = relationship("BridgeLettres", backref = "hauteur")
 
+    #property
+    def _data (self):
+        return{
+            'id':self.id,
+            'value':self.value
+        }
+    def save (self):
+        db.session.add (self)
+        db.session.commit()
 class Bridge(db.Model):
     __tablename__ = 'bridge'
 
@@ -304,7 +340,29 @@ class Bridge(db.Model):
         db.session.add (self)
         db.session.commit()
 
+class BridgeLettres(db.Model):
+    __tablename__ = 'bridge_lettres'
+     
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
+    matiere_id = db.Column(db.Integer,ForeignKey('matiere.id') )
+    epaisseur_id = db.Column(db.Integer , ForeignKey('epaisseur.id') )
+    hauteur_id = db.Column(db.Integer,ForeignKey('hauteur.id'))
+    type_matiere = db.Column(db.String(100), nullable=True )
+    prix = db.Column(db.Float , nullable=False)
 
+
+     #property
+    def _data (self):
+        return{
+            'matiere_id':self.matiere_id,
+            'epaisseur_id':self.epaisseur_id,
+            'hauteur_id':self.hauteur_id,
+            'type_matiere':self.type_matiere,
+            'prix':self.prix
+        }
+    def save (self):
+        db.session.add (self)
+        db.session.commit()
 
 def get_epaisseurs(matiere_id,type_id):
 
