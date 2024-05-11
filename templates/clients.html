@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block contenue %}
+<a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newClientForm()">Nouvelle client </a>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Success!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif%}
+{% endwith %}
+<table id="clients_table" class="table">
+    <div class="mt-4">
+        <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
+            <p id="mt_name">{{name}}</p>
+            </h1> -->
+        <label for="representant"><strong>Représentant</strong></label>
+        <select id="representant" class="form-select form-select-lg mb-3"
+            aria-label=".form-select-sm nouvelle_utilisateur" style="width: 30%;">
+            <!-- <option selected>Select le matiere</option> -->
+            {% for item in representants%}
+            <option value='{{ item.id}}'>{{ item.username}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <thead class="thead-light">
+        <tr>
+            <th scope="row"></th>
+            <th scope="col">Représentant</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Address</th>
+            <th scope="col">Cp</th>
+            <th scope="col">Ville</th>
+            <th scope="col">Email</th>
+            <th scope="col">Tel</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in clients %}
+        <tr>
+
+
+
+            <td>*</th>
+            <td>{{item[5]}}</td>
+            <td>{{item[0]}}</td>
+            <td> <span class="numero_voie_edit_span">{{item[3]}}</span > &nbsp <span class="name_voie_edit_span">{{item[4]}}</span> </td>
+            <td>{{item[2]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{item[6]}}</td>
+            <td>{{item[7]}}</td>
+            <td>
+                
+                <output class="rec_client_id" style="visibility: hidden;">{{item[9]}}</output>
+                <output class="rec_user_id" style="visibility: hidden;">{{item[8]}}</output>
+                <!-- <a  class="btn btn-warning">Edit</a> -->
+                <!-- <a  class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de supprimer cet utilisateur?')">Delete</a> -->
+                <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;"></i>
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                    onclick="delete_client(this,'{{item[9]}}')"></i>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<section id="liste_clients_section" class=" justify-content-center">
+    <div class="card-body " style="width: 70%; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;background-color: #cde2ef;">
+        <form style="margin: 20px;" class="mt-4" >
+            <div class="form-group mt-3">
+                <label for="rep_new_client">Représentant:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-2 text-danger">*</div>
+                    </div>
+                    <select id="rep_new_client" class="form-select form-select-sm" aria-label=".form-select-sm example">
+                       
+                        {% for item in representants%}
+                        <option value='{{ item.id}}'>{{ item.username}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name">Nom:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="text" id="name" class="form-control" placeholder="Nom d'entrée" name="name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="numero_voie">Addresse:</label>
+                <div class="input-group ">
+                    <div class="input-group-prepend">
+                        <div class=" col-1 input-group-text d-flex justify-content-center  text-danger fs-4  ">*</div>
+                    </div>
+                    <div class="col-2 " >
+                        <input type="text" id="numero_voie" class="form-control" placeholder="N°" name="numero_voie" style="height: 100%;" required>
+                        
+                    </div>
+                    <div class="col-8 " style="margin-left: 5px;">
+                        <input type="text" id="nom_voie" class="form-control" placeholder="Nom de rue" name="nom_voie" style="height: 100%;" required>
+                    </div>
+                    
+                </div>
+                <div class="input-group mt-2">
+                    <div class="input-group-prepend">
+                        <div class=" col-2 input-group-text d-flex justify-content-center  text-danger fs-4 ">*</div>
+                    </div>
+                    <div class="col-2">
+                        <input type="text" id="cp" class="form-control" placeholder="Cp" name="cp" style="height: 100%;" required>
+                        
+                    </div>
+                    <div class="col-6 " style="margin-left: 5px;">
+                        <input type="text" id="ville" class="form-control" placeholder="Ville" name="ville" style="height: 100%;" required>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
+                    </div>
+                    <input type="email" id="email" class="form-control" placeholder="E-mail" name="email" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="telp">Telephone:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">(+33)</div>
+                    </div>
+                    <input type="text" id="telp" class="form-control" placeholder="Telephone" name="telp" required>
+                </div>
+            </div>
+        <div class="mt-2" id="msg_div" style="background-color: rgb(192, 235, 148); display: none;">
+            <p>s</p>
+        </div>
+            <div class="form-group d-flex justify-content-center align-items-center mt-5">
+                <button type="submit" class="btn btn-success btn-sm" name="submit" onclick="addNewClient()">Ajouter</button>
+                <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;" onclick="closeFormClient()">Annuler</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- edit client -->
+
+<section id="edit_client_section" class=" justify-content-center">
+    <div class="card-body " style="width: 70%; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;background-color: #cde2ef;">
+        <form style="margin: 20px;" class="mt-4" >
+            <div class="form-group mt-3">
+                <label for="rep_edit_client">Représentant:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-2 text-danger">*</div>
+                    </div>
+                    <select id="rep_edit_client" class="form-select form-select-sm" aria-label=".form-select-sm example">
+                        <option  selected></option>
+                        {% for item in representants%}
+                        <option value='{{item.id}}'>{{ item.username}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name_client_edit">Nom:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <output id="rec_client_id" style="visibility: hidden;"></output>
+                    <input type="text" id="name_client_edit" class="form-control" placeholder="Nom d'entrée" name="name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="numero_voie_edit">Addresse:</label>
+                <div class="input-group ">
+                    <div class="input-group-prepend">
+                        <div class=" col-1 input-group-text d-flex justify-content-center  text-danger fs-4  ">*</div>
+                    </div>
+                    <div class="col-2 " >
+                        <input type="text" id="numero_voie_edit" class="form-control" placeholder="N°" name="numero_voie" style="height: 100%;" required>
+                        
+                    </div>
+                    <div class="col-8 " style="margin-left: 5px;">
+                        <input type="text" id="nom_voie_edit" class="form-control" placeholder="Nom de rue" name="nom_voie" style="height: 100%;" required>
+                    </div>
+                    
+                </div>
+                <div class="input-group mt-2">
+                    <div class="input-group-prepend">
+                        <div class=" col-2 input-group-text d-flex justify-content-center  text-danger fs-4 ">*</div>
+                    </div>
+                    <div class="col-2">
+                        <input type="text" id="cp_edit" class="form-control" placeholder="Cp" name="cp" style="height: 100%;" required>
+                        
+                    </div>
+                    <div class="col-6 " style="margin-left: 5px;">
+                        <input type="text" id="ville_edit" class="form-control" placeholder="Ville" name="ville" style="height: 100%;" required>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            <div class="form-group">
+                <label for="email_edit">Email:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
+                    </div>
+                    <input type="email" id="email_edit" class="form-control" placeholder="E-mail" name="email" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="telp_edit">Telephone:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">(+33)</div>
+                    </div>
+                    <input type="text" id="telp_edit" class="form-control" placeholder="Telephone" name="telp" required>
+                </div>
+            </div>
+        <div class="mt-2" id="msg_div_edit" style="background-color: rgb(192, 235, 148); display: none;">
+            <p>s</p>
+        </div>
+            <div class="form-group d-flex justify-content-center align-items-center mt-5">
+                <button type="button" class="btn btn-success btn-sm" name="submit" onclick="EnregistrerEditClient()">Enregistrer</button>
+                <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;" onclick="closeEditClient()">Annuler</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

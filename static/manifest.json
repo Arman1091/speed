@@ -1,0 +1,17 @@
+{
+	"name": "speed-interne",
+	"short_name": "speed-interne",
+	"start_url": "/",
+	"scope": "/",
+	"background_color": "#17a2b8",
+	"theme_color": "#17a2b8",
+	"display": "standalone",
+	"icons": [
+		{
+			"src": "img/logo/logo.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+
+	]
+}

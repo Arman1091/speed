@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block contenue %}
+<a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newUserForm()">Nouvelle utilisateur </a>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Success!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif%}
+{% endwith %}
+<div class="mt-4">
+    <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
+        <p id="mt_name">{{name}}</p>
+        </h1> -->
+    <label for="role_users"><strong>Rôle</strong></label>
+    <select id="role_users" class="form-select form-select-lg mb-3"
+        aria-label=".form-select-lg nouvelle_utilisateur" style="width: 30%;">
+        <!-- <option selected>Select le matiere</option> -->
+        {% for role in roles %}
+        <option value='{{ role.id}}'>{{ role.name}}</option>
+        {% endfor %}
+    </select>
+</div>
+<table id="users_table" class="table">
+    
+    <thead class="thead-light">
+        <tr>
+            <th scope="row"></th>
+            <th scope="col">Nom d'utilisateur</th>
+            <th scope="col">Email</th>
+            <th scope="col">Tel</th>
+            <th scope="col">Mot de passe</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user_row in select_users %}
+        <tr>
+            <td>
+            </th>
+            <td>{{user_row.username}}</td>
+            <td>{{user_row.email}}</td>
+            <td>+33<span class="user_pure_tel">{{user_row.tel}}</span></td>
+            <td>*********
+            </td>
+            <td>
+                <!-- <a  class="btn btn-warning">Edit</a> -->
+                <!-- <a  class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de supprimer cet utilisateur?')">Delete</a> -->
+                <output class="set_user_id" style="visibility: hidden;">{{user_row.id}}</output>
+                <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                    onclick="delete_user('{{user.id}}')"></i>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<section id="new_users_section" class=" justify-content-center">
+    <div class="card-body "
+        style="width: 70%; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;background-color: #cde2ef;">
+        <form style="margin: 20px;margin-bottom: 40px;" >
+            <div class="form-group mt-3">
+                <label for="role_new_user">Role:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-2 text-danger">*</div>
+                    </div>
+                    <select id="role_new_user" class="form-select form-select-sm" aria-label=".form-select-sm example">
+
+                        {% for item in roles%}
+                        <option value='{{ item.id}}'>{{ item.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name_user">Nom complet:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="text" id="name_user" class="form-control" placeholder="Nom complet" name="name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
+                    </div>
+                    <input type="email" id="email" class="form-control" placeholder="E-mail" name="email" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="pwd">Mot de passe:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="password" id="pwd" class="form-control" placeholder="Mot de passe" name="mot_de_passe"
+                        required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm_pwd">Confirmation mot de passe:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="password" id="confirm_pwd" class="form-control" placeholder="Confirmation mot de passe"
+                        name="confirm_pwd" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="telp">Telephone:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">(+33)</div>
+                    </div>
+                    <input type="text" id="telp" class="form-control" placeholder="Telephone" name="telp" required>
+                </div>
+            </div>
+            <!-- <div class="mt-2" id="msg_div" style="background-color: rgb(192, 235, 148); display: none;">
+            <p>s</p> -->
+            <div class="form-group d-flex justify-content-center align-items-center mt-5">
+                <button type="button" class="btn btn-success btn-sm" name="submit" onclick="addNewUser()">Ajouter</button>
+                <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;"
+                    onclick="closeFormUser()">Annuler</button>
+            </div>
+    </div>
+    
+    </form>
+    </div>
+</section>
+
+
+<section id="edit_user_section" class=" justify-content-center">
+    <div class="card-body "
+        style="width: 70%; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;background-color: #cde2ef;">
+        <form style="margin: 20px;margin-bottom: 40px;" >
+            <div class="form-group mt-3">
+                <label for="role_edit_user">Role:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-2 text-danger">*</div>
+                    </div>
+                    <select id="role_edit_user" class="form-select form-select-sm" aria-label=".form-select-sm example">
+                        <option  selected></option>
+                        {% for item in roles%}
+                        <option value='{{ item.id}}'>{{ item.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name_edit_user">Nom complet:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="text" id="name_edit_user" class="form-control" placeholder="Nom complet" name="name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit_email">Email:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
+                    </div>
+                    <input type="email" id="edit_email" class="form-control" placeholder="E-mail" name="email" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="user_pwd">Mot de passe:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <output name="user_pwd" class="form-control d-flex justify-content-between align-items-center" >
+                        <span id="user_pwd_value">*****************</span>
+                        <div>
+                            
+                            <i type="button" id = "close_pwd_change" class="bi bi-x text-danger fs-4" style="display: none;" onclick="closeNewPasswordSpace()" ></i>
+                            <i  type="button"  id = "pwd_change" class="bi bi-pencil " onclick="openNewPasswordSpace()"></i>
+                        </div>
+                        
+                    </output>
+                    
+                </div>
+            </div>
+            <div id="new_pwd_div" class="form-group" style="display: none;">
+                <label for="new_pwd">Nouvelle mot de passe:</label>
+                <div class="input-group d-flex d-column">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex  justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="password" id="new_pwd" class="form-control" placeholder="Mot de passe" name="mot_de_passe"
+                        required >
+                    
+                </div>
+            </div>
+            <div class="form-group mt-1" id="confirm_pwd_div" style="display: none;">
+                
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="password" id="new_confirm_pwd" class="form-control" placeholder="Confirmation mot de passe"
+                        name="new_confirm_pwd" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit_tel">Telephone:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">(+33)</div>
+                    </div>
+                    <input type="text" id="edit_tel" class="form-control" placeholder="Telephone" name="telp" required>
+                </div>
+            </div>
+            <output id="edit_user_id" style="visibility: hidden;"></output>
+            <!-- <div class="mt-2" id="msg_div" style="background-color: rgb(192, 235, 148); display: none;">
+            <p>s</p> -->
+            <div class="form-group d-flex justify-content-center align-items-center mt-5">
+                <button type="button" class="btn btn-success btn-sm" name="submit" onclick="SaveEditUser()">Ajouter</button>
+                <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;"
+                    onclick="closeEditUser()">Annuler</button>
+            </div>
+    </div>
+    
+    </form>
+    </div>
+</section>
+{% endblock %}

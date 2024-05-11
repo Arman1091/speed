@@ -1,8 +1,5 @@
 
-var perimetre = 0;
-var long = 0;
-var larg = 0;
-var surface = 0;
+
 (function () {
   "use strict";
 
@@ -174,6 +171,37 @@ var surface = 0;
       mirror: false
     })
   });
+
+  if (document.getElementsByName('mode_emp')) {
+    var radios = document.getElementsByName('mode_emp');
+    radios.forEach(function (radio) {
+      radio.addEventListener('change', function () {
+        let verif_file = document.getElementById("fileInput").value;
+        var prix_livr_ht = 0;
+        if (verif_file) {
+          console.log(this.value);
+          var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
+          var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
+          console.log(prix_total_ht);
+          if (this.value == "livraison") {
+            prix_livr_ht = 19.50;
+            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) + 19.50;
+            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) + 1.2 * 19.50;
+          } else {
+            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) - 19.50;
+            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) - 1.2 * 19.50;
+          }
+          document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+        }
+
+      });
+    });
+
+  }
+
+
+
+
   // *********counter******************
 
 
@@ -223,7 +251,7 @@ var surface = 0;
       let frais_decoup_ttc = document.getElementById("frais_decoup_ttc").innerText;
       console.log("sd")
       console.log(parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht));
-      document.getElementById("prix_lin_ht").innerHTML =(count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht))).toFixed(2);;
+      document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht))).toFixed(2);;
       document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc))).toFixed(2);;
       document.getElementById("qte_structure").innerHTML = count;
     }
@@ -268,6 +296,7 @@ var surface = 0;
     var selectMatiereElement = document.getElementById("matiere_select");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
     var selectedMatiereValue = selectedMatiereOption.value;
+    var matiereText = selectedMatiereOption.innerText;
 
     var selectTypeElement = document.getElementById("type_matiere");
     var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
@@ -278,125 +307,167 @@ var surface = 0;
     var selectedEpaisseurValue = selectedEpaisseurOption.value;
 
     var selectTypeUsinageElement = document.getElementById("type_usinage");
-
-    let verif_file = document.getElementById("fileInput").value;
     let formData = new FormData();
-    if (verif_file) {
-      let file = $('#fileInput')[0].files[0];
-      console.log(file);
-      formData.append('file', file);
-    }
-
-    // console.log(verif_file);
-
-    formData.append('matiere_id', selectedMatiereValue);
-    formData.append('type_id', selectedTypeValue);
-    formData.append('epaisseur_id', selectedEpaisseurValue);
-
-    $.ajax({
-      url: '/change_epaisseur',
-      type: 'POST',
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function (data) {
-        const length_usg = data["types_usinage"].length;
-        console.log("sdsds")
-        console.log(length_usg)
-        while (selectTypeUsinageElement.options.length > 0) {
-          selectTypeUsinageElement.remove(0);
-        }
-        for (let i = 0; i < length_usg; i++) {
-          const newOption = document.createElement('option');
-          newOption.value = data["types_usinage"][i].id;
-          newOption.text = data["types_usinage"][i].name;
-          selectTypeUsinageElement.add(newOption);
-        }
-        if (data['prix']) {
-          var qte = document.getElementById("qte").value;
-          let prix_decoup_mtr = data['prix'][0][0];
-          let prix_matiere_mtr = data['prix'][0][1];
-          // console.log(perimetre);
-          let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-          let formattedNumber_decoup = prix_decoup;
-          let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-          let prix_matiere_ht = prix_matiere_mtr * surface;
-          let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-          let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-          let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
-          // console.log(total_prix_decoup);
-          document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-          document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-          document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-          document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-          document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-          document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
-        }
-      },
-      error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    if (file_btn.classList.contains("active-case")) {
+      let verif_file = document.getElementById("fileInput").value;
+      if (verif_file) {
+        let file = $('#fileInput')[0].files[0];
+        console.log(file);
+        formData.append('file', file);
       }
-    });
 
-  })
-
-  //changement type usinage
-  $("#type_usinage").on('change', function () {
-
-    let verif_file = document.getElementById("fileInput").value;
-
-    if (verif_file) {
-      let formData = new FormData();
-      var selectMatiereElement = document.getElementById("matiere_select");
-      var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
-      var selectedMatiereValue = selectedMatiereOption.value;
-
-      var selectTypeElement = document.getElementById("type_matiere");
-      var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
-      var selectedTypeValue = selectedTypeOption.value;
-
-      var selectEpaisseurElement = document.getElementById("epp");
-      var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
-      var selectedEpaisseurValue = selectedEpaisseurOption.value;
-
-      var selectTypeUsinageElement = document.getElementById("type_usinage");
-      var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
-      var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
-      let file = $('#fileInput')[0].files[0];
-
-      formData.append('file', file);
+      // console.log(verif_file);
 
       formData.append('matiere_id', selectedMatiereValue);
       formData.append('type_id', selectedTypeValue);
       formData.append('epaisseur_id', selectedEpaisseurValue);
-      formData.append('type_usinage_id', selectedTypeUsinageValue);
+      formData.append('matiereText', matiereText);
 
       $.ajax({
-        url: '/change_type_usinage',
+        url: '/change_epaisseur',
         type: 'POST',
         data: formData,
         contentType: false,
         processData: false,
         success: function (data) {
-          var qte = document.getElementById("qte").value;
-          let prix_decoup_mtr = data['prix'][0][0];
-          let prix_matiere_mtr = data['prix'][0][1];
-          // console.log(perimetre);
-          let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-          let formattedNumber_decoup = prix_decoup;
-          let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-          let prix_matiere_ht = prix_matiere_mtr * surface;
-          let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-          let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-          let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
-          // console.log(total_prix_decoup);
-          document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-          document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-          document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-          document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-          document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-          document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+          const length_usg = data["types_usinage"].length;
+          console.log("sdsds")
+          console.log(length_usg)
+          while (selectTypeUsinageElement.options.length > 0) {
+            selectTypeUsinageElement.remove(0);
+          }
+          for (let i = 0; i < length_usg; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["types_usinage"][i].id;
+            newOption.text = data["types_usinage"][i].name;
+            selectTypeUsinageElement.add(newOption);
+          }
+          if (data['prix']) {
+            var qte = document.getElementById("qte").value;
+            let larg = document.getElementById('height_img').innerHTML;
+            let long = document.getElementById('width_img').innerHTML;
+            let surface = 0;
 
+            if (larg && long) {
+              surface = (larg * long);
+              // console.log(surface);
+            }
+
+            if (matiereText = 'Pmma' && data["types_usinage"][0].name == 'USIL') {
+
+              if (surface < 0.1) {
+
+                var prix_ht_entity = data['prix'][0][0];
+              } else if (surface >= 0.1 && surface <= 0.25) {
+                var prix_ht_entity = data['prix'][0][1];
+              } else {
+                var prix_ht_entity = data['prix'][0][2];
+              }
+              var prix_ht = (qte * prix_ht_entity * surface).toFixed(2);
+              var prix_ttc = (1.2 * prix_ht).toFixed(2);
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+              document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+              document.getElementById("qte_structure").innerHTML = qte;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+                prix_material_div.style.display = 'none'
+                frais_decoup_div.style.display = 'none'
+              }
+            } else {
+              var perimetre = document.getElementById('perimetre_totale').innerHTML;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              var qte = document.getElementById("qte").value;
+              let prix_decoup_mtr = data['prix'][0][0];
+              let prix_matiere_mtr = data['prix'][0][1];
+              console.log("perim" + perimetre);
+              console.log(prix_decoup_mtr);
+              let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+              let formattedNumber_decoup = prix_decoup;
+              let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+              let prix_matiere_ht = prix_matiere_mtr * surface;
+
+              let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
+              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+              // console.log(total_prix_decoup);
+              document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+              document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+              document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+
+              document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+              document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+              console.log(document.getElementById("prix_mat_ht").innerHTML);
+              if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+                prix_material_div.style.display = 'flex'
+                frais_decoup_div.style.display = 'flex'
+              }
+            }
+          }
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    } else {
+      var hauteur = document.getElementById("height");
+      var text_input = document.getElementById('text_input');
+      var text = text_input.value;
+      var textSansEspace = TextWithoutSpaces(text.trim());
+      var nbr_lettres = 0;
+      if (textSansEspace.length !== 0) {
+        nbr_lettres = textSansEspace.length;
+        formData.append('nbr_lettres', nbr_lettres);
+      }
+      formData.append('matiere_id', selectedMatiereValue);
+      formData.append('type_id', selectedTypeValue);
+      formData.append('epaisseur_id', selectedEpaisseurValue)
+      $.ajax({
+        url: '/change_lettre_epaisseur',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          console.log(data);
+
+          while (selectTypeUsinageElement.options.length > 0) {
+            selectTypeUsinageElement.remove(0);
+          }
+          const length_usg = data["types_usinage"].length;
+          for (let i = 0; i < length_usg; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["types_usinage"][i].id;
+            newOption.text = data["types_usinage"][i].name;
+            selectTypeUsinageElement.add(newOption);
+          }
+          while (hauteur.options.length > 0) {
+            hauteur.remove(0);
+          }
+          const length_hauteur = data["hauteurs"].length;
+          console.log(length_hauteur);
+          for (let i = 0; i < length_hauteur; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["hauteurs"][i].id;
+            newOption.text = data["hauteurs"][i].value / 10;
+            hauteur.add(newOption);
+          }
+          if (data['prix']) {
+            var qte = document.getElementById("qte").value;
+            var prix_rec = data["prix"][0][0];
+            var total_prix_ht = nbr_lettres * qte * prix_rec;
+            var total_prix_ttc = 1.2 * total_prix_ht;
+            document.getElementById('prix_lin_ht').innerHTML = total_prix_ht.toFixed(2);
+            document.getElementById('prix_lin_ttc').innerHTML = total_prix_ttc.toFixed(2);
+            document.getElementById('prix_lettre_ht').innerHTML = prix_rec.toFixed(2);
+            document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
+            document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
+            document.getElementById('qte_text').innerHTML = qte;
+          }
         },
         error: function () {
           alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
@@ -404,9 +475,238 @@ var surface = 0;
       });
     }
 
+  })
+  $("#height").on('change', function () {
 
+    var selectMatiereElement = document.getElementById("matiere_select");
+    var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+    var selectedMatiereValue = selectedMatiereOption.value;
+    var matiereText = selectedMatiereOption.innerText;
 
+    var selectTypeElement = document.getElementById("type_matiere");
+    var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+    var selectedTypeValue = selectedTypeOption.value;
 
+    var selectEpaisseurElement = document.getElementById("epp");
+    var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
+    var selectedEpaisseurValue = selectedEpaisseurOption.value;
+
+    var selectTypeUsinageElement = document.getElementById("type_usinage");
+    var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
+    var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+
+    var selectedHauteurElement = document.getElementById("height");
+    var selectedHauteurOption = selectedHauteurElement.options[selectedHauteurElement.selectedIndex];
+    var selectedHauteurValue = selectedHauteurOption.value;
+
+    var text_input = document.getElementById('text_input');
+    var text = text_input.value;
+    var textSansEspace = TextWithoutSpaces(text.trim());
+    var nbr_lettres = 0;
+    if (textSansEspace.length !== 0) {
+      nbr_lettres = textSansEspace.length;
+    }
+
+    let formData = new FormData();
+    formData.append('matiere_id', selectedMatiereValue);
+    formData.append('type_id', selectedTypeValue);
+    formData.append('epaisseur_id', selectedEpaisseurValue)
+    formData.append('type_usinage', selectedTypeUsinageValue);
+    formData.append('hauteur', selectedHauteurValue)
+    $.ajax({
+      url: '/change_lettre_hauteur',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (data) {
+
+        if (data["prix"]) {
+          console.log(data["prix"][0]);
+          var qte = document.getElementById("qte").value;
+          var prix_rec = data["prix"][0];
+          var total_prix_ht = nbr_lettres * qte * prix_rec;
+          var total_prix_ttc = 1.2 * total_prix_ht;
+          document.getElementById('prix_lin_ht').innerHTML = total_prix_ht.toFixed(2);
+          document.getElementById('prix_lin_ttc').innerHTML = total_prix_ttc.toFixed(2);
+          document.getElementById('prix_lettre_ht').innerHTML = prix_rec.toFixed(2);
+          document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
+          document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
+          document.getElementById('qte_text').innerHTML = qte;
+        }
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+  })
+  //changement type usinage
+  $("#type_usinage").on('change', function () {
+    let formData = new FormData();
+    var selectMatiereElement = document.getElementById("matiere_select");
+    var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+    var selectedMatiereValue = selectedMatiereOption.value;
+    var matiereText = selectedMatiereOption.innerHTML;
+
+    var selectTypeElement = document.getElementById("type_matiere");
+    var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+    var selectedTypeValue = selectedTypeOption.value;
+
+    var selectEpaisseurElement = document.getElementById("epp");
+    var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
+    var selectedEpaisseurValue = selectedEpaisseurOption.value;
+
+    var selectTypeUsinageElement = document.getElementById("type_usinage");
+    var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
+    var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+    var selectedUsinageTypeText = selectedTypeUsinageOption.innerHTML;
+    if (file_btn.classList.contains("active-case")) {
+
+      let verif_file = document.getElementById("fileInput").value;
+
+      if (verif_file) {
+        console.log(matiereText);
+        let file = $('#fileInput')[0].files[0];
+
+        formData.append('file', file);
+
+        formData.append('matiere_id', selectedMatiereValue);
+        formData.append('type_id', selectedTypeValue);
+        formData.append('epaisseur_id', selectedEpaisseurValue);
+        formData.append('type_usinage_id', selectedTypeUsinageValue);
+        formData.append('matiereText', matiereText);
+        formData.append('selectedUsinageTypeText', selectedUsinageTypeText);
+
+        $.ajax({
+          url: '/change_type_usinage',
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function (data) {
+            var qte = document.getElementById("qte").value;
+            let larg = document.getElementById('height_img').innerHTML;
+            let long = document.getElementById('width_img').innerHTML;
+            let surface = 0;
+
+            if (larg && long) {
+              surface = (larg * long);
+              // console.log(surface);
+            }
+
+            if (matiereText = 'Pmma' && selectedUsinageTypeText == 'USIL') {
+
+              if (surface < 0.1) {
+                console.log(data['prix']);
+                var prix_ht_entity = data['prix'][0][0];
+              } else if (surface >= 0.1 && surface <= 0.25) {
+                var prix_ht_entity = data['prix'][0][1];
+              } else {
+                var prix_ht_entity = data['prix'][0][2];
+              }
+              console.log("sddsd" + prix_ht_entity);
+              var prix_ht = (qte * prix_ht_entity * surface).toFixed(2);
+              var prix_ttc = (1.2 * prix_ht).toFixed(2);
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+              document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+                prix_material_div.style.display = 'none'
+                frais_decoup_div.style.display = 'none'
+              }
+            } else {
+              var perimetre = document.getElementById('perimetre_totale').innerHTML;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              var qte = document.getElementById("qte").value;
+              let prix_decoup_mtr = data['prix'][0][0];
+              let prix_matiere_mtr = data['prix'][0][1];
+              console.log("perim" + perimetre);
+              console.log(prix_decoup_mtr);
+              let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+              let formattedNumber_decoup = prix_decoup;
+              let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+              let prix_matiere_ht = prix_matiere_mtr * surface;
+
+              let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
+              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+              // console.log(total_prix_decoup);
+              document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+              document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+              document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+
+              document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+              document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+              console.log(document.getElementById("prix_mat_ht").innerHTML);
+              if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+                prix_material_div.style.display = 'flex'
+                frais_decoup_div.style.display = 'flex'
+              }
+            }
+
+          },
+          error: function () {
+            alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          }
+        });
+      }
+    } else {
+      var hauteur = document.getElementById("height");
+      var text_input = document.getElementById('text_input');
+      var text = text_input.value;
+      var textSansEspace = TextWithoutSpaces(text.trim());
+      var nbr_lettres = 0;
+      if (textSansEspace.length !== 0) {
+        nbr_lettres = textSansEspace.length;
+        formData.append('nbr_lettres', nbr_lettres);
+      }
+      formData.append('matiere_id', selectedMatiereValue);
+      formData.append('type_id', selectedTypeValue);
+      formData.append('epaisseur_id', selectedEpaisseurValue)
+      formData.append('usinage_id', selectedTypeUsinageValue);
+      $.ajax({
+        url: '/change_lettre_usinage',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          console.log(data);
+
+          while (hauteur.options.length > 0) {
+            hauteur.remove(0);
+          }
+          const length_hauteur = data["hauteurs"].length;
+          console.log(length_hauteur);
+          for (let i = 0; i < length_hauteur; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["hauteurs"][i].id;
+            newOption.text = data["hauteurs"][i].value / 10;
+            hauteur.add(newOption);
+          }
+          if (data['prix']) {
+            var qte = document.getElementById("qte").value;
+            var prix_rec = data["prix"][0][0];
+            var total_prix_ht = nbr_lettres * qte * prix_rec;
+            var total_prix_ttc = 1.2 * total_prix_ht;
+            document.getElementById('prix_lin_ht').innerHTML = total_prix_ht.toFixed(2);
+            document.getElementById('prix_lin_ttc').innerHTML = total_prix_ttc.toFixed(2);
+            document.getElementById('prix_lettre_ht').innerHTML = prix_rec.toFixed(2);
+            document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
+            document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
+            document.getElementById('qte_text').innerHTML = qte;
+          }
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    }
   })
 
   function filterTableRows() {
@@ -488,19 +788,19 @@ var surface = 0;
     ul = document.getElementById('en_attents_list');
     li = ul.getElementsByTagName('li');
     var elements = document.querySelectorAll('.contact_name');
-    elements.forEach(function(element) {
-      
+    elements.forEach(function (element) {
+
       let text = element.innerText;
       let current_li = element.closest('li');
       console.log(text.toLowerCase());
-      if (text.toLowerCase().indexOf(filter) === -1 ) {
+      if (text.toLowerCase().indexOf(filter) === -1) {
 
         // Hide the row if the search text is not found
 
         current_li.style.display = 'none';
 
       } else {
-     
+
         // Show the row if the search text is found
 
         current_li.style.display = 'block';
@@ -512,21 +812,24 @@ var surface = 0;
     // for (i = 0; i < li.length; i++) {
     //   Values.push(li[i].innerText);
     //   console.log(Values[i]);
-      // txtValue = a.textContent || a.innerText;
+    // txtValue = a.textContent || a.innerText;
 
-      // if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      //   li[i].style.display = '';
-      // } else {
-      //   li[i].style.display = 'none';
-      // }
-    }
-  
+    // if (txtValue.toUpperCase().indexOf(filter) > -1) {
+    //   li[i].style.display = '';
+    // } else {
+    //   li[i].style.display = 'none';
+    // }
+  }
+
 
   // Event listener for the input field to trigger filtering on input change
   $('#search_en_attants').keyup(function () {
 
     filterTableAttents();
   });
+  function TextWithoutSpaces(text) {
+    return text.replace(/\s/g, '')
+  }
   $('#text_input').keyup(function () {
     var selectFontElement = document.getElementById("fontSelect");
     var selectedFontOption = selectFontElement.options[selectFontElement.selectedIndex];
@@ -534,16 +837,82 @@ var surface = 0;
     console.log(selectedFontValue);
     var input = document.getElementById('text_input');
     var text = input.value;
-    console.log(text);
-    console.log(selectedFontValue);
-    
-    var myTextElement = document.getElementById("visualisation_div");
+    var testSansEspace = TextWithoutSpaces(text.trim());
+    var myTextElement = document.getElementById("text_area");
     myTextElement.style.fontFamily = selectedFontValue; // Replace with your desired font
 
     // You can also set other font properties like size and color
-    myTextElement.style.fontSize = "30px";
+    myTextElement.style.fontSize = "40px";
     // myTextElement.style.color = "blue";
-    myTextElement.innerText=text;
+    myTextElement.innerText = testSansEspace;
+    if (testSansEspace.length !== 0) {
+      var nbr_lettres = testSansEspace.length;
+      let formData = new FormData();
+      var selectEppElement = document.getElementById("epp");
+      var selectedEppOption = selectEppElement.options[selectEppElement.selectedIndex];
+      var selectedEppValue = selectedEppOption.value;
+
+      var selectType = document.getElementById("type_usinage");
+      var selectedTypeOption = selectType.options[selectType.selectedIndex];
+      var selectedUsinageTypeValue = selectedTypeOption.value;
+
+
+
+      var selectMatiereElement = document.getElementById("matiere_select");
+      var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+      var mt = selectedMatiereOption.value;
+
+
+      var selectMatiereTypeElement = document.getElementById("type_matiere");
+      var selectedMatiereTypeOption = selectMatiereTypeElement.options[selectMatiereTypeElement.selectedIndex];
+      var type = selectedMatiereTypeOption.value;
+
+      var selectHeightElement = document.getElementById("height");
+      var selectedHeightOption = selectHeightElement.options[selectHeightElement.selectedIndex];
+      var hauteur = selectedHeightOption.value;
+      var qte = document.getElementById("qte").value;
+      console.log(qte);
+
+      formData.append('mt', mt);
+      formData.append('type', type);
+      formData.append('type_usinage', selectedUsinageTypeValue);
+      formData.append('epaisseur', selectedEppValue);
+      formData.append('nbr_lettres ', nbr_lettres);
+      formData.append('hauteur', hauteur);
+      $.ajax({
+        url: '/recevoir_prix_lettre',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          var prix_rec = data["prix"][0][0];
+          var total_prix_ht = nbr_lettres * qte * prix_rec;
+          var total_prix_ttc = 1.2 * total_prix_ht;
+          var text_prix_detailles = document.getElementById('text_prix_detailles');
+          var acardion_format_pro = document.getElementById("acardion_format_pro");
+          var form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
+          var total_prix_detailles = document.getElementById("total_prix_detailles");
+          text_prix_detailles.style.display = 'block';
+          acardion_format_pro.style.display = 'block';
+          form_envoyer_usinage_btn.style.display = 'block';
+          total_prix_detailles.style.display = 'flex';
+          document.getElementById('prix_lin_ht').innerHTML = total_prix_ht.toFixed(2);
+          document.getElementById('prix_lin_ttc').innerHTML = total_prix_ttc.toFixed(2);
+          document.getElementById('prix_lettre_ht').innerHTML = prix_rec.toFixed(2);
+          document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
+          document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
+          document.getElementById('qte_text').innerHTML = qte;
+
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+
+    }
+
+
   });
   //   $('#multiple-select').mobiscroll().select({
 
@@ -552,233 +921,559 @@ var surface = 0;
   // });
   // **************
   $("#type_matiere").on('change', function () {
-    let verif_file = document.getElementById("fileInput").value;
-    let formData = new FormData();
-    if (verif_file) {
-      let file = $('#fileInput')[0].files[0];
-      console.log(file);
-      formData.append('file', file);
-    }
     var selectMatiereElement = document.getElementById("matiere_select");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
     var selectedMatiereValue = selectedMatiereOption.value;
+    var selectedMatiereText = selectedMatiereOption.innerHTML;
 
     var selectTypeElement = document.getElementById("type_matiere");
     var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
     var selectedTypeValue = selectedTypeOption.value;
+
 
     var selectEpaisseurElement = document.getElementById("epp");
     var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
     var selectedEpaisseurValue = selectedEpaisseurOption.value;
 
     var selectTypeUsinageElement = document.getElementById("type_usinage");
-    // var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
-    // var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+    let formData = new FormData();
+    if (file_btn.classList.contains("active-case")) {
+      let verif_file = document.getElementById("fileInput").value;
 
-    formData.append('matiere_id', selectedMatiereValue);
-    formData.append('type_id', selectedTypeValue);
-    $.ajax({
-      url: '/change_type',
-      type: 'POST',
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function (data) {
-        console.log(data["epaisseurs"][0].value)
-        while (selectEpaisseurElement.options.length > 0) {
-          selectEpaisseurElement.remove(0);
-        }
-        const length_arr = data["epaisseurs"].length;
-        for (let i = 0; i < length_arr; i++) {
-          const newOption = document.createElement('option');
-          newOption.value = data["epaisseurs"][i].id;
-          newOption.text = data["epaisseurs"][i].value;
-          selectEpaisseurElement.add(newOption);
-        }
-
-        while (selectTypeUsinageElement.options.length > 0) {
-          selectTypeUsinageElement.remove(0);
-        }
-        const length_usg = data["types_usinage"].length;
-        console.log(length_usg)
-        for (let i = 0; i < length_usg; i++) {
-          const newOption = document.createElement('option');
-          newOption.value = data["types_usinage"][i].id;
-          newOption.text = data["types_usinage"][i].name;
-          selectTypeUsinageElement.add(newOption);
-        }
-        if (data['prix']) {
-          var qte = document.getElementById("qte").value;
-          let prix_decoup_mtr = data['prix'][0][0];
-          let prix_matiere_mtr = data['prix'][0][1];
-          // console.log(perimetre);
-          let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-          let formattedNumber_decoup = prix_decoup;
-          let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-          let prix_matiere_ht = prix_matiere_mtr * surface;
-          let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-          let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-          let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
-          // console.log(total_prix_decoup);
-          document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-          document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-          document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-          document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-          document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-          document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
-        }
-        // let verif_file = $("#fileInput")[0].value;
-        // if (verif_file) {
-        //   // console.log(verif_file);
-
-        //   var mt = document.getElementById("mt").innerText;
-        //   var mt_name = document.getElementById("mt_name").innerText;
-        //   formData.append('mt', mt);
-        //   formData.append('mt_name', mt_name);
-        //   formData.append('selectedValue', selectedValue);
-        //   $.ajax({
-        //     url: '/change_epaisseur',
-        //     type: 'POST',
-        //     data: formData,
-        //     contentType: false,
-        //     processData: false,
-        //     success: function (data) {
-        //       let prix_decoup_mtr = data['prix'][0][0];
-        //       let prix_matiere_mtr = data['prix'][0][1];
-        //       // console.log(perimetre);
-        //       let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-        //       let formattedNumber_decoup = prix_decoup;
-        //       let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-        //       let prix_matiere_ht = prix_matiere_mtr * surface;
-        //       let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-        //       let total_prix_decoup = prix_matiere_ht + formattedNumber_decoup;
-        //       let total_prix_matiere = prix_decoup_ttc + prix_matiere_ttc;
-        //       // console.log(total_prix_decoup);
-        //       document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-        //       document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-        //       document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-        //       document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-        //       document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-        //       document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
-
-
-        //       // Change the image source
-        //       //  imageElement.src =  'static/img/upload/current.png';
-        //       //  let myDiv = document.getElementById("accordionExample");
-        //       //  myDiv.style.display = "block";
-        //       // let myDiv2 = document.getElementById("prix_total");
-        //       // myDiv2.style.display = "block";
-
-        //     },
-        //     error: function () {
-        //       alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
-        //     }
-        //   });
-        // }
-        // let prix_decoup_mtr = data['prix'][0][0];
-        // let prix_matiere_mtr = data['prix'][0][1];
-        // // console.log(perimetre);
-        // let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-        // let formattedNumber_decoup = prix_decoup;
-        // let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-        // let prix_matiere_ht = prix_matiere_mtr * surface;
-        // let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-        // let total_prix_decoup = prix_matiere_ht + formattedNumber_decoup;
-        // let total_prix_matiere = prix_decoup_ttc + prix_matiere_ttc;
-        // // console.log(total_prix_decoup);
-        // document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-        // document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-        // document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-        // document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-        // document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-        // document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
-
-
-        // Change the image source
-        //  imageElement.src =  'static/img/upload/current.png';
-        //  let myDiv = document.getElementById("accordionExample");
-        //  myDiv.style.display = "block";
-        // let myDiv2 = document.getElementById("prix_total");
-        // myDiv2.style.display = "block";
-
-      },
-      error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      if (verif_file) {
+        let file = $('#fileInput')[0].files[0];
+        console.log(file);
+        formData.append('file', file);
       }
-    });
 
+      // var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
+      // var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+
+      formData.append('matiere_id', selectedMatiereValue);
+      formData.append('type_id', selectedTypeValue);
+      formData.append('selectedMatiereText', selectedMatiereText);
+      $.ajax({
+        url: '/change_type',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          console.log(data["epaisseurs"][0].value)
+          while (selectEpaisseurElement.options.length > 0) {
+            selectEpaisseurElement.remove(0);
+          }
+          const length_arr = data["epaisseurs"].length;
+          for (let i = 0; i < length_arr; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["epaisseurs"][i].id;
+            newOption.text = data["epaisseurs"][i].value;
+            selectEpaisseurElement.add(newOption);
+          }
+
+          while (selectTypeUsinageElement.options.length > 0) {
+            selectTypeUsinageElement.remove(0);
+          }
+          const length_usg = data["types_usinage"].length;
+          console.log(length_usg)
+          for (let i = 0; i < length_usg; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["types_usinage"][i].id;
+            newOption.text = data["types_usinage"][i].name;
+            selectTypeUsinageElement.add(newOption);
+          }
+          if (data['prix']) {
+            var qte = document.getElementById("qte").value;
+            let larg = document.getElementById('height_img').innerHTML;
+            let long = document.getElementById('width_img').innerHTML;
+            let surface = 0;
+
+            if (larg && long) {
+              surface = (larg * long);
+              // console.log(surface);
+            }
+
+            if (selectedMatiereText = 'Pmma' && data['types_usinage'] == 'USIL') {
+
+              if (surface < 0.1) {
+                console.log(data['prix']);
+                var prix_ht_entity = data['prix'][0][0];
+              } else if (surface >= 0.1 && surface <= 0.25) {
+                var prix_ht_entity = data['prix'][0][1];
+              } else {
+                var prix_ht_entity = data['prix'][0][2];
+              }
+              console.log("sddsd" + prix_ht_entity);
+              var prix_ht = (qte * prix_ht_entity * surface).toFixed(2);
+              var prix_ttc = (1.2 * prix_ht).toFixed(2);
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+              document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+                prix_material_div.style.display = 'none'
+                frais_decoup_div.style.display = 'none'
+              }
+            } else {
+              var perimetre = document.getElementById('perimetre_totale').innerHTML;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              var qte = document.getElementById("qte").value;
+              let prix_decoup_mtr = data['prix'][0][0];
+              let prix_matiere_mtr = data['prix'][0][1];
+              console.log("perim" + perimetre);
+              console.log(prix_decoup_mtr);
+              let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+              let formattedNumber_decoup = prix_decoup;
+              let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+              let prix_matiere_ht = prix_matiere_mtr * surface;
+
+              let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
+              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+              // console.log(total_prix_decoup);
+              document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+              document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+              document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+
+              document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+              document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+              console.log(document.getElementById("prix_mat_ht").innerHTML);
+              if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+                prix_material_div.style.display = 'flex'
+                frais_decoup_div.style.display = 'flex'
+              }
+            }
+
+          }
+
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    } else {
+      var hauteur = document.getElementById("height");
+      var text_input = document.getElementById('text_input');
+      var text = text_input.value;
+      var textSansEspace = TextWithoutSpaces(text.trim());
+      var nbr_lettres = 0;
+      if (textSansEspace.length !== 0) {
+        nbr_lettres = textSansEspace.length;
+        formData.append('nbr_lettres', nbr_lettres);
+      }
+      formData.append('matiere_id', selectedMatiereValue);
+      formData.append('type_id', selectedTypeValue);
+      $.ajax({
+        url: '/change_lettre_type',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          console.log(data);
+
+          while (selectEpaisseurElement.options.length > 0) {
+            selectEpaisseurElement.remove(0);
+          }
+
+
+          const length_arr = data["epaisseurs"].length;
+          for (let i = 0; i < length_arr; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["epaisseurs"][i].id;
+            newOption.text = data["epaisseurs"][i].value;
+            selectEpaisseurElement.add(newOption);
+          }
+
+          while (selectTypeUsinageElement.options.length > 0) {
+            selectTypeUsinageElement.remove(0);
+          }
+          const length_usg = data["types_usinage"].length;
+          for (let i = 0; i < length_usg; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["types_usinage"][i].id;
+            newOption.text = data["types_usinage"][i].name;
+            selectTypeUsinageElement.add(newOption);
+          }
+          while (hauteur.options.length > 0) {
+            hauteur.remove(0);
+          }
+          const length_hauteur = data["hauteurs"].length;
+          console.log(length_hauteur);
+          for (let i = 0; i < length_hauteur; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["hauteurs"][i].id;
+            newOption.text = data["hauteurs"][i].value / 10;
+            hauteur.add(newOption);
+          }
+          if (data['prix']) {
+            var qte = document.getElementById("qte").value;
+            var prix_rec = data["prix"][0][0];
+            var total_prix_ht = nbr_lettres * qte * prix_rec;
+            var total_prix_ttc = 1.2 * total_prix_ht;
+            document.getElementById('prix_lin_ht').innerHTML = total_prix_ht.toFixed(2);
+            document.getElementById('prix_lin_ttc').innerHTML = total_prix_ttc.toFixed(2);
+            document.getElementById('prix_lettre_ht').innerHTML = prix_rec.toFixed(2);
+            document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
+            document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
+            document.getElementById('qte_text').innerHTML = qte;
+          }
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    }
 
 
   });
   // changement matiere
   // **************
   $("#matiere_select").on('change', function () {
-
-    let verif_file = document.getElementById("fileInput").value;
-    let formData = new FormData();
-    if (verif_file) {
-      let file = $('#fileInput')[0].files[0];
-      formData.append('file', file);
-    }
     var selectMatiereElement = document.getElementById("matiere_select");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
     var selectedMatiereValue = selectedMatiereOption.value;
-
+    var matiereText = selectedMatiereOption.innerText;
     var selectTypeElement = document.getElementById("type_matiere");
-
-    var selectEpaisseurElement = document.getElementById("epp");
-
-
     var selectTypeUsinageElement = document.getElementById("type_usinage");
-    // var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
-    // var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+    let formData = new FormData();
+    var selectEpaisseurElement = document.getElementById("epp");
+    if (file_btn.classList.contains("active-case")) {
+      let verif_file = document.getElementById("fileInput").value;
+      if (verif_file) {
+        let file = $('#fileInput')[0].files[0];
+        formData.append('file', file);
+      }
+
+      formData.append('matiere_id', selectedMatiereValue);
+      formData.append('matiereText', matiereText);
+      // formData.append('type_id', selectedTypeValue);
+
+
+      $.ajax({
+        url: '/change_matiere',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          while (selectTypeElement.options.length > 0) {
+            selectTypeElement.remove(0);
+          }
+          const length_matieres_types = data["matieres_types"].length;
+
+          for (let i = 0; i < length_matieres_types; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["matieres_types"][i].id;
+            newOption.text = data["matieres_types"][i].name;
+            selectTypeElement.add(newOption);
+          }
+          while (selectEpaisseurElement.options.length > 0) {
+            selectEpaisseurElement.remove(0);
+          }
+
+
+          const length_arr = data["epaisseurs"].length;
+          for (let i = 0; i < length_arr; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["epaisseurs"][i].id;
+            newOption.text = data["epaisseurs"][i].value;
+            selectEpaisseurElement.add(newOption);
+          }
+
+          while (selectTypeUsinageElement.options.length > 0) {
+            selectTypeUsinageElement.remove(0);
+          }
+          const length_usg = data["types_usinage"].length;
+          for (let i = 0; i < length_usg; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["types_usinage"][i].id;
+            newOption.text = data["types_usinage"][i].name;
+            selectTypeUsinageElement.add(newOption);
+          }
+
+
+          if (data['prix']) {
+            let larg = document.getElementById('height_img').innerHTML;
+            let long = document.getElementById('width_img').innerHTML;
+            let surface = 0;
+
+            if (larg && long) {
+              surface = (larg * long);
+              // console.log(surface);
+            }
+
+            if (matiereText = 'Pmma' && data["types_usinage"][0].name == 'USIL') {
+
+              if (surface < 0.1) {
+
+                var prix_ht_entity = data['prix'][0][0];
+              } else if (surface >= 0.1 && surface <= 0.25) {
+                var prix_ht_entity = data['prix'][0][1];
+              } else {
+                var prix_ht_entity = data['prix'][0][2];
+              }
+              var prix_ht = (qte * prix_ht_entity * surface).toFixed(2);
+              var prix_ttc = (1.2 * prix_ht).toFixed(2);
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+              document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+              document.getElementById("qte_structure").innerHTML = qte;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+                prix_material_div.style.display = 'none'
+                frais_decoup_div.style.display = 'none'
+              }
+            } else {
+              var perimetre = document.getElementById('perimetre_totale').innerHTML;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              var qte = document.getElementById("qte").value;
+              let prix_decoup_mtr = data['prix'][0][0];
+              let prix_matiere_mtr = data['prix'][0][1];
+              console.log("perim" + perimetre);
+              console.log(prix_decoup_mtr);
+              let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+              let formattedNumber_decoup = prix_decoup;
+              let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+              let prix_matiere_ht = prix_matiere_mtr * surface;
+
+              let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
+              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+              // console.log(total_prix_decoup);
+              document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+              document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+              document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+
+              document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+              document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+              console.log(document.getElementById("prix_mat_ht").innerHTML);
+              if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+                prix_material_div.style.display = 'flex'
+                frais_decoup_div.style.display = 'flex'
+              }
+            }
+
+          }
+
+
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    } else {
+      var hauteur = document.getElementById("height");
+      var text_input = document.getElementById('text_input');
+      var text = text_input.value;
+      var textSansEspace = TextWithoutSpaces(text.trim());
+      var nbr_lettres = 0;
+      if (textSansEspace.length !== 0) {
+        nbr_lettres = textSansEspace.length;
+        formData.append('nbr_lettres', nbr_lettres);
+      }
+      formData.append('matiere_id', selectedMatiereValue);
+      $.ajax({
+        url: '/change_lettre_matiere',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          console.log(data);
+          while (selectTypeElement.options.length > 0) {
+            selectTypeElement.remove(0);
+          }
+          const length_matieres_types = data["matieres_types"].length;
+
+          for (let i = 0; i < length_matieres_types; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["matieres_types"][i].id;
+            newOption.text = data["matieres_types"][i].name;
+            selectTypeElement.add(newOption);
+          }
+          while (selectEpaisseurElement.options.length > 0) {
+            selectEpaisseurElement.remove(0);
+          }
+
+
+          const length_arr = data["epaisseurs"].length;
+          for (let i = 0; i < length_arr; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["epaisseurs"][i].id;
+            newOption.text = data["epaisseurs"][i].value;
+            selectEpaisseurElement.add(newOption);
+          }
+
+          while (selectTypeUsinageElement.options.length > 0) {
+            selectTypeUsinageElement.remove(0);
+          }
+          const length_usg = data["types_usinage"].length;
+          for (let i = 0; i < length_usg; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["types_usinage"][i].id;
+            newOption.text = data["types_usinage"][i].name;
+            selectTypeUsinageElement.add(newOption);
+          }
+          while (hauteur.options.length > 0) {
+            hauteur.remove(0);
+          }
+          const length_hauteur = data["hauteurs"].length;
+          console.log(length_hauteur);
+          for (let i = 0; i < length_hauteur; i++) {
+            const newOption = document.createElement('option');
+            newOption.value = data["hauteurs"][i].id;
+            newOption.text = data["hauteurs"][i].value / 10;
+            hauteur.add(newOption);
+          }
+          if (data['prix']) {
+            var qte = document.getElementById("qte").value;
+            var prix_rec = data["prix"][0][0];
+            var total_prix_ht = nbr_lettres * qte * prix_rec;
+            var total_prix_ttc = 1.2 * total_prix_ht;
+            document.getElementById('prix_lin_ht').innerHTML = total_prix_ht.toFixed(2);
+            document.getElementById('prix_lin_ttc').innerHTML = total_prix_ttc.toFixed(2);
+            document.getElementById('prix_lettre_ht').innerHTML = prix_rec.toFixed(2);
+            document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
+            document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
+            document.getElementById('qte_text').innerHTML = qte;
+          }
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    }
+
+
+
+
+  });
+  //changer le role
+  $("#role_users").on('change', function () {
+    alert("d");
+    console.log("sjdbs");
+    let formData = new FormData();
+    var selectRoleElement = document.getElementById("role_users");
+    var selectedRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
+    var selectedRoleValue = selectedRoleOption.value;
+
+
+
+    formData.append('role_value', selectedRoleValue);
+
+
+
+
+    $.ajax({
+      url: '/users_by_role_selected',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (data) {
+        console.log(data);
+        var table = document.getElementById("users_table");
+        var rowCount = table.rows.length;
+
+        // Start from the last row and remove each one
+        for (var i = rowCount - 1; i > 0; i--) {
+          table.deleteRow(i);
+        }
+        var nbr = 1;
+        for (var i = 0; i < data['users_by_role'].length; i++) {
+
+          var row = table.insertRow();
+          var cell0 = row.insertCell(0);
+          var cell1 = row.insertCell();
+          var cell2 = row.insertCell();
+          var cell3 = row.insertCell();
+          var cell4 = row.insertCell();
+          var cell5 = row.insertCell();
+          cell0.innerHTML = nbr++;
+          cell1.innerHTML = data['users_by_role'][i]['username'];
+          cell2.innerHTML = data['users_by_role'][i]['email'];
+          cell3.innerHTML = `+33<span class="user_pure_tel">`+data['users_by_role'][i]['tel']+`</span>`;
+          cell4.innerHTML = "************"
+          cell5.innerHTML = `
+          <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
+                    <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_bridge_row(this)"></i>
+          `;
+        };
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+
+  });
+
+  //changer la matiere de la liste
+  $("#matiere_list").on('change', function () {
+    let formData = new FormData();
+    var selectMatiereElement = document.getElementById("matiere_list");
+    var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+    var selectedMatiereValue = selectedMatiereOption.value;
+
+
+    var selectTypeElement = document.getElementById("type_list");
+    var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+    var selectedTypeValue = selectedTypeOption.value;
+
+    var selectTypeUsinageElement = document.getElementById("type_usinage_list");
+    var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
+    var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+
 
     formData.append('matiere_id', selectedMatiereValue);
     // formData.append('type_id', selectedTypeValue);
 
 
 
-    // let verif_file = files[0];
 
     $.ajax({
-      url: '/change_matiere',
+      url: '/matieres_liste',
       type: 'POST',
       data: formData,
       contentType: false,
       processData: false,
       success: function (data) {
-        if (data['prix']) {
-          alert("sdsd");
+        console.log(data["types_matieres"]);
+
+        var table = document.getElementById("matieres_table");
+        if (table.style.display == "none") {
+          table.style.display = "block";
+          var matieres_usil_table = document.getElementById("matieres_usil_table");
+          matieres_usil_table.style.display = "none";
+          console.log(data["data_usil"]);
+
         }
+
         while (selectTypeElement.options.length > 0) {
           selectTypeElement.remove(0);
         }
-        const length_matieres_types = data["matieres_types"].length;
-
-        for (let i = 0; i < length_matieres_types; i++) {
-          const newOption = document.createElement('option');
-          newOption.value = data["matieres_types"][i].id;
-          newOption.text = data["matieres_types"][i].name;
-          selectTypeElement.add(newOption);
-        }
-        while (selectEpaisseurElement.options.length > 0) {
-          selectEpaisseurElement.remove(0);
-        }
-
-
-        const length_arr = data["epaisseurs"].length;
+        const length_arr = data["types_matieres"].length;
         for (let i = 0; i < length_arr; i++) {
           const newOption = document.createElement('option');
-          newOption.value = data["epaisseurs"][i].id;
-          newOption.text = data["epaisseurs"][i].value;
-          selectEpaisseurElement.add(newOption);
+          newOption.value = data["types_matieres"][i].id;
+          newOption.text = data["types_matieres"][i].name;
+          selectTypeElement.add(newOption);
         }
+
 
         while (selectTypeUsinageElement.options.length > 0) {
           selectTypeUsinageElement.remove(0);
         }
-        const length_usg = data["types_usinage"].length;
-        for (let i = 0; i < length_usg; i++) {
+        const length_usinage = data["types_usinage"].length;
+        for (let i = 0; i < length_usinage; i++) {
           const newOption = document.createElement('option');
           newOption.value = data["types_usinage"][i].id;
           newOption.text = data["types_usinage"][i].name;
@@ -786,59 +1481,45 @@ var surface = 0;
         }
 
 
-        //       let prix_decoup_mtr = data['prix'][0][0];
-        //       let prix_matiere_mtr = data['prix'][0][1];
-        //       // console.log(perimetre);
-        //       let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-        //       let formattedNumber_decoup = prix_decoup;
-        //       let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-        //       let prix_matiere_ht = prix_matiere_mtr * surface;
-        //       let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-        //       let total_prix_decoup = prix_matiere_ht + formattedNumber_decoup;
-        //       let total_prix_matiere = prix_decoup_ttc + prix_matiere_ttc;
-        //       // console.log(total_prix_decoup);
-        //       document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-        //       document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-        //       document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-        //       document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-        //       document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-        //       document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
 
+        var rowCount = table.rows.length;
 
-        //       // Change the image source
-        //       //  imageElement.src =  'static/img/upload/current.png';
-        //       //  let myDiv = document.getElementById("accordionExample");
-        //       //  myDiv.style.display = "block";
-        //       // let myDiv2 = document.getElementById("prix_total");
-        //       // myDiv2.style.display = "block";
-
-        if (data['prix']) {
-          var qte = document.getElementById("qte").value;
-          let prix_decoup_mtr = data['prix'][0][0];
-          let prix_matiere_mtr = data['prix'][0][1];
-          // console.log(perimetre);
-          let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-          let formattedNumber_decoup = prix_decoup;
-          let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-          let prix_matiere_ht = prix_matiere_mtr * surface;
-          let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-          let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-          let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
-          // console.log(total_prix_decoup);
-          document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-          document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-          document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-          document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-          document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-          document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+        // Start from the last row and remove each one
+        for (var i = rowCount - 1; i > 0; i--) {
+          table.deleteRow(i);
         }
+        console.log(data['liste_data'].length);
+        var nbr = 1;
+        for (var i = 0; i < data['liste_data'].length; i++) {
 
-        // Change the image source
-        //  imageElement.src =  'static/img/upload/current.png';
-        //  let myDiv = document.getElementById("accordionExample");
-        //  myDiv.style.display = "block";
-        // let myDiv2 = document.getElementById("prix_total");
-        // myDiv2.style.display = "block";
+          var row = table.insertRow();
+          var cell0 = row.insertCell(0);
+          var cell1 = row.insertCell(1);
+          var cell2 = row.insertCell(2);
+          var cell3 = row.insertCell(3);
+          var cell4 = row.insertCell(4);
+          var cell5 = row.insertCell(5);
+          var cell6 = row.insertCell(6);
+          var cell7 = row.insertCell(7);
+
+          cell0.innerHTML = nbr++;
+          cell1.innerHTML = data["liste_data"][i]["matiere_name"]
+          cell2.innerHTML = data["liste_data"][i]["type_name"]
+          cell3.innerHTML = data["liste_data"][i]["usinage_name"]
+          cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
+
+
+
+          cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class="prix_matiere_input"> €`;
+          cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class="prix_limeaire_input">€`
+          // 
+          cell7.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                    onclick="delete_bridge_row(this)"></i>
+          `;
+
+        };
 
       },
       error: function () {
@@ -846,28 +1527,345 @@ var surface = 0;
       }
     });
 
+  });
+  //changer le type  de la liste
+  $("#type_list").on('change', function () {
 
+    let formData = new FormData();
+    var selectMatiereElement = document.getElementById("matiere_list");
+    var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+    var selectedMatiereValue = selectedMatiereOption.value;
+
+
+    var selectTypeElement = document.getElementById("type_list");
+    var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+    var selectedTypeValue = selectedTypeOption.value;
+
+    var selectTypeUsinageElement = document.getElementById("type_usinage_list");
+    var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
+    var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+
+    formData.append('matiere_id', selectedMatiereValue);
+    formData.append('type_id', selectedTypeValue);
+
+
+
+
+    $.ajax({
+      url: '/type_liste',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (data) {
+        console.log(data["liste_data"]);
+        while (selectTypeUsinageElement.options.length > 0) {
+          selectTypeUsinageElement.remove(0);
+        }
+        const length_usinage = data["types_usinage"].length;
+        for (let i = 0; i < length_usinage; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types_usinage"][i].id;
+          newOption.text = data["types_usinage"][i].name;
+          selectTypeUsinageElement.add(newOption);
+        }
+
+
+        var table = document.getElementById("matieres_table");
+        if (table.style.display == "none") {
+          table.style.display = "block";
+          var matieres_usil_table = document.getElementById("matieres_usil_table");
+          matieres_usil_table.style.display = "none";
+          console.log(data["data_usil"]);
+
+        }
+        var rowCount = table.rows.length;
+
+        // Start from the last row and remove each one
+        for (var i = rowCount - 1; i > 0; i--) {
+          table.deleteRow(i);
+        }
+        console.log(data['liste_data'].length);
+        var nbr = 1;
+        for (var i = 0; i < data['liste_data'].length; i++) {
+
+          var row = table.insertRow();
+          var cell0 = row.insertCell(0);
+          var cell1 = row.insertCell(1);
+          var cell2 = row.insertCell(2);
+          var cell3 = row.insertCell(3);
+          var cell4 = row.insertCell(4);
+          var cell5 = row.insertCell(5);
+          var cell6 = row.insertCell(6);
+          var cell7 = row.insertCell(7);
+
+          cell0.innerHTML = nbr++;
+          cell1.innerHTML = data["liste_data"][i]["matiere_name"]
+          cell2.innerHTML = data["liste_data"][i]["type_name"]
+          cell3.innerHTML = data["liste_data"][i]["usinage_name"]
+          cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
+
+          cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
+          cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
+          cell7.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_bridge_row(this)"></i>
+          `;
+
+        };
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
 
   });
 
-  $(document).ready(function () {
+  $("#type_usinage_list").on('change', function () {
 
-     var fontSelect = document.getElementById("fontSelect");
-     var options = fontSelect.getElementsByTagName("option");
-     for (var i = 0; i < options.length; i++) {
-       console.log(options[i]);
-       options[i].style.fontFamily = options[i].value;
-     }
-    $("#mySelect").change(function () {
-      updateSelectedOptions();
+    let formData = new FormData();
+    var selectMatiereElement = document.getElementById("matiere_list");
+    var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+    var selectedMatiereValue = selectedMatiereOption.value;
+    var selectedMatiereText = selectedMatiereOption.innerText;
+
+
+    var selectTypeElement = document.getElementById("type_list");
+    var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+    var selectedTypeValue = selectedTypeOption.value;
+
+    var selectTypeUsinageElement = document.getElementById("type_usinage_list");
+    var selectedTypeUsinageOption = selectTypeUsinageElement.options[selectTypeUsinageElement.selectedIndex];
+    var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
+
+    var selectedTypeUsinageText = selectedTypeUsinageOption.innerText;
+
+
+    formData.append('matiere_id', selectedMatiereValue);
+    formData.append('type_id', selectedTypeValue);
+    formData.append('type_usinage_id', selectedTypeUsinageValue);
+    formData.append('matiere_name', selectedMatiereText);
+    formData.append('usinage_name', selectedTypeUsinageText);
+
+
+
+
+    $.ajax({
+      url: '/type_usinage_liste',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (data) {
+        if ((data["liste_data"])) {
+          var table = document.getElementById("matieres_table");
+          if (table.style.display == "none") {
+            table.style.display = "block";
+            var matieres_usil_table = document.getElementById("matieres_usil_table");
+            matieres_usil_table.style.display = "none";
+            console.log(data["data_usil"]);
+
+          }
+
+          var rowCount = table.rows.length;
+          // Start from the last row and remove each one
+          for (var i = rowCount - 1; i > 0; i--) {
+            table.deleteRow(i);
+          }
+          console.log(data['liste_data'].length);
+          var nbr = 1;
+          for (var i = 0; i < data['liste_data'].length; i++) {
+
+            var row = table.insertRow();
+            var cell0 = row.insertCell(0);
+            var cell1 = row.insertCell(1);
+            var cell2 = row.insertCell(2);
+            var cell3 = row.insertCell(3);
+            var cell4 = row.insertCell(4);
+            var cell5 = row.insertCell(5);
+            var cell6 = row.insertCell(6);
+            var cell7 = row.insertCell(7);
+
+            cell0.innerHTML = nbr++;
+            cell1.innerHTML = data["liste_data"][i]["matiere_name"]
+            cell2.innerHTML = data["liste_data"][i]["type_name"]
+            cell3.innerHTML = data["liste_data"][i]["usinage_name"]
+            cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
+
+            cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
+            cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
+            cell7.innerHTML = `
+       
+              <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_user('{{user.id}}')"></i>
+        `;
+
+          };
+        } else {
+          if ((data["data_usil"])) {
+            var matieres_table = document.getElementById("matieres_table");
+            matieres_table.style.display = "none";
+            var matieres_usil_table = document.getElementById("matieres_usil_table");
+            matieres_usil_table.style.display = "block";
+            console.log(data["data_usil"]);
+
+            var rowCount = matieres_usil_table.rows.length;
+            // Start from the last row and remove each one
+            for (var i = rowCount - 1; i > 0; i--) {
+              matieres_usil_table.deleteRow(i);
+            }
+            console.log(data['data_usil'].length);
+            var nbr = 1;
+            for (var i = 0; i < data['data_usil'].length; i++) {
+
+              var row = matieres_usil_table.insertRow();
+              var cell0 = row.insertCell(0);
+              var cell1 = row.insertCell(1);
+              var cell2 = row.insertCell(2);
+              var cell3 = row.insertCell(3);
+              var cell4 = row.insertCell(4);
+              var cell5 = row.insertCell(5);
+              var cell6 = row.insertCell(6);
+              var cell7 = row.insertCell(7);
+              var cell8 = row.insertCell(8);
+
+              cell0.innerHTML = nbr++;
+              cell1.innerHTML = data["data_usil"][i]["matiere_name"]
+              cell2.innerHTML = data["data_usil"][i]["type_name"]
+              cell3.innerHTML = data["data_usil"][i]["usinage_name"]
+              cell4.innerHTML = data["data_usil"][i]["epaisseur_value"]
+
+              cell5.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_1"] + `' class='prix_1_input'> €`;
+              cell6.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_2"] + `'class='prix_2_input'>€`;
+              cell7.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_3"] + `'class='prix_3_input'>€`;
+              cell8.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_bridge_row(this)"></i>
+          `;
+            }
+          }
+        }
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
     });
 
-    // Update the selected options text
-    function updateSelectedOptions() {
-      var selectedOptions = $("#mySelect").val();
-      console.log(selectedOptions); // You can use the selectedOptions array as needed
+  });
+  //change representant
+  $("#representant").on('change', function () {
+
+    let formData = new FormData();
+    var selectRepresentantElement = document.getElementById("representant");
+    var selectedRepresentantOption = selectRepresentantElement.options[selectRepresentantElement.selectedIndex];
+    var selectedRepresentantValue = selectedRepresentantOption.value;
+
+
+
+
+    formData.append('representant', selectedRepresentantValue);
+
+
+
+
+
+    $.ajax({
+      url: '/change_representant',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (data) {
+
+        console.log(data["clients"]);
+        var table = document.getElementById("clients_table");
+        var rowCount = table.rows.length;
+
+        // Start from the last row and remove each one
+        for (var i = rowCount - 1; i > 0; i--) {
+          table.deleteRow(i);
+        }
+        var nbr = 1;
+        for (var i = 0; i < data['clients'].length; i++) {
+
+          var row = table.insertRow();
+          var cell0 = row.insertCell(0);
+          var cell1 = row.insertCell();
+          var cell2 = row.insertCell();
+          var cell3 = row.insertCell();
+          var cell4 = row.insertCell();
+          var cell5 = row.insertCell();
+          var cell6 = row.insertCell();
+          var cell7 = row.insertCell();
+          var cell8 = row.insertCell();
+          cell0.innerHTML = nbr++;
+          cell1.innerHTML = data['clients'][i][5];
+          cell2.innerHTML = data['clients'][i][0];
+          cell3.innerHTML = `<span class="numero_voie_edit_span">` + data['clients'][i][3] + `</span > &nbsp <span class="name_voie_edit_span">` + data['clients'][i][4] + `</span>`;
+          cell4.innerHTML = data['clients'][i][2];
+          cell5.innerHTML = data['clients'][i][1];
+          cell6.innerHTML = data['clients'][i][6];
+          cell7.innerHTML = data['clients'][i][7];
+          cell8.innerHTML = `
+            <output class="rec_client_id" style="visibility: hidden;">`+ data['clients'][i][9] + `</output>
+            <output class="rec_user_id" style="visibility: hidden;">`+ data['clients'][i][8] + `</output>
+            <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;"></i>
+            <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_user('{{user.id}}')"></i>
+          `;
+        };
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+
+  });
+  // ***********
+  $(document).ready(function () {
+    // if (document.getElementById("users_table")) {
+    //   var table = document.getElementById("users_table");
+    //   var rowCount = 1;
+    //   for (var i = 0; i < table.rows.length; i++) {
+    //     var cell = table.rows[i].insertCell(0);
+    //     cell.innerHTML = rowCount++;
+    //   }
+    // }
+
+    if (document.getElementById("fontSelect")) {
+      var fontSelect = document.getElementById("fontSelect");
+      var options = fontSelect.getElementsByTagName("option");
+      for (var i = 0; i < options.length; i++) {
+        //  console.log(options[i]);
+        options[i].style.fontFamily = options[i].value;
+      }
+      $("#fontSelect").change(function () {
+        updateSelectedOptions();
+      });
+
+      // Update the selected options text
+      function updateSelectedOptions() {
+
+        var selectedOptions = $("#fontSelect").val();
+        console.log(selectedOptions); // You can use the selectedOptions array as needed
+        var input = document.getElementById('text_input');
+        var text = input.value;
+        if (text.trim().length !== 0) {
+          var myTextElement = document.getElementById("text_area");
+          myTextElement.style.fontSize = "40px";
+          myTextElement.style.fontFamily = selectedOptions
+        }
+
+      }
     }
+
+
+
     let dropArea = $("#drop-area");
+    let dropAreaBl = $("#drop-area-bl");
 
     dropArea.on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
       e.preventDefault();
@@ -908,6 +1906,46 @@ var surface = 0;
         // }
       }
     }
+    dropAreaBl.on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    })
+      .on('dragover dragenter', function () {
+        dropAdropAreaBl.addClass('dragged');
+      })
+      .on('dragleave dragend drop', function () {
+        dropAreaBl.removeClass('dragged');
+      })
+      .on('drop', function (e) {
+        let files = e.originalEvent.dataTransfer.files;
+        // handleFilesBl(files);
+      });
+
+    $("#fileInputBl").on('change', function () {
+      let files = this.files;
+      // handleFilesBl(files);
+    });
+
+    function handleFilesBl(files) {
+
+      // let x = document.getElementById("div_test");
+      // var imagejavascript = document.createElement("svg");
+      // var im = document.createElement("img");
+      // im.src = "images.png";
+      // // imagejavascript.src = "arman.svg";
+      // imagejavascript.appendChild(im);
+      // x.appendChild(im);
+
+      if (files.length > 0) {
+        let file = files[0];
+        uploadFileBl(file);
+        // if (file.type === 'dxf') {
+        //     uploadFile(file);
+        // } else {
+        //     alert('Veuillez sélectionner un fichier DXF valide.');
+        // }
+      }
+    }
 
     function uploadFile(file) {
       console.log(file);
@@ -921,10 +1959,13 @@ var surface = 0;
       var selectType = document.getElementById("type_usinage");
       var selectedTypeOption = selectType.options[selectType.selectedIndex];
       var selectedTypeValue = selectedTypeOption.value;
+      var usinage_text = selectedTypeOption.innerHTML;
+
 
       var selectMatiereElement = document.getElementById("matiere_select");
       var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
       var mt = selectedMatiereOption.value;
+      var mt_text = selectedMatiereOption.innerHTML;
 
       var selectMatiereTypeElement = document.getElementById("type_matiere");
       var selectedMatiereTypeOption = selectMatiereTypeElement.options[selectMatiereTypeElement.selectedIndex];
@@ -939,6 +1980,8 @@ var surface = 0;
       formData.append('mt_name', mt_name);
       formData.append('selectedValue', selectedValue);
       formData.append('selectedTypeValue', selectedTypeValue);
+      formData.append('mt_text', mt_text);
+      formData.append('usinage_text', usinage_text);
       // formData.append('qte', qte);
       $.ajax({
         url: '/upload',
@@ -947,19 +1990,112 @@ var surface = 0;
         contentType: false,
         processData: false,
         success: function (data) {
-          // console.log(data['clients']);
-          let prix_decoup_mtr = data['prix'][0][0];
-          let prix_matiere_mtr = data['prix'][0][1];
-          // console.log(prix_matiere_mtr);
-          larg = data['dimension']['larg'] / 1000;
-          long = data['dimension']['long'] / 1000;
-          var path_folder = data['path_folder'];
+          var nbr_percage = data['nbr_percage'];
 
+          console.log(nbr_percage);
+          var path_folder = data['path_folder'];
+          let larg = data['dimension']['larg'] / 1000;
+          let long = data['dimension']['long'] / 1000;
+
+
+          let surface = 0, perimetre = 0;
           if (larg && long) {
             surface = (larg * long);
             // console.log(surface);
-            perimetre = data['perimetre'];
           }
+          if (data['perimetre']) {
+            let prix_decoup_mtr = data['prix'][0][0];
+            let prix_matiere_mtr = data['prix'][0][1];
+            // console.log(prix_matiere_mtr);
+
+            perimetre = data['perimetre'];
+            var radios = document.getElementsByName('mode_emp');
+            var radio_value;
+            for (var i = 0; i < radios.length; i++) {
+              // Check if the radio button is checked
+              if (radios[i].checked) {
+                // If checked, log its value
+                console.log("Checked radio value:", radios[i].value);
+                // You can return the value here if needed
+                radio_value = radios[i].value;
+                break;
+              }
+            }
+            var prix_livraison_ht = 0;
+            if (radio_value == "livraison") {
+              prix_livraison_ht = 19.50;
+            }
+            let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+            let formattedNumber_decoup = prix_decoup;
+            let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+            let prix_matiere_ht = prix_matiere_mtr * surface;
+
+            let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+            let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup) + prix_livraison_ht;
+            let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc) + 1.2 * prix_livraison_ht;
+            // console.log(prix_matiere_ht);
+            // console.log(total_prix_decoup);
+            document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+            document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+            document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
+            document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+            document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+            document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+            document.getElementById("qte_structure").innerHTML = qte;
+            document.getElementById("qte_percage").innerHTML = nbr_percage;
+            document.getElementById("prix_percage").innerHTML = (0.3 * nbr_percage).toFixed(2);
+            document.getElementById("prix_livr").innerHTML = (1.2 * prix_livraison_ht).toFixed(2);
+
+            document.getElementById("perimetre_totale").innerHTML = perimetre;
+
+            var prix_material_div = document.getElementById("prix_material_div");
+            var frais_decoup_div = document.getElementById("frais_decoup_div");
+            if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+              prix_material_div.style.display = 'flex'
+              frais_decoup_div.style.display = 'flex'
+            }
+
+
+          } else {
+
+            surface = surface.toFixed(2);
+            if (surface < 0.1) {
+
+              var prix_ht_entity = data['prix'][0][0];
+            } else if (surface >= 0.1 && surface <= 0.25) {
+              var prix_ht_entity = data['prix'][0][1];
+            } else {
+              var prix_ht_entity = data['prix'][0][2];
+            }
+            var prix_ht = (qte * prix_ht_entity).toFixed(2);
+            var prix_ttc = (1.2 * prix_ht).toFixed(2);
+
+            document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+            document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+            document.getElementById("qte_structure").innerHTML = qte;
+            var prix_material_div = document.getElementById("prix_material_div");
+            var frais_decoup_div = document.getElementById("frais_decoup_div");
+            if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+              prix_material_div.style.display = 'none'
+              frais_decoup_div.style.display = 'none'
+            }
+
+
+          }
+          // Change the image source
+          imageElement.src = path_folder + '/current.png';
+          let myDiv = document.getElementById("accordionExample");
+          myDiv.style.display = "block";
+          let devis_pro = document.getElementById("acardion_format_pro");
+          devis_pro.style.display = "block";
+          let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
+          form_envoyer_usinage_btn.style.display = "block";
+          let total_prix_detailles = document.getElementById("total_prix_detailles");
+          total_prix_detailles.style.display = "flex";
+          document.getElementById("height_img").innerHTML = larg.toFixed(2);
+          document.getElementById("width_img").innerHTML = long.toFixed(2);
+
+          // console.log(data['clients']);
 
           // if(larg && long){
           //   surface = 2*(larg+long);
@@ -969,34 +2105,7 @@ var surface = 0;
           //   surface = long;
           // }
 
-          let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-          let formattedNumber_decoup = prix_decoup;
-          let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-          let prix_matiere_ht = prix_matiere_mtr * surface;
-          console.log(prix_matiere_ht);
-          let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-          let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-          let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
-          // console.log(prix_matiere_ht);
-          // console.log(total_prix_decoup);
-          document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-          document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-          document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-          document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-          document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-          document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
 
-
-          // Change the image source
-          imageElement.src = path_folder + '/current.png';
-          let myDiv = document.getElementById("accordionExample");
-          myDiv.style.display = "block";
-          let devis_pro = document.getElementById("acardion_format_pro");
-          devis_pro.style.display = "block";
-          let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
-          form_envoyer_usinage_btn.style.display= "block";
-          let total_prix_detailles = document.getElementById("total_prix_detailles");
-          total_prix_detailles.style.display = "flex";
           // let myDiv2 = document.getElementById("prix_total");
           // myDiv2.style.display = "block";
 
@@ -1006,7 +2115,11 @@ var surface = 0;
         }
       });
     }
+
+
   });
+
+
 
 
 
@@ -1123,7 +2236,10 @@ function envoyer_command() {
   });
 }
 function confirmation(id) {
+  alert("ds");
   let formData = new FormData();
+  let file = $('#fileInputBl')[0].files[0];
+  formData.append("file", file);
   formData.append("id", id);
   $.ajax({
     url: '/change_statut_confirmer',
@@ -1291,6 +2407,23 @@ function telecharger_pdf(user) {
   var selectDevisProOption = selectDevisProElement.options[selectDevisProElement.selectedIndex];
   var selectedDevisProValue = selectDevisProOption.value;
   let formData = new FormData();
+  var radios = document.getElementsByName('mode_emp');
+  var radio_value;
+  for (var i = 0; i < radios.length; i++) {
+    // Check if the radio button is checked
+    if (radios[i].checked) {
+      // If checked, log its value
+
+      // You can return the value here if needed
+      radio_value = radios[i].value;
+      break;
+    }
+  }
+
+  if (radio_value == "livraison") {
+    console.log(radio_value);
+    formData.append('prix_livr_ht', 19.50);
+  }
   if (selectedDevisProValue == -1) {
     let text = "Voulez vous continuer sans client?";
     confirm(text);
@@ -1363,31 +2496,31 @@ function telecharger_pdf(user) {
     }
   });
 }
-function confirmation(id) {
-  let formData = new FormData();
-  formData.append("id", id);
-  $.ajax({
-    url: '/change_statut_confirmer',
-    type: 'POST',
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function (msg) {
-      window.location.href = "/en_attente";
+// function confirmation(id) {
+//   let formData = new FormData();
+//   formData.append("id", id);
+//   $.ajax({
+//     url: '/change_statut_confirmer',
+//     type: 'POST',
+//     data: formData,
+//     contentType: false,
+//     processData: false,
+//     success: function (msg) {
+//       window.location.href = "/en_attente";
 
-      // Change the image source
-      //  imageElement.src =  'static/img/upload/current.png';
-      //  let myDiv = document.getElementById("accordionExample");
-      //  myDiv.style.display = "block";
-      // let myDiv2 = document.getElementById("prix_total");
-      // myDiv2.style.display = "block";
+//       // Change the image source
+//       //  imageElement.src =  'static/img/upload/current.png';
+//       //  let myDiv = document.getElementById("accordionExample");
+//       //  myDiv.style.display = "block";
+//       // let myDiv2 = document.getElementById("prix_total");
+//       // myDiv2.style.display = "block";
 
-    },
-    error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
-    }
-  });
-}
+//     },
+//     error: function () {
+//       alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+//     }
+//   });
+// }
 function usiner(id) {
   alert("d");
   let formData = new FormData();
@@ -1431,8 +2564,92 @@ function text_btn_active() {
       file_btn.classList.remove("active-case");
       drop_area = document.getElementById("drop-area");
       drop_area.style.display = "none";
+      img_usinage = document.getElementById('img_usinage');
+      img_usinage.style.display = 'none'
+      text_div = document.getElementById("text_div");
+      text_div.style.display = 'block';
+
     }
+
+    $.ajax({
+      url: '/charge_text_data',
+      type: 'POST',
+      contentType: false,
+      processData: false,
+      success: function (data) {
+        console.log(data);
+        var selectMatiereElement = document.getElementById("matiere_select");
+        var selectTypeElement = document.getElementById("type_matiere");
+        var selectEpaisseurElement = document.getElementById("epp");
+        var selectTypeUsinageElement = document.getElementById("type_usinage");
+        var selectHauteurElement = document.getElementById("height");
+        while (selectMatiereElement.options.length > 0) {
+          selectMatiereElement.remove(0);
+        }
+        const length_matieres = data["matieres"].length;
+
+        for (let i = 0; i < length_matieres; i++) {
+          console.log(data["matieres"][i].name);
+          const newOption = document.createElement('option');
+          newOption.value = data["matieres"][i].id;
+          newOption.text = data["matieres"][i].name;
+          selectMatiereElement.add(newOption);
+        }
+
+        while (selectTypeElement.options.length > 0) {
+          selectTypeElement.remove(0);
+        }
+        const length_matieres_types = data["types"].length;
+
+        for (let i = 0; i < length_matieres_types; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types"][i].id;
+          newOption.text = data["types"][i].name;
+          selectTypeElement.add(newOption);
+        }
+        while (selectEpaisseurElement.options.length > 0) {
+          selectEpaisseurElement.remove(0);
+        }
+
+
+        const length_arr = data["epaisseurs"].length;
+        for (let i = 0; i < length_arr; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["epaisseurs"][i].id;
+          newOption.text = data["epaisseurs"][i].value;
+          selectEpaisseurElement.add(newOption);
+        }
+
+        while (selectTypeUsinageElement.options.length > 0) {
+          selectTypeUsinageElement.remove(0);
+        }
+        const length_usg = data["types_usinage"].length;
+        for (let i = 0; i < length_usg; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types_usinage"][i].id;
+          newOption.text = data["types_usinage"][i].name;
+          selectTypeUsinageElement.add(newOption);
+        }
+
+        while (selectHauteurElement.options.length > 0) {
+          selectHauteurElement.remove(0);
+        }
+        const length_hauteur = data["hauteurs"].length;
+
+        for (let i = 0; i < length_hauteur; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["hauteurs"][i].id;
+          newOption.text = data["hauteurs"][i].value / 10 + " cm";
+          selectHauteurElement.add(newOption);
+        }
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
   }
+
+
 }
 
 function upload_btn_active() {
@@ -1452,7 +2669,162 @@ function upload_btn_active() {
       text_bn.classList.remove("active-case");
       text_section = document.getElementById("text-section");
       text_section.style.display = "none";
+      img_usinage = document.getElementById('img_usinage');
+      img_usinage.style.display = 'block'
+      text_div = document.getElementById("text_div");
+      text_div.style.display = 'none';
     }
+
+    $.ajax({
+      url: '/charge_form_data',
+      type: 'POST',
+      contentType: false,
+      processData: false,
+      success: function (data) {
+        console.log(data);
+        var selectMatiereElement = document.getElementById("matiere_select");
+        var selectTypeElement = document.getElementById("type_matiere");
+        var selectEpaisseurElement = document.getElementById("epp");
+        var selectTypeUsinageElement = document.getElementById("type_usinage");
+        while (selectMatiereElement.options.length > 0) {
+          selectMatiereElement.remove(0);
+        }
+        const length_matieres = data["matieres"].length;
+
+        for (let i = 0; i < length_matieres; i++) {
+          console.log(data["matieres"][i].name);
+          const newOption = document.createElement('option');
+          newOption.value = data["matieres"][i].id;
+          newOption.text = data["matieres"][i].name;
+          selectMatiereElement.add(newOption);
+        }
+
+        while (selectTypeElement.options.length > 0) {
+          selectTypeElement.remove(0);
+        }
+        const length_matieres_types = data["types"].length;
+
+        for (let i = 0; i < length_matieres_types; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types"][i].id;
+          newOption.text = data["types"][i].name;
+          selectTypeElement.add(newOption);
+        }
+        while (selectEpaisseurElement.options.length > 0) {
+          selectEpaisseurElement.remove(0);
+        }
+
+
+        const length_arr = data["epaisseurs"].length;
+        for (let i = 0; i < length_arr; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["epaisseurs"][i].id;
+          newOption.text = data["epaisseurs"][i].value;
+          selectEpaisseurElement.add(newOption);
+        }
+
+        while (selectTypeUsinageElement.options.length > 0) {
+          selectTypeUsinageElement.remove(0);
+        }
+        const length_usg = data["types_usinage"].length;
+        for (let i = 0; i < length_usg; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types_usinage"][i].id;
+          newOption.text = data["types_usinage"][i].name;
+          selectTypeUsinageElement.add(newOption);
+        }
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+  }
+}
+
+function forms_btn_active() {
+
+  var file_btn = document.getElementById("file_btn");
+  var text_bn = document.getElementById("text_btn");
+
+  // text_bn.classList.add("active-case");
+  if (!file_btn.classList.contains("active-case")) {
+
+    file_btn.classList.add("active-case");
+    drop_area = document.getElementById("drop-area");
+    drop_area.style.display = "block"
+
+
+    if (text_bn.classList.contains("active-case")) {
+      text_bn.classList.remove("active-case");
+      text_section = document.getElementById("text-section");
+      text_section.style.display = "none";
+    }
+
+    $.ajax({
+      url: '/charge_form_data',
+      type: 'POST',
+      contentType: false,
+      processData: false,
+      success: function (data) {
+        console.log(data);
+        var selectMatiereElement = document.getElementById("matiere_select");
+        var selectTypeElement = document.getElementById("type_matiere");
+        var selectEpaisseurElement = document.getElementById("epp");
+        var selectTypeUsinageElement = document.getElementById("type_usinage");
+        while (selectMatiereElement.options.length > 0) {
+          selectMatiereElement.remove(0);
+        }
+        const length_matieres = data["matieres"].length;
+
+        for (let i = 0; i < length_matieres; i++) {
+          console.log(data["matieres"][i].name);
+          const newOption = document.createElement('option');
+          newOption.value = data["matieres"][i].id;
+          newOption.text = data["matieres"][i].name;
+          selectMatiereElement.add(newOption);
+        }
+
+        while (selectTypeElement.options.length > 0) {
+          selectTypeElement.remove(0);
+        }
+        const length_matieres_types = data["types"].length;
+
+        for (let i = 0; i < length_matieres_types; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types"][i].id;
+          newOption.text = data["types"][i].name;
+          selectTypeElement.add(newOption);
+        }
+        while (selectEpaisseurElement.options.length > 0) {
+          selectEpaisseurElement.remove(0);
+        }
+
+
+        const length_arr = data["epaisseurs"].length;
+        for (let i = 0; i < length_arr; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["epaisseurs"][i].id;
+          newOption.text = data["epaisseurs"][i].value;
+          selectEpaisseurElement.add(newOption);
+        }
+
+        while (selectTypeUsinageElement.options.length > 0) {
+          selectTypeUsinageElement.remove(0);
+        }
+        const length_usg = data["types_usinage"].length;
+        for (let i = 0; i < length_usg; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = data["types_usinage"][i].id;
+          newOption.text = data["types_usinage"][i].name;
+          selectTypeUsinageElement.add(newOption);
+        }
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
   }
 }
 function ajuter_plaque_select() {
@@ -1482,4 +2854,1195 @@ function ajuter_plaque_select() {
 
   // Append HTML using innerHTML
   myDiv.innerHTML += htmlCode;
+}
+
+// ouvre nes user form
+function newClientForm() {
+  var liste_clients_section = document.getElementById("liste_clients_section");
+  liste_clients_section.style.display = "flex";
+  // var selectRepresentant = document.getElementById("representant");
+  // var selectedRepresentantValue= selectRepresentant.value;
+  // var selectedRepresentantText = selectRepresentant.innerHTML;
+  // var selectEpaisseurElement = document.getElementById("epp");
+  // var selectRepresentantOption = selectRepresentant.options[selectRepresentant.selectedIndex];
+  // var selectedRepresentantValue = selectRepresentantOption.value;
+  // var selectedRepresentantText = selectRepresentantOption.innerHTML;
+
+  // var rep_new_client = document.getElementById("rep_new_client");
+  // rep_new_client.options[0].value=selectedRepresentantValue;
+  // rep_new_client.options[0].innerHTML=selectedRepresentantText;
+
+  // var opp = rep_new_client.options[rep_new_client.selectedIndex];
+  // var testValue = opp.value;
+  // var testText = opp.innerHTML;
+  // console.log(testText);
+}
+
+// fermer Form 
+
+function closeFormClient() {
+
+  var liste_clients_section = document.getElementById("liste_clients_section");
+  liste_clients_section.style.display = "none";
+}
+
+function addNewClient() {
+  var selectRepresentantElement = document.getElementById("rep_new_client");
+  var selectRepresentantOption = selectRepresentantElement.options[selectRepresentantElement.selectedIndex];
+  var selectedRepresentantValue = selectRepresentantOption.value;
+  console.log(selectedRepresentantValue);
+  var name = document.getElementById("name");
+  var nameText = name.value;
+
+
+
+  var numeroVoie = document.getElementById("numero_voie");
+  var numeroVoieText = numeroVoie.value;
+
+  var nameVoie = document.getElementById("nom_voie");
+  var nameVoieText = nameVoie.value;
+
+  var cp = document.getElementById("cp");
+  var cpText = cp.value;
+  console.log(cpText);
+  alert("eed");
+  var ville = document.getElementById("ville");
+  var villeText = ville.value;
+
+  var email = document.getElementById("email");
+  var emailText = email.value;
+
+  var telp = document.getElementById("telp");
+  var telpText = telp.value;
+  let formData = new FormData();
+  formData.append('representant', selectedRepresentantValue);
+  formData.append('name', nameText);
+  formData.append('numeroVoie', numeroVoieText);
+  formData.append('nameVoie', nameVoieText);
+  formData.append('cp', cpText);
+  formData.append('ville', villeText);
+  formData.append('email', emailText);
+  formData.append('tel', telpText);
+  console.log(formData);
+
+  $.ajax({
+    url: '/new_client',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (msg) {
+
+      console.log(msg)
+      var liste_clients_section = document.getElementById("liste_clients_section");
+      liste_clients_section.style.display = "none";
+      window.location.href = "/clients";
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+
+
+
+  var selectedRepresentantText = selectRepresentantOption.innerHTML;
+  console.log(selectedRepresentantText);
+}
+
+// function edit_client(id){
+//   alert("test");
+// }
+$('#clients_table').on('click', function (event) {
+
+
+  // Check if the clicked element is a button with the class 'getInfoBtn'
+  if (event.target.classList.contains('getInfoBtn')) {
+    var liste_clients_section = document.getElementById("edit_client_section");
+    liste_clients_section.style.display = "flex";
+    // Find the parent row (tr) of the clicked button
+    const row = event.target.closest('tr');
+    var rec_user_id = row.querySelector('.rec_user_id').textContent;
+    var rec_client_id = row.querySelector('.rec_client_id').textContent;
+    // Get data from the row
+    var id = row.cells[0].value;
+    var name_rep = row.cells[1].innerText;
+    var name_client = row.cells[2].innerText;
+    var numero_voie_span = row.querySelector('.numero_voie_edit_span');
+    var name_voie_span = row.querySelector('.name_voie_edit_span');
+
+    // Get the value from the span element
+    var numero_voie_value = numero_voie_span.textContent.trim();
+    var name_voie_value = name_voie_span.textContent.trim();
+
+    var selectElement = document.getElementById("rep_edit_client");
+    // Loop through options to find the one with the desired value
+    for (var i = 0; i < selectElement.options.length; i++) {
+      if (selectElement.options[i].selected == true) {
+        // Set the selected property to true for the found option
+        selectElement.options[i].innerHTML = name_rep;
+        selectElement.options[i].value = rec_user_id;
+
+        break;
+      }
+    }
+    var cp = row.cells[4].innerText;
+
+
+
+    var ville = row.cells[5].innerText;
+    var email = row.cells[6].innerText;
+    var tel = row.cells[7].innerText;
+
+    document.getElementById("name_client_edit").value = name_client;
+    document.getElementById("numero_voie_edit").value = numero_voie_value;
+    document.getElementById("nom_voie_edit").value = name_voie_value;
+
+    document.getElementById("cp_edit").value = cp;
+    document.getElementById("ville_edit").value = ville;
+    document.getElementById("email_edit").value = email;
+    document.getElementById("telp_edit").value = tel;
+    document.getElementById("rec_client_id").innerHTML = rec_client_id;
+
+
+  }
+});
+
+function closeEditClient() {
+  var liste_clients_section = document.getElementById("edit_client_section");
+  liste_clients_section.style.display = "none";
+}
+
+function EnregistrerEditClient() {
+  var selectRepresentantElement = document.getElementById("rep_edit_client");
+  var selectRepresentantOption = selectRepresentantElement.options[selectRepresentantElement.selectedIndex];
+  var selectedRepresentantValue = selectRepresentantOption.value;
+  console.log(selectedRepresentantValue);
+  var name = document.getElementById("name_client_edit");
+  var nameText = name.value;
+
+  var client_id = document.getElementById("rec_client_id").value;
+
+
+
+  var numeroVoie = document.getElementById("numero_voie_edit");
+  var numeroVoieText = numeroVoie.value;
+
+  var nameVoie = document.getElementById("nom_voie_edit");
+  var nameVoieText = nameVoie.value;
+
+  var cp = document.getElementById("cp_edit");
+  var cpValue = cp.value;
+
+
+  var ville = document.getElementById("ville_edit");
+  var villeText = ville.value;
+
+  var email = document.getElementById("email_edit");
+  var emailText = email.value;
+
+  var telp = document.getElementById("telp_edit");
+  var telpText = telp.value;
+  let formData = new FormData();
+  formData.append('representant', selectedRepresentantValue);
+  formData.append('name', nameText);
+  formData.append('numeroVoie', numeroVoieText);
+  formData.append('nameVoie', nameVoieText);
+  formData.append('cp', cpValue);
+  formData.append('ville', villeText);
+  formData.append('email', emailText);
+  formData.append('tel', telpText);
+  formData.append('client_id', client_id);
+  console.log(selectedRepresentantValue);
+  console.log(client_id);
+  console.log(telpText);
+  console.log(emailText);
+  console.log(villeText);
+  console.log(cpValue);
+  console.log(nameVoieText);
+  console.log(nameText);
+
+  alert("eee");
+  $.ajax({
+    url: '/edit_client',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (msg) {
+
+      console.log(msg)
+      var liste_clients_section = document.getElementById("edit_client_section");
+      liste_clients_section.style.display = "none";
+      window.location.href = "/clients";
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+
+
+
+  // var selectedRepresentantText = selectRepresentantOption.innerHTML;
+  // console.log(selectedRepresentantText);
+}
+
+
+$('#matieres_table').on('change', function (event) {
+  var confirmed = confirm("Voulez-vous enregistrer les modifications ?");
+
+
+  if (event.target.classList.contains('prix_limeaire_input')) {
+    if (confirmed) {
+      const row = event.target.closest('tr');
+      var newValue = row.querySelector('.prix_limeaire_input').value;
+      console.log(row);
+      // var rec_user_id = row.querySelector('.rec_user_id').textContent;
+      // var rec_client_id = row.querySelector('.rec_client_id').textContent;
+      // Get data from the row
+      var matiere = row.cells[1].innerHTML;
+      var type = row.cells[2].innerHTML;
+      var type_usinage = row.cells[3].innerHTML;
+      var epaisseur = row.cells[4].innerHTML;
+      console.log(matiere);
+      console.log(type);
+      console.log(type_usinage);
+      console.log(epaisseur);
+      let formData = new FormData();
+      formData.append('new_prix_limeaire', newValue);
+      formData.append('matiere', matiere);
+      formData.append('type_matiere', type);
+      formData.append('type_usinage', type_usinage);
+      formData.append('epaisseur', epaisseur);
+      $.ajax({
+        url: '/edit_prix_limeaire',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (msg) {
+
+          console.log(msg)
+          // var liste_clients_section = document.getElementById("edit_client_section");
+          // liste_clients_section.style.display = "none";
+          // window.location.href = "/clients";
+
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    }
+  } else if (event.target.classList.contains('prix_matiere_input')) {
+    if (confirmed) {
+      const row = event.target.closest('tr');
+      var newValue = row.querySelector('.prix_matiere_input').value;
+      var matiere = row.cells[1].innerHTML;
+      var type = row.cells[2].innerHTML;
+      var type_usinage = row.cells[3].innerHTML;
+      var epaisseur = row.cells[4].innerHTML;
+      console.log(matiere);
+      console.log(type);
+      console.log(type_usinage);
+      console.log(epaisseur);
+      console.log(newValue);
+      let formData = new FormData();
+      formData.append('new_prix_matiere', newValue);
+      formData.append('matiere', matiere);
+      formData.append('type_matiere', type);
+      formData.append('type_usinage', type_usinage);
+      formData.append('epaisseur', epaisseur);
+      $.ajax({
+        url: '/edit_prix_matiere',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (msg) {
+
+          console.log(msg)
+          // var liste_clients_section = document.getElementById("edit_client_section");
+          // liste_clients_section.style.display = "none";
+          // window.location.href = "/clients";
+
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+
+    }
+  }
+});
+
+function delete_client(current_row, id) {
+  let text = "Attention!En supprimant cette client ,ca va supprimer automatiquement tous les commandes en cours de  cette client.Voulez vous supprimer la cliente?";
+  if (confirm(text)) {
+    let formData = new FormData();
+    formData.append('id_client', id);
+    $.ajax({
+      url: '/delete_client',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
+        var row = current_row.parentNode.parentNode; // Get the parent row of the button
+        row.parentNode.removeChild(row); // Remove the row from the table
+        // var liste_clients_section = document.getElementById("edit_client_section");
+        // liste_clients_section.style.display = "none";
+        // window.location.href = "/clients";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+  }
+}
+
+
+function delete_bridge_row(current_bridge_row) {
+  let text = "Attention!En supprimant cette client ,ca va supprimer automatiquement tous les commandes en cours de  ces informations.Voulez vous supprimer la cliente?";
+  if (confirm(text)) {
+    var row = current_bridge_row.parentNode.parentNode;
+    var matiere = row.cells[1].innerHTML;
+    var type = row.cells[2].innerHTML;
+    var usinage = row.cells[3].innerHTML;
+    var epaisseur = row.cells[4].innerHTML;
+
+
+    let formData = new FormData();
+    formData.append('matiere', matiere);
+    formData.append('type', type);
+    formData.append('usinage', usinage);
+    formData.append('epaisseur', epaisseur);
+    console.log(matiere);
+    console.log(type);
+    console.log(usinage);
+    console.log(epaisseur);
+    $.ajax({
+      url: '/delete_bridge_row',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
+        console.log(msg);
+
+        row.parentNode.removeChild(row);
+        // Get the parent row of the button
+        // row.parentNode.removeChild(row); // Remove the row from the table
+        // var liste_clients_section = document.getElementById("edit_client_section");
+        // liste_clients_section.style.display = "none";
+        // window.location.href = "/clients";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+  }
+}
+
+function lettres_btn_bridge_active() {
+  $.ajax({
+    url: '/charge_text_prix_data',
+    type: 'POST',
+    contentType: false,
+    processData: false,
+    success: function (data) {
+
+      var selectMatiereElement = document.getElementById("matiere_list_text");
+      var selectTypeElement = document.getElementById("type_list_text");
+      var selectEpaisseurElement = document.getElementById("epaisseur_text");
+      // var selectTypeUsinageElement = document.getElementById("type_usinage");
+      // var selectHauteurElement = document.getElementById("height");
+      while (selectMatiereElement.options.length > 0) {
+        selectMatiereElement.remove(0);
+      }
+      const length_matieres = data["matieres"].length;
+
+      for (let i = 0; i < length_matieres; i++) {
+        console.log(data["matieres"][i].name);
+        const newOption = document.createElement('option');
+        newOption.value = data["matieres"][i].id;
+        newOption.text = data["matieres"][i].name;
+        selectMatiereElement.add(newOption);
+      }
+
+      while (selectTypeElement.options.length > 0) {
+        selectTypeElement.remove(0);
+      }
+      const length_matieres_types = data["types"].length;
+
+      for (let i = 0; i < length_matieres_types; i++) {
+        const newOption = document.createElement('option');
+        newOption.value = data["types"][i].id;
+        newOption.text = data["types"][i].name;
+        selectTypeElement.add(newOption);
+      }
+      while (selectEpaisseurElement.options.length > 0) {
+        selectEpaisseurElement.remove(0);
+      }
+
+
+      const length_arr = data["epaisseurs"].length;
+      for (let i = 0; i < length_arr; i++) {
+        const newOption = document.createElement('option');
+        newOption.value = data["epaisseurs"][i].id;
+        newOption.text = data["epaisseurs"][i].value;
+        selectEpaisseurElement.add(newOption);
+      }
+
+      // while (selectTypeUsinageElement.options.length > 0) {
+      //   selectTypeUsinageElement.remove(0);
+      // }
+      // const length_usg = data["types_usinage"].length;
+      // for (let i = 0; i < length_usg; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["types_usinage"][i].id;
+      //   newOption.text = data["types_usinage"][i].name;
+      //   selectTypeUsinageElement.add(newOption);
+      // }
+
+      // while (selectHauteurElement.options.length > 0) {
+      //   selectHauteurElement.remove(0);
+      // }
+      // const length_hauteur = data["hauteurs"].length;
+
+      // for (let i = 0; i < length_hauteur; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["hauteurs"][i].id;
+      //   newOption.text = data["hauteurs"][i].value / 10 + " cm";
+      //   selectHauteurElement.add(newOption);
+      // }
+
+
+      var table = document.getElementById("matieres_text_table");
+      var rowCount = table.rows.length;
+
+      // Start from the last row and remove each one
+      for (var i = rowCount - 1; i > 0; i--) {
+        table.deleteRow(i);
+      }
+
+      var nbr = 1;
+      for (var i = 0; i < data['prix_lettre_list'].length; i++) {
+        console.log(data["prix_lettre_list"][i]);
+      
+        var row = table.insertRow();
+        var cell0 = row.insertCell(0);
+        var cell1 = row.insertCell(1);
+        var cell2 = row.insertCell(2);
+        var cell3 = row.insertCell(3);
+        var cell4 = row.insertCell(4);
+        var cell5 = row.insertCell(5);
+        var cell6 = row.insertCell(6);
+        var cell7 = row.insertCell(7);
+
+        cell0.innerHTML = nbr++;
+        cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
+        cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
+        cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
+        cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+
+
+        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+        cell7.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_Lettrebridge_row(this)"></i>
+          `;
+}
+        var text_section = document.getElementById("text_section");
+        text_section.style.display = "block";
+        var form_section = document.getElementById("form_section");
+        form_section.style.display = "none";
+        var epaisseur_text_div = document.getElementById("epaisseur_text_div");
+        epaisseur_text_div.style.display = "block";
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+
+}
+
+function forms_btn_bridge_active() {
+
+  var text_section = document.getElementById("text_section");
+  text_section.style.display = "none";
+  var form_section = document.getElementById("form_section");
+  form_section.style.display = "block";
+  var epaisseur_text_div = document.getElementById("epaisseur_text_div");
+  epaisseur_text_div.style.display = "none";
+  window.location.href = "/prix";
+
+}
+
+$("#matiere_list_text").on('change', function () {
+  let formData = new FormData();
+  var selectMatiereElement = document.getElementById("matiere_list_text");
+  var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+  var selectedMatiereValue = selectedMatiereOption.value;
+
+
+  var selectTypeElement = document.getElementById("type_list_text");
+  var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+  var selectedTypeValue = selectedTypeOption.value;
+
+  var selectEpaisseurElement = document.getElementById("epaisseur_text");
+  var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
+  var selectedEpaisseurValue = selectedEpaisseurOption.value;
+
+
+  formData.append('matiere_id', selectedMatiereValue);
+  // formData.append('type_id', selectedTypeValue);
+
+
+
+
+  $.ajax({
+    url: '/matieres_text_liste',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+      
+      while (selectTypeElement.options.length > 0) {
+        selectTypeElement.remove(0);
+      }
+      const length_matieres_types = data["types"].length;
+
+      for (let i = 0; i < length_matieres_types; i++) {
+        const newOption = document.createElement('option');
+        newOption.value = data["types"][i].id;
+        newOption.text = data["types"][i].name;
+        selectTypeElement.add(newOption);
+      }
+      while (selectEpaisseurElement.options.length > 0) {
+        selectEpaisseurElement.remove(0);
+      }
+
+
+      const length_arr = data["epaisseurs"].length;
+      for (let i = 0; i < length_arr; i++) {
+        const newOption = document.createElement('option');
+        newOption.value = data["epaisseurs"][i].id;
+        newOption.text = data["epaisseurs"][i].value;
+        selectEpaisseurElement.add(newOption);
+      }
+
+      // while (selectTypeUsinageElement.options.length > 0) {
+      //   selectTypeUsinageElement.remove(0);
+      // }
+      // const length_usg = data["types_usinage"].length;
+      // for (let i = 0; i < length_usg; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["types_usinage"][i].id;
+      //   newOption.text = data["types_usinage"][i].name;
+      //   selectTypeUsinageElement.add(newOption);
+      // }
+
+      // while (selectHauteurElement.options.length > 0) {
+      //   selectHauteurElement.remove(0);
+      // }
+      // const length_hauteur = data["hauteurs"].length;
+
+      // for (let i = 0; i < length_hauteur; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["hauteurs"][i].id;
+      //   newOption.text = data["hauteurs"][i].value / 10 + " cm";
+      //   selectHauteurElement.add(newOption);
+      // }
+
+
+      var table = document.getElementById("matieres_text_table");
+      var rowCount = table.rows.length;
+
+      // Start from the last row and remove each one
+      for (var i = rowCount - 1; i > 0; i--) {
+        table.deleteRow(i);
+      }
+
+      var nbr = 1;
+      for (var i = 0; i < data['prix_lettre_list'].length; i++) {
+        console.log(data["prix_lettre_list"][i]);
+      
+        var row = table.insertRow();
+        var cell0 = row.insertCell(0);
+        var cell1 = row.insertCell(1);
+        var cell2 = row.insertCell(2);
+        var cell3 = row.insertCell(3);
+        var cell4 = row.insertCell(4);
+        var cell5 = row.insertCell(5);
+        var cell6 = row.insertCell(6);
+        var cell7 = row.insertCell(7);
+
+        cell0.innerHTML = nbr++;
+        cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
+        cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
+        cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
+        cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+
+
+        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+        cell7.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_Lettrebridge_row(this)"></i>
+          `;
+}
+      
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+
+});
+
+
+$("#type_list_text").on('change', function () {
+
+  let formData = new FormData();
+  var selectMatiereElement = document.getElementById("matiere_list_text");
+  var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+  var selectedMatiereValue = selectedMatiereOption.value;
+
+
+  var selectTypeElement = document.getElementById("type_list_text");
+  var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+  var selectedTypeValue = selectedTypeOption.value;
+
+  var selectEpaisseurElement = document.getElementById("epaisseur_text");
+  var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
+  var selectedEpaisseurValue = selectedEpaisseurOption.value;
+
+
+  formData.append('matiere_id', selectedMatiereValue);
+  formData.append('type_id', selectedTypeValue);
+
+
+
+
+  $.ajax({
+    url: '/change_type_text_liste',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+ 
+      while (selectEpaisseurElement.options.length > 0) {
+        selectEpaisseurElement.remove(0);
+      }
+
+
+      const length_arr = data["epaisseurs"].length;
+      for (let i = 0; i < length_arr; i++) {
+        const newOption = document.createElement('option');
+        newOption.value = data["epaisseurs"][i].id;
+        newOption.text = data["epaisseurs"][i].value;
+        selectEpaisseurElement.add(newOption);
+      }
+
+      // while (selectTypeUsinageElement.options.length > 0) {
+      //   selectTypeUsinageElement.remove(0);
+      // }
+      // const length_usg = data["types_usinage"].length;
+      // for (let i = 0; i < length_usg; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["types_usinage"][i].id;
+      //   newOption.text = data["types_usinage"][i].name;
+      //   selectTypeUsinageElement.add(newOption);
+      // }
+
+      // while (selectHauteurElement.options.length > 0) {
+      //   selectHauteurElement.remove(0);
+      // }
+      // const length_hauteur = data["hauteurs"].length;
+
+      // for (let i = 0; i < length_hauteur; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["hauteurs"][i].id;
+      //   newOption.text = data["hauteurs"][i].value / 10 + " cm";
+      //   selectHauteurElement.add(newOption);
+      // }
+
+
+      var table = document.getElementById("matieres_text_table");
+      var rowCount = table.rows.length;
+
+      // Start from the last row and remove each one
+      for (var i = rowCount - 1; i > 0; i--) {
+        table.deleteRow(i);
+      }
+
+      var nbr = 1;
+      for (var i = 0; i < data['prix_lettre_list'].length; i++) {
+        console.log(data["prix_lettre_list"][i]);
+      
+        var row = table.insertRow();
+        var cell0 = row.insertCell(0);
+        var cell1 = row.insertCell(1);
+        var cell2 = row.insertCell(2);
+        var cell3 = row.insertCell(3);
+        var cell4 = row.insertCell(4);
+        var cell5 = row.insertCell(5);
+        var cell6 = row.insertCell(6);
+        var cell7 = row.insertCell(7);
+
+        cell0.innerHTML = nbr++;
+        cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
+        cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
+        cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
+        cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+
+
+        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+        cell7.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_Lettrebridge_row(this)"></i>
+          `;
+}
+      
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+
+});
+
+
+$("#epaisseur_text").on('change', function () {
+
+  let formData = new FormData();
+  var selectMatiereElement = document.getElementById("matiere_list_text");
+  var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+  var selectedMatiereValue = selectedMatiereOption.value;
+
+
+  var selectTypeElement = document.getElementById("type_list_text");
+  var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+  var selectedTypeValue = selectedTypeOption.value;
+
+  var selectEpaisseurElement = document.getElementById("epaisseur_text");
+  var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
+  var selectedEpaisseurValue = selectedEpaisseurOption.value;
+
+
+  formData.append('matiere_id', selectedMatiereValue);
+  formData.append('type_id', selectedTypeValue);
+  formData.append('epaisseur_id',selectedEpaisseurValue)
+
+
+
+
+  $.ajax({
+    url: '/change_eppaisseur_text_liste',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+
+      // while (selectTypeUsinageElement.options.length > 0) {
+      //   selectTypeUsinageElement.remove(0);
+      // }
+      // const length_usg = data["types_usinage"].length;
+      // for (let i = 0; i < length_usg; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["types_usinage"][i].id;
+      //   newOption.text = data["types_usinage"][i].name;
+      //   selectTypeUsinageElement.add(newOption);
+      // }
+
+      // while (selectHauteurElement.options.length > 0) {
+      //   selectHauteurElement.remove(0);
+      // }
+      // const length_hauteur = data["hauteurs"].length;
+
+      // for (let i = 0; i < length_hauteur; i++) {
+      //   const newOption = document.createElement('option');
+      //   newOption.value = data["hauteurs"][i].id;
+      //   newOption.text = data["hauteurs"][i].value / 10 + " cm";
+      //   selectHauteurElement.add(newOption);
+      // }
+
+
+      var table = document.getElementById("matieres_text_table");
+      var rowCount = table.rows.length;
+
+      // Start from the last row and remove each one
+      for (var i = rowCount - 1; i > 0; i--) {
+        table.deleteRow(i);
+      }
+
+      var nbr = 1;
+      for (var i = 0; i < data['prix_lettre_list'].length; i++) {
+        console.log(data["prix_lettre_list"][i]);
+      
+        var row = table.insertRow();
+        var cell0 = row.insertCell(0);
+        var cell1 = row.insertCell(1);
+        var cell2 = row.insertCell(2);
+        var cell3 = row.insertCell(3);
+        var cell4 = row.insertCell(4);
+        var cell5 = row.insertCell(5);
+        var cell6 = row.insertCell(6);
+        var cell7 = row.insertCell(7);
+
+        cell0.innerHTML = nbr++;
+        cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
+        cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
+        cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
+        cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+
+
+        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+        cell7.innerHTML = `
+         
+                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_Lettrebridge_row(this)"></i>
+          `;
+}
+      
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+
+});
+
+
+function delete_Lettrebridge_row(current_bridge_row) {
+  let text = "Attention!En supprimant cette client ,ca va supprimer automatiquement tous les commandes en cours de  ces informations.Voulez vous supprimer la cliente?";
+  if (confirm(text)) {
+    var row = current_bridge_row.parentNode.parentNode;
+    var matiere = row.cells[1].innerHTML;
+    var type = row.cells[2].innerHTML;
+    var usinage = row.cells[3].innerHTML;
+    var epaisseur = row.cells[4].innerHTML;
+
+
+    let formData = new FormData();
+    formData.append('matiere', matiere);
+    formData.append('type', type);
+    formData.append('usinage', usinage);
+    formData.append('epaisseur', epaisseur);
+    console.log(matiere);
+    console.log(type);
+    console.log(usinage);
+    console.log(epaisseur);
+    alert("sd");
+    $.ajax({
+      url: '/delete_Lettrebridge_row',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
+        console.log(msg);
+
+        row.parentNode.removeChild(row);
+        // Get the parent row of the button
+        // row.parentNode.removeChild(row); // Remove the row from the table
+        // var liste_clients_section = document.getElementById("edit_client_section");
+        // liste_clients_section.style.display = "none";
+        // window.location.href = "/clients";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      }
+    });
+  }
+}
+
+$('#matieres_text_table').on('change', function (event) {
+  var confirmed = confirm("Voulez-vous enregistrer les modifications ?");
+
+
+  if (event.target.classList.contains('prix_text_input')) {
+    if (confirmed) {
+      const row = event.target.closest('tr');
+      var newValue = row.querySelector('.prix_text_input').value;
+      console.log(row);
+      // var rec_user_id = row.querySelector('.rec_user_id').textContent;
+      // var rec_client_id = row.querySelector('.rec_client_id').textContent;
+      // Get data from the row
+      var matiere = row.cells[1].innerHTML;
+      var type = row.cells[2].innerHTML;
+      var type_usinage = row.cells[3].innerHTML;
+      var epaisseur = row.cells[4].innerHTML;
+      var hauteur = row.cells[5].innerHTML*10;
+
+      let formData = new FormData();
+      formData.append('new_prix', newValue);
+      formData.append('matiere', matiere);
+      formData.append('type_matiere', type);
+      formData.append('type_usinage', type_usinage);
+      formData.append('epaisseur', epaisseur);
+      formData.append('hauteur', hauteur);
+
+      $.ajax({
+        url: '/edit_prix_lettre',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (msg) {
+
+          console.log(msg)
+          // var liste_clients_section = document.getElementById("edit_client_section");
+          // liste_clients_section.style.display = "none";
+          // window.location.href = "/clients";
+
+        },
+        error: function () {
+          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        }
+      });
+    }
+  }
+});
+
+function newUserForm(){
+  var new_users_section = document.getElementById("new_users_section");
+  new_users_section.style.display="block";
+}
+
+function closeFormUser(){
+  var new_users_section = document.getElementById("new_users_section");
+  new_users_section.style.display="none";
+}
+
+
+
+
+function addNewUser(){
+  var selectRoleElement = document.getElementById("role_new_user");
+  var selectRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
+  var selectedRoleValue = selectRoleOption.value;
+ 
+  var name = document.getElementById("name_user");
+  var nameText = name.value;
+
+  
+  var pwd = document.getElementById("pwd");
+  var pwdText = pwd.value;
+
+  var pwd = document.getElementById("pwd");
+  var pwdText = pwd.value;
+
+  var confirm_pwd = document.getElementById("confirm_pwd");
+  var confirm_pwdText = confirm_pwd.value;
+
+  var email = document.getElementById("email");
+  var emailText = email.value;
+
+  var tel = document.getElementById("telp");
+  var telText = tel.value;
+  let formData = new FormData();
+  formData.append('role', selectedRoleValue);
+  formData.append('username', nameText);
+  formData.append('email', emailText);
+  formData.append('password', pwdText);
+  formData.append('tel', telText);
+  console.log(formData);
+
+  $.ajax({
+    url: '/new_user',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (msg) {
+
+      console.log(msg)
+      var new_users_section = document.getElementById("new_users_section");
+      new_users_section.style.display="none";
+      window.location.href = "/membres";
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+}
+
+function closeEditUser(){
+  var edit_user_section = document.getElementById("edit_user_section");
+  edit_user_section.style.display = "none";
+}
+
+
+$('#users_table').on('click', function (event) {
+
+
+  // Check if the clicked element is a button with the class 'getInfoBtn'
+  if (event.target.classList.contains('getInfoBtn')) {
+    var edit_user_section = document.getElementById("edit_user_section");
+    edit_user_section.style.display = "flex";
+    // Find the parent row (tr) of the clicked button
+    const row = event.target.closest('tr');
+    var username = row.cells[1].innerHTML;
+    var email = row.cells[2].innerHTML;
+    var tel_span = row.querySelector('.user_pure_tel');
+    var tel = tel_span.textContent.trim();
+
+    var user_output = row.querySelector('.set_user_id');
+    var user_output_id = user_output.textContent.trim();
+  
+    console.log(user_output_id);
+    alert("zzz");
+    
+    document.getElementById("name_edit_user").value = username;
+    document.getElementById("edit_email").value = email;
+    document.getElementById("edit_tel").value = tel;
+    document.getElementById("edit_user_id").innerHTML = user_output_id;
+
+    var selectRoleElement = document.getElementById("role_users");
+    var selectRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
+    var selectedRoleValue = selectRoleOption.value;
+    var selectedRoleText = selectRoleOption.innerText;
+
+    var selectRole = document.getElementById("role_edit_user");
+     // Loop through options to find the one with the desired value
+     for (var i = 0; i < selectRole.options.length; i++) {
+       if (selectRole.options[i].selected == true) {
+         // Set the selected property to true for the found option
+         selectRole.options[i].innerHTML = selectedRoleText;
+         selectRole.options[i].value = selectedRoleValue;
+
+         break;
+       }
+     }
+    
+    // var rec_user_id = row.querySelector('.rec_user_id').textContent;
+    // var rec_client_id = row.querySelector('.rec_client_id').textContent;
+    // // Get data from the row
+    // var id = row.cells[0].value;
+    // var name_rep = row.cells[1].innerText;
+    // var name_client = row.cells[2].innerText;
+    // var numero_voie_span = row.querySelector('.numero_voie_edit_span');
+    // var name_voie_span = row.querySelector('.name_voie_edit_span');
+
+    // // Get the value from the span element
+    // var numero_voie_value = numero_voie_span.textContent.trim();
+    // var name_voie_value = name_voie_span.textContent.trim();
+
+    // var selectElement = document.getElementById("rep_edit_client");
+    // // Loop through options to find the one with the desired value
+    // for (var i = 0; i < selectElement.options.length; i++) {
+    //   if (selectElement.options[i].selected == true) {
+    //     // Set the selected property to true for the found option
+    //     selectElement.options[i].innerHTML = name_rep;
+    //     selectElement.options[i].value = rec_user_id;
+
+    //     break;
+    //   }
+    // }
+    // var cp = row.cells[4].innerText;
+
+
+
+    // var ville = row.cells[5].innerText;
+    // var email = row.cells[6].innerText;
+    // var tel = row.cells[7].innerText;
+
+    // document.getElementById("name_client_edit").value = name_client;
+    // document.getElementById("numero_voie_edit").value = numero_voie_value;
+    // document.getElementById("nom_voie_edit").value = name_voie_value;
+
+    // document.getElementById("cp_edit").value = cp;
+    // document.getElementById("ville_edit").value = ville;
+    // document.getElementById("email_edit").value = email;
+    // document.getElementById("telp_edit").value = tel;
+    // document.getElementById("rec_client_id").innerHTML = rec_client_id;
+
+
+  }
+});
+
+
+function openNewPasswordSpace(){
+  close_pwd_change = document.getElementById("close_pwd_change");
+  pwd_change = document.getElementById("pwd_change");
+  close_pwd_change.style.display = "block";
+  pwd_change.style.display = "none";
+  new_pwd_div = document.getElementById("new_pwd_div");
+  confirm_pwd_div=document.getElementById("confirm_pwd_div");
+  new_pwd_div.style.display="block";
+  confirm_pwd_div.style.display="block";
+}
+
+
+function closeNewPasswordSpace(){
+  close_pwd_change = document.getElementById("close_pwd_change");
+  pwd_change = document.getElementById("pwd_change");
+  close_pwd_change.style.display = "none";
+  pwd_change.style.display = "block";
+
+  new_pwd_div = document.getElementById("new_pwd_div");
+  confirm_pwd_div=document.getElementById("confirm_pwd_div");
+  new_pwd_div.style.display="none";
+  confirm_pwd_div.style.display="none";
+}
+
+function SaveEditUser(){
+  var edit_user_id=document.getElementById("edit_user_id").innerHTML;
+  console.log(edit_user_id);
+  alert("test");
+  var selectRoleElement = document.getElementById("role_edit_user");
+  var selectRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
+  var selectedRoleValue = selectRoleOption.value;
+
+  var name_edit_user = document.getElementById("name_edit_user").value;
+  var edit_email = document.getElementById("edit_email").value;
+  
+  var new_pwd = document.getElementById("new_pwd").value;
+  var new_confirm_pwd = document.getElementById("new_confirm_pwd").value;
+  var edit_tel = document.getElementById("edit_tel").value;
+  
+  let formData = new FormData();
+  formData.append('user_id', edit_user_id);
+  formData.append('role', selectedRoleValue);
+  formData.append('username', name_edit_user);
+  formData.append('email', edit_email);
+  formData.append('password', new_pwd);
+  formData.append('tel', edit_tel);
+  console.log(formData);
+  
+  $.ajax({
+    url: '/edit_user',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (msg) {
+
+      console.log(msg)
+      alert("d");
+
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
+  
 }

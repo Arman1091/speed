@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block contenue %}
+<div class="row ">
+    <div class="col-2 ">
+        <button id="form_btn_bridge" type="button" class=" case_btn btn  active-case border  border-secondary  "
+            style="padding-left: 8px;padding-right: 8px" onclick="forms_btn_bridge_active()"><i
+                class="bi bi-folder fs-1"></i>
+            <p>Forms</p>
+        </button>
+
+    </div>
+    <div class="col-3 d-flex justify-content-start align-content-center">
+        <button id="lettre_btn_bridge" type="button" class="case_btn btn  border  border-secondary  "
+            style="padding-left: 8px;padding-right: 8px" onclick="lettres_btn_bridge_active()"><i
+                class="bi bi-fonts fs-1"></i>
+            <p>Lettres</p>
+        </button>
+
+    </div>
+
+
+</div>
+<!-- <div class="mt-3">
+    <a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;">Nouvelle utilisateur </a>
+</div> -->
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Success!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif%}
+{% endwith %}
+
+<section id="form_section">
+    <div class="mt-4 row ">
+        <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
+            <p id="mt_name">{{name}}</p>
+            </h1> -->*
+        <div class="col-3">
+            <label for="matiere_list"><strong>Matiere</strong></label>
+            <select id="matiere_list" class="form-select form-select-sm mb-3"
+                aria-label=".form-select-lg nouvelle_utilisateur" style="width: 90%;">
+                <!-- <option selected>Select le matiere</option> -->
+                {% for row_mt in matieres %}
+                <option value='{{ row_mt.id}}'>{{ row_mt.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-3">
+            <label for="type_list"><strong>Type</strong></label>
+            <select id="type_list" class="form-select form-select-sm mb-3"
+                aria-label=".form-select-sm nouvelle_utilisateur" style="width: 90%;">
+                <!-- <option selected>Select le matiere</option> -->
+                {% for row_type in types_matieres %}
+                <option value='{{ row_type.id}}'>{{row_type.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-3">
+            <label for="type_usinage_list"><strong>Type usinage</strong></label>
+            <select id="type_usinage_list" class="form-select form-select-sm mb-3"
+                aria-label=".form-select-sm nouvelle_utilisateur" style="width: 90%;">
+                <!-- <option selected>Select le matiere</option> -->
+                {% for row_type_usinage in types_usinage %}
+                <option value='{{row_type_usinage.id}}'>{{row_type_usinage.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+     
+    </div>
+    <table id="matieres_table" class="table">
+        
+        <thead class="thead-light">
+            <tr>
+              <th scope="col">N</th>
+                <th scope="col">Matiere</th>
+                <th scope="col">Type</th>
+                <th scope="col">Usinage</th>
+                <th scope="col">Epaisseur</th>
+                <th scope="col">Matiere m²</th>
+                <th scope="col">Limeaire m²</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    
+            {% for matieres_data_row in data_matieres %}
+           
+            <tr>
+                <td>1</td>
+                <td> {{matieres_data_row[0]}}</td>
+                <td> {{matieres_data_row[1]}}</td>
+                <td> {{matieres_data_row[2]}}</td>
+                <td> {{matieres_data_row[3]}}</td>
+                <td> <input type="text" value='{{matieres_data_row[4]}}' class="prix_matiere_input"> €</td>
+                <td><input type="text" value='{{matieres_data_row[5]}}'class="prix_limeaire_input">€ </td>
+                <td>
+                    <!-- <a  class="btn btn-warning">Edit</a> -->
+                    <!-- <a  class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de supprimer cet utilisateur?')">Delete</a> -->
+                    <!-- <i class="bi bi-pencil-square" style="font-size: 20px;" onclick="edit_user('{{user.id}}')"></i> -->
+                    <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                        onclick="delete_bridge_row(this)"></i>
+    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <table id="matieres_usil_table" class="table" style="display: none;">
+        
+        <thead class="thead-light">
+            <tr>
+              <th scope="col">N</th>
+                <th scope="col">Matiere</th>
+                <th scope="col">Type</th>
+                <th scope="col">Usinage</th>
+                <th scope="col">Epaisseur</th>
+                <th scope="col">Prix 1er m²</th>
+                <th scope="col">Prix 2em m²</th>
+                <th scope="col">Prix 3em m²</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</section>
+<section id ="text_section" style="display: none;">
+    <div class="mt-4 row ">
+        <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
+            <p id="mt_name">{{name}}</p>
+            </h1> -->
+        <div class="col-3">
+            <label for="matiere_list_text"><strong>Matiere</strong></label>
+            <select id="matiere_list_text" class="form-select form-select-sm mb-3"
+                aria-label=".form-select-lg nouvelle_utilisateur" style="width: 90%;">
+                <!-- <option selected>Select le matiere</option> -->
+                <!-- {% for row_mt in matieres %}
+                <option value='{{ row_mt.id}}'>{{ row_mt.name}}</option>
+                {% endfor %} -->
+            </select>
+        </div>
+        <div class="col-3">
+            <label for="type_list_text"><strong>Type</strong></label>
+            <select id="type_list_text" class="form-select form-select-sm mb-3"
+                aria-label=".form-select-sm nouvelle_utilisateur" style="width: 90%;">
+                <!-- <option selected>Select le matiere</option> -->
+                <!-- {% for row_type in types_matieres %}
+                <option value='{{ row_type.id}}'>{{row_type.name}}</option>
+                {% endfor %} -->
+            </select>
+        </div>
+        <div id = "epaisseur_text_div" class="col-3" >
+            <label for="epaisseur_text"><strong>Epaisseur</strong></label>
+            <select id="epaisseur_text" class="form-select form-select-sm mb-3"
+                aria-label=".form-select-sm nouvelle_utilisateur" style="width: 90%;">
+                <!-- <option selected>Select le matiere</option> -->
+                <!-- {% for row_type_usinage in types_usinage %}
+                <option value='{{row_type_usinage.id}}'>{{row_type_usinage.name}}</option>
+                {% endfor %} -->
+            </select>
+        </div>
+    </div>
+    <table id="matieres_text_table" class="table" >
+        
+        <thead class="thead-light">
+            <tr>
+              <th scope="col">N</th>
+                <th scope="col">Matiere</th>
+                <th scope="col">Type</th>
+                <th scope="col">Usinage</th>
+                <th scope="col">Epaisseur</th>
+                <th scope="col">Hauteur</th>
+                <th scope="col">Prix</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    
+          
+        </tbody>
+    </table>
+    
+</section>
+
+{% endblock %}

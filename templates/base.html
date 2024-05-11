@@ -14,7 +14,7 @@
     </div>
  
     <ul class="list-unstyled  mt-5">
-      {% if user.role_id==1 or user.role_id==2 %}
+      {% if user.role_id==1 or user.role_id==2  or 1 ==1 %}
       <li class="active mt-5">
         <a href="{{url_for( 'Usinage')}}">Simulation</a>
       </li class=" mt-1">
@@ -32,7 +32,13 @@
         <a href="{{url_for('livré')}}">Livrés</a>
       </li>
       <li class=" mt-1">
-        <a href="#">Membres</a>
+        <a href="{{url_for('membres')}}">Membres</a>
+      </li>
+      <li class=" mt-1">
+        <a href="{{url_for('prix')}}">Prix</a>
+      </li>
+      <li class=" mt-1">
+        <a href="{{url_for('clients')}}">Clients</a>
       </li>
     </ul>
 

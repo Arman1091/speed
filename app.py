@@ -2,7 +2,7 @@
 from config import Config
 from extensions import db
 from flask_migrate import Migrate
-import mysql.connector
+# import mysql.connector
 # from routes import main
 # from models import models
 from models.models import User
@@ -48,6 +48,6 @@ def register_extensions(app):
 
 if __name__ == '__main__':
     # app = create_app()
-   
+    app.debug = True
     app.run()
 	

@@ -66,13 +66,27 @@ def create_pdf( data ):
     type_usinage = data ['type_usinage']
     qte= int(data['qte'])
     prix_ht = float(data ['prix_ht'])
+    
+    print(prix_ht )
     epaisseur = data['epaisseur']
     user = data["user"]
-    montant_ht = qte*prix_ht
-
-    montant_tva = round(0.2*montant_ht, 2)
-    montant_totat_ttc = round(1.2*montant_ht)
-    print(montant_totat_ttc)
+    montant_total_ht = prix_ht
+    montant_ht = prix_ht
+    montant_tva = round(0.2*montant_total_ht, 2)
+    print("eee")
+    print(montant_total_ht)
+    print(montant_tva)
+    if 'prix_livr_ht' in data:
+        
+        prix_livr_ht= 19.5
+        montant_ht -=prix_livr_ht
+        # montant_tva = round(0.2*(montant_ht+19.5), 2)
+        # montant_ht -=19.50
+        
+        
+  
+    montant_totat_ttc = round(1.2*montant_total_ht)
+    
     current_date = str(datetime.now().date())
         
     devisVide_path = "static/img/devis_vide.png"
@@ -100,11 +114,10 @@ def create_pdf( data ):
     if 'client_id' in data:
         client_id= data['client_id']
         detailles = get_client_detailles_by_id(client_id)
-        referance_client=detailles[0].reference
-        name_client=detailles[1].name
-        ville_client=detailles[1].ville
-        cp_client=detailles[1].cp
-        client_addresse=detailles[1].addresse
+        name_client=detailles.name
+        ville_client=detailles.ville
+        cp_client=detailles.cp
+        client_addresse=detailles.addresse
         c.setFont("Helvetica-Bold", 9)
         c.drawString(300, 662, name_client)
     
@@ -113,6 +126,11 @@ def create_pdf( data ):
 
         c.setFont("Helvetica", 9)
         c.drawString(300, 630, str(cp_client)+" "+ville_client)
+
+    if 'prix_livr_ht' in data:
+        prix_livr_ht= data['prix_livr_ht']
+        c.setFont("Helvetica", 9)
+        c.drawString(175, 159, prix_livr_ht)
 # USIM
     c.setFont("Helvetica", 9)
     c.drawString(30, 515, type_usinage)
@@ -125,7 +143,7 @@ def create_pdf( data ):
 
     # P.U
     c.setFont("Helvetica", 9)
-    c.drawString(458, 515, str(prix_ht))
+    c.drawString(458, 515, str(montant_ht/qte))
     # MontantHT
     c.setFont("Helvetica", 9)
     c.drawString(522, 515, str(montant_ht) )
@@ -144,7 +162,7 @@ def create_pdf( data ):
     
     # TotalHT
     c.setFont("Helvetica", 8)
-    c.drawString(522, 188, str(montant_ht))
+    c.drawString(522, 188, str(montant_total_ht))
 
     # TotalTVA
     c.setFont("Helvetica", 8)

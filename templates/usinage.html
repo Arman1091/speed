@@ -3,10 +3,30 @@
 
 {% block contenue %}
 
-<div id="usinage_container" class="container " >
-    <div class="row mt-5">
+<div id="usinage_container" class="container ">
+    <div class="row mt-2">
         <div class="col-md-6">
-            <div>
+            <div class="row ">
+                <div class="col-4">
+                    <button id="file_btn" type="button" class=" case_btn btn  active-case border  border-secondary  "
+                        style="padding-left: 8px;padding-right: 8px" onclick="upload_btn_active()"><i
+                            class="bi bi-folder fs-1"></i>
+                        <p>Télécharger</p>
+                    </button>
+
+                </div>
+                <div class="col-4">
+                    <button id="text_btn" type="button" class="case_btn btn  border  border-secondary  "
+                        style="padding-left: 20px;padding-right: 20px" onclick="text_btn_active()"><i
+                            class="bi bi-fonts fs-1"></i>
+                        <p>Text</p>
+                    </button>
+
+                </div>
+
+
+            </div>
+            <div class="mt-4">
                 <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
                     <p id="mt_name">{{name}}</p>
                     </h1> -->
@@ -78,29 +98,10 @@
             </div> -->
 
             <!-- HTML -->
-            <div class="row mt-4">
-                <div class="col-4">
-                    <button id="file_btn" type="button" class=" case_btn btn  active-case border  border-secondary  "
-                        style="padding-left: 8px;padding-right: 8px" onclick="upload_btn_active()"><i
-                            class="bi bi-folder fs-1"></i>
-                        <p>Télécharger</p>
-                    </button>
 
-                </div>
-                <div class="col-4">
-                    <button id="text_btn" type="button" class="case_btn btn  border  border-secondary  "
-                        style="padding-left: 20px;padding-right: 20px" onclick="text_btn_active()"><i
-                            class="bi bi-fonts fs-1"></i>
-                        <p>Text</p>
-                    </button>
-
-                </div>
-
-
-            </div>
             <div id="drop-area" class="mt-4">
                 <h3 class="drop-text">Glissez et déposez un fichier DXF ici</h3>
-                <input type="file" id="fileInput" accept=".dxf" />
+                <input type="file" id="fileInput" accept=".pdf" />
                 <div id="result-container"></div>
             </div>
             <div class="counter-container mt-4">
@@ -110,6 +111,23 @@
                 <input id="qte" value=1 min="1">
                 <button class="btn_counter" id="increment">+</button>
             </div>
+            <div class="mt-3">
+                <fieldset style="border: 1px dashed;">
+                    <legend>Mode du reception</legend>
+
+                    <div>
+                        <input type="radio" id="mode_livr" name="mode_emp" value="livraison" checked />
+                        <label for="mode_livr">Livraison</label>
+                    </div>
+
+                    <div>
+                        <input type="radio" id="mode_emp" name="mode_emp" value="enlevement" />
+                        <label for="mode_emp">Enlevement</label>
+                    </div>
+
+                </fieldset>
+
+            </div>
             <!-- <div>
                 <label class="mt-3" for="qte"><strong>Qte</strong></label>
                 <input id="qte" value=1 min="1">
@@ -118,7 +136,7 @@
                 <form class="mt-4" action="/generate_dxf" method="post">
                     <!-- <fieldset disabled> -->
                     <label class="form-label" for="text_input">Saisissez le texte:</label>
-                    <input id="text_input"class="form-control" type="text" name="text" required>
+                    <input id="text_input" class="form-control" type="text" name="text" required>
                     <label for="font" class="form-label">Select a font:</label>
                     <select class="form-select" id="fontSelect" name="font" required>
                         <option value="Arial">Arial</option>
@@ -167,14 +185,16 @@
                     <!-- <label class="form-label" for="width">Text width:</label>
                     <input class="form-control" type="number" name="width" required> -->
 
-                    <label class="form-label" for="height">Text height:</label>
-                    <input class="form-control" type="number" name="height" required>
+                    <label for="height"><strong>Hauteur du text:</strong></label>
+                    <select id="height" class="form-select mt-1" aria-label="Hauteur du text" style="width: 60%;">
+
+                    </select>
 
                     <!-- <button type="submit">Generate DXF</button> -->
                     <!-- </fieldset> -->
                 </form>
             </div>
-            <div  id="total_prix_detailles"class=" mt-5 justify-content-between align-items-center">
+            <div id="total_prix_detailles" class=" mt-5 justify-content-between align-items-center">
                 <div class="bg-light">
                     <p><strong>Total prix:</strong></p>
 
@@ -193,8 +213,8 @@
                 </div>
             </div>
             <div id="prix_detailles" class="row   mt-3">
-               
-                <div class="accordion" id="accordionExample" >
+
+                <div class="accordion" id="accordionExample">
                     <div class="accordion">
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingTwo">
@@ -206,7 +226,7 @@
                             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <div class="row">
+                                    <div id="prix_material_div" class="row">
                                         <div class="col-4">
                                             <p>Prix matériel</p>
                                         </div>
@@ -217,7 +237,7 @@
                                             <h6><strong id="prix_mat_ttc">0€ </strong>&nbsp; TTC</h6>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div id="frais_decoup_div" class="row">
                                         <div class="col-4">
                                             <p>Frais de découpe</p>
                                         </div>
@@ -230,13 +250,13 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-4">
-                                            <p>Supplément de forme</p>
+                                            <p>Percage</p>
                                         </div>
                                         <div class="col-4">
-                                            <h6><strong>Gratuit </strong></h6>
+                                            <h6><strong id="qte_percage">5</strong></h6>
                                         </div>
                                         <div class="col-4">
-                                            <h6><strong>Gratuit </strong></h6>
+                                            <h6><strong id="prix_percage"> 2</strong>€&nbsp;TTC</h6>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -247,12 +267,81 @@
                                             <h6><strong id="qte_structure">1 </strong></h6>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <p><strong>Livraison</strong></p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="prix_livr"></strong>€&nbsp;TTC</h6>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="accordion " id="acardion_format_pro" >
+                <div id="text_prix_detailles" class="row   mt-3">
+
+                    <div class="accordion" id="text_structure_accordion" style="width: 100%;">
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="text_structure_header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#text_structure_prix_collapse" aria-expanded="false"
+                                        aria-controls="text_structure_prix_collapse">
+                                        La structure de prix
+                                    </button>
+                                </h2>
+                                <div id="text_structure_prix_collapse" class="accordion-collapse collapse"
+                                    aria-labelledby="text_structure_header" data-bs-parent="#text_structure_accordion">
+                                    <div class="accordion-body">
+                                        <div id="prix_materi_div" class="row">
+                                            <div class="col-6">
+                                                <p>Découpe à la lettre</p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="prix_lettre_ht">0€ </strong>&nbsp;HT</h6>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="prix_lettre_ttc">0€ </strong>&nbsp; TTC</h6>
+                                            </div>
+                                        </div>
+                                        <div id="nbr_div" class="row">
+                                            <div class="col-9">
+                                                <p><strong>Nombre des lettres</strong></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="nbr_lettres">1 </strong></h6>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-9">
+                                                <p><strong>Qte</strong></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="qte_text"> </strong></h6>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-9">
+                                                <p><strong>Livraison</strong></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="prix_livr_text">23.40</strong>€&nbsp;TTC</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- <div class="mt-4">
+                        <button class=" bg-primary">Telecharger le devis</button>
+                    </div> -->
+                </div>
+                <div class="accordion " id="acardion_format_pro">
                     <div class="accordion">
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingTwo">
@@ -265,47 +354,64 @@
                                 data-bs-parent="#acardion_format_pro">
                                 <div class="accordion-body">
                                     <div class="mb-3">
-                                        <select id="cients_devis_pro" class="form-select custom-select" aria-label="Default select example" style="width: 60%;">
-                                            <option value=-1 selected>Sélectionnez une client</option> 
+                                        <select id="cients_devis_pro" class="form-select custom-select"
+                                            aria-label="Default select example" style="width: 60%;">
+                                            <option value=-1 selected>Sélectionnez une client</option>
+
                                             {% for item in clients %}
-                    
-                                            <option value='{{ item[1].id}}'>{{ item[2].name}}</option>
+
+                                            <option value='{{ item.id}}'>{{ item.name}}</option>
                                             {% endfor %}
-                    
+
                                         </select>
                                     </div>
                                     <div class="mt-2">
                                         <!-- {{ url_for('static', filename= 'files/fact.pdf') }} -->
-                                        <span id="tcrg_span" confirm onclick="telecharger_pdf('{{user.username}}')">Télécharger le devis <img
-                                                src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}" alt="Logo de pdf"
-                                                style="width: 35px;" />
+                                        <span id="tcrg_span" confirm
+                                            onclick="telecharger_pdf('{{user.username}}')">Télécharger le devis <img
+                                                src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}"
+                                                alt="Logo de pdf" style="width: 35px;" />
                                         </span>
-                        
-                        
+
+
                                     </div>
-    
-                     
-                             
+
+
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="mt-3 d-flex justify-content-center align-items-center">
-                    <button  id="form_envoyer_usinage_btn"class=" btn btn-primary btn-block bg-success " onclick="ouvrir_form_envoi()">Envoyer usinage</button>
-                </div>
+
                 <!-- <div class="mt-4">
                     <button class=" bg-primary">Telecharger le devis</button>
                 </div> -->
             </div>
+            <div class="mt-3 d-flex justify-content-center align-items-center">
+                <button id="form_envoyer_usinage_btn" class=" btn btn-primary btn-block bg-success "
+                    onclick="ouvrir_form_envoi()">Envoyer usinage</button>
+                <!-- <button  id=" btn btn-primary btn-block bg-primary  " onclick="ouvrir_form_envoi()" style="padding: 2px; background-color: blue;">Partager</i></button> -->
+            </div>
         </div>
 
 
-        <div id="visualisation_div"class="col-md-6">
-            
-            <iframe class="img_usinage mt-5" src="{{ url_for('static', filename= 'img/usinage/matiers/Pvc.jpg') }}"
-                style="height: 55vh;width: 30%;margin-left: 5%; position: fixed;" ></iframe>
-          
+        <div id="visualisation_div" class="col-md-6 d-flex justify-content-center align-items-center " style="overflow-wrap: break-word; text-wrap: wrap;">
+            <div  id = "text_div"style="height: 40vh;border: 1px dashed; width: 80%; position: relative; display: none;">
+                <h1  id = "text_area"style="overflow-wrap:break-word; " ></h1>
+            </div>
+            <iframe  id = "img_usinage" class="img_usinage mt-5" src="{{ url_for('static', filename= 'img/usinage/matiers/Pvc.jpg') }}"
+                style="height: 55vh;width: 80%;margin-left: 5%"></iframe>
+            <output>
+                <p id="height_img" style="display: none;"></p>
+            </output>
+            <output>
+                <p id="width_img"  style="display: none;"></p>
+            </output>
+            <output>
+                <p id="perimetre_totale" style="visibility: hidden;"></p>
+            </output>
+
         </div>
 
 
@@ -314,6 +420,7 @@
 
             <div class="mb-3">
                 <label for="dateInput" class="form-label">Date de livraison:</label>
+
                 <input type="date" class="form-control" id="dateInput" name="date">
             </div>
             <div class="mb-3">
@@ -321,10 +428,46 @@
                     <!-- <option selected>Select une slient</option> -->
                     {% for item in clients %}
 
-                    <option value='{{ item[1].id}}'>{{ item[2].name}}</option>
+                    <option value='{{ item.id}}'>{{ item.name}}</option>
                     {% endfor %}
 
                 </select>
+            </div>
+            <div id = "livr_div" >
+                <form style="margin: 20px;" class="mt-4" >
+                   
+                    <div class="form-group">
+                        <label for="numero_voie">Addresse:</label>
+                        <div class="input-group ">
+                            <div class="input-group-prepend">
+                                <div class=" col-1 input-group-text d-flex justify-content-center  text-danger fs-4  ">*</div>
+                            </div>
+                            <div class="col-2 " >
+                                <input type="text" id="numero_voie_livr" class="form-control" placeholder="N°" name="numero_voie" style="height: 100%;" required>
+                                
+                            </div>
+                            <div class="col-8 " style="margin-left: 5px;">
+                                <input type="text" id="nom_voie_livr" class="form-control" placeholder="Nom de rue" name="nom_voie" style="height: 100%;" required>
+                            </div>
+                            
+                        </div>
+                        <div class="input-group mt-2">
+                            <div class="input-group-prepend">
+                                <div class=" col-2 input-group-text d-flex justify-content-center  text-danger fs-4 ">*</div>
+                            </div>
+                            <div class="col-2">
+                                <input type="text" id="cp_livr" class="form-control" placeholder="Cp" name="cp" style="height: 100%;" required>
+                                
+                            </div>
+                            <div class="col-6 " style="margin-left: 5px;">
+                                <input type="text" id="ville_livr" class="form-control" placeholder="Ville" name="ville" style="height: 100%;" required>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                    
+                </form>
             </div>
             <div class="mb-3">
                 <label for="descriptionInput" class="form-label">Description:</label>
@@ -333,12 +476,13 @@
             <div class="d-flex justify-content-center">
                 <button type="submit" class="btn btn-primary " style="background-color: rgb(110, 191, 63);"
                     onclick="envoyer_command()">Envoyer</button>
-                <button type="submit" class="btn btn-primary " onclick="fermer_envoi()">Fermer</button>
+                <button type="submit" class="btn btn-primary " style="margin-left: 5px;" onclick="fermer_envoi()">Fermer</button>
             </div>
 
 
         </div>
     </div>
-    
+
 </div>
+
 {% endblock %}
