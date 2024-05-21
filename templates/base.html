@@ -12,32 +12,67 @@
       <a href="{{url_for( 'Usinage')}}" class="logo me-auto"><img
           src="{{ url_for('static', filename= 'img/logo/logo.png') }}" alt="speed logo" style="width: 200px;"></a>
     </div>
- 
+
     <ul class="list-unstyled  mt-5">
-      {% if user.role_id==1 or user.role_id==2  or 1 ==1 %}
-      <li class="active mt-5">
+      {% if user.role_id==1 or user.role_id==2 %}
+
+        {% if page == "Simulation" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
+
+
         <a href="{{url_for( 'Usinage')}}">Simulation</a>
       </li class=" mt-1">
       {% endif %}
+      {% if page == "attents" %}
+      <li class="mt-1 active">
+        {% else %}
       <li class="mt-1">
+        {% endif %}
         <a href="{{url_for( 'en_attente')}}">En attents</a>
       </li class=" mt-1">
-      <li>
+      {% if page == "Confirmés" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
         <a href="{{url_for( 'confirmé')}}">Confirmés</a>
       </li>
-      <li class=" mt-1">
+      {% if page == "Usinés" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
         <a href="{{url_for('usiné')}}">Usinés</a>
       </li>
-      <li class=" mt-1">
+      {% if page == "Livrés" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
         <a href="{{url_for('livré')}}">Livrés</a>
       </li>
-      <li class=" mt-1">
+      {% if page == "Membres" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
         <a href="{{url_for('membres')}}">Membres</a>
       </li>
-      <li class=" mt-1">
+      {% if page == "Prix" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
         <a href="{{url_for('prix')}}">Prix</a>
       </li>
-      <li class=" mt-1">
+      {% if page == "Clients" %}
+          <li class="mt-1 active">
+        {% else %}
+          <li class="mt-1">
+        {% endif %}
         <a href="{{url_for('clients')}}">Clients</a>
       </li>
     </ul>

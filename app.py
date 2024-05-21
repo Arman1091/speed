@@ -45,9 +45,14 @@ def register_extensions(app):
 #     app.register_blueprint(main)
     
 
+def create_tables():
+
+    with app.app_context():
+        # Create all tables
+        db.create_all()
 
 if __name__ == '__main__':
+    create_tables()
     # app = create_app()
-    app.debug = True
-    app.run()
+    app.run(debug=True)
 	

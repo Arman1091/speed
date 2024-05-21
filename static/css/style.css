@@ -108,7 +108,7 @@ a:focus {
     overflow: hidden;
     position: relative;
   }
-  #hero .carousel-item
+  #hero .main_div_index
   {
     position: absolute;
     top: 0;
@@ -121,6 +121,7 @@ a:focus {
     display: flex;
     justify-content: center;
     align-items: flex-end;
+    background-image: url("/static/img/accueil_img.jpg");
   }
   
   #hero .container {
@@ -150,7 +151,7 @@ a:focus {
     color: #fff;
   }
   
-  #hero .carousel-item {
+  #hero .main_div_index{
     transition-property: opacity;
     background-position: center top;
   }
@@ -217,7 +218,7 @@ a:focus {
 
 .form span{
 
-      position: absolute;
+    position: absolute;
   right: 17px;
   top: 13px;
   padding: 2px;
@@ -425,6 +426,15 @@ a.article:hover {
 body{
 font-family: 'Asap', sans-serif;
 }
+
+#index_form{
+  width: 80%; 
+  min-width: 220px;
+}
+
+.connexion-title{
+  color: rgb(110, 191, 63);
+}
 .commande_main{
 display: flex;
 flex-direction: row;
@@ -433,6 +443,9 @@ justify-content: space-around;
 padding: 20px;
 }
 
+.error-message {
+  color: red;
+}
 .commande_div{
 width: 100%;
 padding: 10px 20px;
@@ -675,7 +688,16 @@ border-radius: 2px;
   height: 45%;
 
 }
-
+#errMsg{
+  color: red !important;
+}
+#errorMessages{
+  position: absolute;
+  width: 70%;
+  background-color: greenyellow;
+  top: 20vh;
+  left: 15%;
+}
 /* *********************
 **************** */
 
@@ -759,4 +781,13 @@ border-radius: 2px;
     /* height: 70vh; */
     display:none;
     
+  }
+
+
+  fieldset{
+    border: 1px dashed
+  }
+
+  #scructure_livraison_form, #addresse_div{
+    display: none;
   }

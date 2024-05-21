@@ -171,6 +171,10 @@
       mirror: false
     })
   });
+  if(document.getElementById("errMsg")){
+    clearErrorMsg();
+  }
+  
 
   if (document.getElementsByName('mode_emp')) {
     var radios = document.getElementsByName('mode_emp');
@@ -187,9 +191,13 @@
             prix_livr_ht = 19.50;
             document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) + 19.50;
             document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) + 1.2 * 19.50;
+            document.getElementById("scructure_livraison_form").style.display="block";
+            document.getElementById("mode_livr_envoi").checked = true;
           } else {
             document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) - 19.50;
             document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) - 1.2 * 19.50;
+            document.getElementById("scructure_livraison_form").style.display="none";
+            document.getElementById("mode_emp_envoi").checked = true;
           }
           document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
         }
@@ -198,6 +206,42 @@
     });
 
   }
+
+  if (document.getElementsByName('mode_livr')) {
+    var radios = document.getElementsByName('mode_livr');
+    radios.forEach(function (radio) {
+      radio.addEventListener('change', function () {
+        let verif_file = document.getElementById("fileInput").value;
+        var prix_livr_ht = 0;
+        if (verif_file) {
+          console.log(this.value);
+          var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
+          var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
+          console.log(prix_total_ht);
+          if (this.value == "livraison") {
+            prix_livr_ht = 19.50;
+            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) + 19.50;
+            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) + 1.2 * 19.50;
+            document.getElementById("scructure_livraison_form").style.display="block";
+            document.getElementById("adresse_envoi_form").reset();
+            document.getElementById("addresse_div").style.display="block";
+            document.getElementById("mode_livr").checked = true;
+          } else {
+            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) - 19.50;
+            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) - 1.2 * 19.50;
+            document.getElementById("scructure_livraison_form").style.display="none";
+            document.getElementById("addresse_div").style.display="none";
+            document.getElementById("adresse_envoi_form").reset();
+            document.getElementById("mode_emp").checked = true;
+          }
+          document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+        }
+
+      });
+    });
+
+  }
+
 
 
 
@@ -1401,7 +1445,7 @@
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data['users_by_role'][i]['username'];
           cell2.innerHTML = data['users_by_role'][i]['email'];
-          cell3.innerHTML = `+33<span class="user_pure_tel">`+data['users_by_role'][i]['tel']+`</span>`;
+          cell3.innerHTML = `+33<span class="user_pure_tel">` + data['users_by_role'][i]['tel'] + `</span>`;
           cell4.innerHTML = "************"
           cell5.innerHTML = `
           <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
@@ -1824,6 +1868,49 @@
     });
 
   });
+
+  function validateForm() {
+    var name = document.getElementById("name").value;
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+    var confirmPassword = document.getElementById("confirmPassword").value;
+    var errorMessageContainer = document.getElementById("errorMessages");
+    var isValid = true;
+    errorMessageContainer.innerHTML = ""; // Clear previous error messages
+
+    // Check if name is empty
+    if (name.trim() === "") {
+      displayErrorMessage("Name must be filled out");
+      isValid = false;
+    }
+
+    // Check if email is empty
+    if (email.trim() === "") {
+      displayErrorMessage("Email must be filled out");
+      isValid = false;
+    }
+
+    // Check if email is valid
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      displayErrorMessage("Invalid email address");
+      isValid = false;
+    }
+
+    // Check if password is empty
+    if (password === "") {
+      displayErrorMessage("Password must be filled out");
+      isValid = false;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      displayErrorMessage("Passwords do not match");
+      isValid = false;
+    }
+
+    return isValid;
+  }
   // ***********
   $(document).ready(function () {
     // if (document.getElementById("users_table")) {
@@ -2161,10 +2248,17 @@
 function ouvrir_form_envoi() {
   let myDiv = document.getElementById("envoi_div");
   myDiv.style.display = "block";
+  document.getElementById("adresse_envoi_form").reset();
+  if(document.getElementById("mode_livr").checked == true){
+    document.getElementById("addresse_div").style.display="block";
+  }
+    
+
 }
 function fermer_envoi() {
   let myDiv = document.getElementById("envoi_div");
   myDiv.style.display = "none";
+  document.getElementById("adresse_envoi_form").reset();
 }
 function envoyer_command() {
   let formData = new FormData();
@@ -3331,7 +3425,7 @@ function lettres_btn_bridge_active() {
       var nbr = 1;
       for (var i = 0; i < data['prix_lettre_list'].length; i++) {
         console.log(data["prix_lettre_list"][i]);
-      
+
         var row = table.insertRow();
         var cell0 = row.insertCell(0);
         var cell1 = row.insertCell(1);
@@ -3347,7 +3441,7 @@ function lettres_btn_bridge_active() {
         cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
         cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
-        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
 
         cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
@@ -3356,18 +3450,18 @@ function lettres_btn_bridge_active() {
                 <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                 onclick="delete_Lettrebridge_row(this)"></i>
           `;
-}
-        var text_section = document.getElementById("text_section");
-        text_section.style.display = "block";
-        var form_section = document.getElementById("form_section");
-        form_section.style.display = "none";
-        var epaisseur_text_div = document.getElementById("epaisseur_text_div");
-        epaisseur_text_div.style.display = "block";
-      },
-      error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
       }
-    });
+      var text_section = document.getElementById("text_section");
+      text_section.style.display = "block";
+      var form_section = document.getElementById("form_section");
+      form_section.style.display = "none";
+      var epaisseur_text_div = document.getElementById("epaisseur_text_div");
+      epaisseur_text_div.style.display = "block";
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+    }
+  });
 
 }
 
@@ -3412,7 +3506,7 @@ $("#matiere_list_text").on('change', function () {
     contentType: false,
     processData: false,
     success: function (data) {
-      
+
       while (selectTypeElement.options.length > 0) {
         selectTypeElement.remove(0);
       }
@@ -3472,7 +3566,7 @@ $("#matiere_list_text").on('change', function () {
       var nbr = 1;
       for (var i = 0; i < data['prix_lettre_list'].length; i++) {
         console.log(data["prix_lettre_list"][i]);
-      
+
         var row = table.insertRow();
         var cell0 = row.insertCell(0);
         var cell1 = row.insertCell(1);
@@ -3488,7 +3582,7 @@ $("#matiere_list_text").on('change', function () {
         cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
         cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
-        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
 
         cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
@@ -3497,8 +3591,8 @@ $("#matiere_list_text").on('change', function () {
                 <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                 onclick="delete_Lettrebridge_row(this)"></i>
           `;
-}
-      
+      }
+
 
     },
     error: function () {
@@ -3539,7 +3633,7 @@ $("#type_list_text").on('change', function () {
     contentType: false,
     processData: false,
     success: function (data) {
- 
+
       while (selectEpaisseurElement.options.length > 0) {
         selectEpaisseurElement.remove(0);
       }
@@ -3588,7 +3682,7 @@ $("#type_list_text").on('change', function () {
       var nbr = 1;
       for (var i = 0; i < data['prix_lettre_list'].length; i++) {
         console.log(data["prix_lettre_list"][i]);
-      
+
         var row = table.insertRow();
         var cell0 = row.insertCell(0);
         var cell1 = row.insertCell(1);
@@ -3604,7 +3698,7 @@ $("#type_list_text").on('change', function () {
         cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
         cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
-        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
 
         cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
@@ -3613,8 +3707,8 @@ $("#type_list_text").on('change', function () {
                 <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                 onclick="delete_Lettrebridge_row(this)"></i>
           `;
-}
-      
+      }
+
 
     },
     error: function () {
@@ -3644,7 +3738,7 @@ $("#epaisseur_text").on('change', function () {
 
   formData.append('matiere_id', selectedMatiereValue);
   formData.append('type_id', selectedTypeValue);
-  formData.append('epaisseur_id',selectedEpaisseurValue)
+  formData.append('epaisseur_id', selectedEpaisseurValue)
 
 
 
@@ -3692,7 +3786,7 @@ $("#epaisseur_text").on('change', function () {
       var nbr = 1;
       for (var i = 0; i < data['prix_lettre_list'].length; i++) {
         console.log(data["prix_lettre_list"][i]);
-      
+
         var row = table.insertRow();
         var cell0 = row.insertCell(0);
         var cell1 = row.insertCell(1);
@@ -3708,7 +3802,7 @@ $("#epaisseur_text").on('change', function () {
         cell2.innerHTML = data["prix_lettre_list"][i]["type_name"];
         cell3.innerHTML = data["prix_lettre_list"][i]["usinage_name"];
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
-        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"]/10;
+        cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
 
         cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
@@ -3717,8 +3811,8 @@ $("#epaisseur_text").on('change', function () {
                 <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                 onclick="delete_Lettrebridge_row(this)"></i>
           `;
-}
-      
+      }
+
 
     },
     error: function () {
@@ -3789,7 +3883,7 @@ $('#matieres_text_table').on('change', function (event) {
       var type = row.cells[2].innerHTML;
       var type_usinage = row.cells[3].innerHTML;
       var epaisseur = row.cells[4].innerHTML;
-      var hauteur = row.cells[5].innerHTML*10;
+      var hauteur = row.cells[5].innerHTML * 10;
 
       let formData = new FormData();
       formData.append('new_prix', newValue);
@@ -3821,28 +3915,28 @@ $('#matieres_text_table').on('change', function (event) {
   }
 });
 
-function newUserForm(){
+function newUserForm() {
   var new_users_section = document.getElementById("new_users_section");
-  new_users_section.style.display="block";
+  new_users_section.style.display = "block";
 }
 
-function closeFormUser(){
+function closeFormUser() {
   var new_users_section = document.getElementById("new_users_section");
-  new_users_section.style.display="none";
+  new_users_section.style.display = "none";
 }
 
 
 
 
-function addNewUser(){
+function addNewUser() {
   var selectRoleElement = document.getElementById("role_new_user");
   var selectRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
   var selectedRoleValue = selectRoleOption.value;
- 
+
   var name = document.getElementById("name_user");
   var nameText = name.value;
 
-  
+
   var pwd = document.getElementById("pwd");
   var pwdText = pwd.value;
 
@@ -3875,7 +3969,7 @@ function addNewUser(){
 
       console.log(msg)
       var new_users_section = document.getElementById("new_users_section");
-      new_users_section.style.display="none";
+      new_users_section.style.display = "none";
       window.location.href = "/membres";
 
     },
@@ -3885,7 +3979,7 @@ function addNewUser(){
   });
 }
 
-function closeEditUser(){
+function closeEditUser() {
   var edit_user_section = document.getElementById("edit_user_section");
   edit_user_section.style.display = "none";
 }
@@ -3907,10 +4001,10 @@ $('#users_table').on('click', function (event) {
 
     var user_output = row.querySelector('.set_user_id');
     var user_output_id = user_output.textContent.trim();
-  
+
     console.log(user_output_id);
     alert("zzz");
-    
+
     document.getElementById("name_edit_user").value = username;
     document.getElementById("edit_email").value = email;
     document.getElementById("edit_tel").value = tel;
@@ -3922,17 +4016,17 @@ $('#users_table').on('click', function (event) {
     var selectedRoleText = selectRoleOption.innerText;
 
     var selectRole = document.getElementById("role_edit_user");
-     // Loop through options to find the one with the desired value
-     for (var i = 0; i < selectRole.options.length; i++) {
-       if (selectRole.options[i].selected == true) {
-         // Set the selected property to true for the found option
-         selectRole.options[i].innerHTML = selectedRoleText;
-         selectRole.options[i].value = selectedRoleValue;
+    // Loop through options to find the one with the desired value
+    for (var i = 0; i < selectRole.options.length; i++) {
+      if (selectRole.options[i].selected == true) {
+        // Set the selected property to true for the found option
+        selectRole.options[i].innerHTML = selectedRoleText;
+        selectRole.options[i].value = selectedRoleValue;
 
-         break;
-       }
-     }
-    
+        break;
+      }
+    }
+
     // var rec_user_id = row.querySelector('.rec_user_id').textContent;
     // var rec_client_id = row.querySelector('.rec_client_id').textContent;
     // // Get data from the row
@@ -3980,32 +4074,32 @@ $('#users_table').on('click', function (event) {
 });
 
 
-function openNewPasswordSpace(){
+function openNewPasswordSpace() {
   close_pwd_change = document.getElementById("close_pwd_change");
   pwd_change = document.getElementById("pwd_change");
   close_pwd_change.style.display = "block";
   pwd_change.style.display = "none";
   new_pwd_div = document.getElementById("new_pwd_div");
-  confirm_pwd_div=document.getElementById("confirm_pwd_div");
-  new_pwd_div.style.display="block";
-  confirm_pwd_div.style.display="block";
+  confirm_pwd_div = document.getElementById("confirm_pwd_div");
+  new_pwd_div.style.display = "block";
+  confirm_pwd_div.style.display = "block";
 }
 
 
-function closeNewPasswordSpace(){
+function closeNewPasswordSpace() {
   close_pwd_change = document.getElementById("close_pwd_change");
   pwd_change = document.getElementById("pwd_change");
   close_pwd_change.style.display = "none";
   pwd_change.style.display = "block";
 
   new_pwd_div = document.getElementById("new_pwd_div");
-  confirm_pwd_div=document.getElementById("confirm_pwd_div");
-  new_pwd_div.style.display="none";
-  confirm_pwd_div.style.display="none";
+  confirm_pwd_div = document.getElementById("confirm_pwd_div");
+  new_pwd_div.style.display = "none";
+  confirm_pwd_div.style.display = "none";
 }
 
-function SaveEditUser(){
-  var edit_user_id=document.getElementById("edit_user_id").innerHTML;
+function SaveEditUser() {
+  var edit_user_id = document.getElementById("edit_user_id").innerHTML;
   console.log(edit_user_id);
   alert("test");
   var selectRoleElement = document.getElementById("role_edit_user");
@@ -4014,11 +4108,11 @@ function SaveEditUser(){
 
   var name_edit_user = document.getElementById("name_edit_user").value;
   var edit_email = document.getElementById("edit_email").value;
-  
+
   var new_pwd = document.getElementById("new_pwd").value;
   var new_confirm_pwd = document.getElementById("new_confirm_pwd").value;
   var edit_tel = document.getElementById("edit_tel").value;
-  
+
   let formData = new FormData();
   formData.append('user_id', edit_user_id);
   formData.append('role', selectedRoleValue);
@@ -4027,7 +4121,7 @@ function SaveEditUser(){
   formData.append('password', new_pwd);
   formData.append('tel', edit_tel);
   console.log(formData);
-  
+
   $.ajax({
     url: '/edit_user',
     type: 'POST',
@@ -4044,5 +4138,82 @@ function SaveEditUser(){
       alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
     }
   });
-  
+}
+
+const validateEmail = (email) => {
+  return email.match(
+    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  );
+};
+
+const validate = () => {
+  clearErrorMsg();
+  const $result_border = $('#email');
+  const email = $('#email').val();
+  if (email !== "") {
+    $result_border.css('borderWidth', '3px')
+    if (validateEmail(email)) {
+      $result_border.css('borderColor', 'green');
+    } else {
+
+      $result_border.css('borderColor', '')
+    }
+  } else {
+    $result_border.css('borderColor', '')
+  }
+
+}
+function validatePassword() {
+  clearErrorMsg();
+  const $result_border = $('#password');
+  const pwd = $('#password').val();
+  if (pwd !== "" && pwd.length>4 ) {
+    $result_border.css('borderWidth', '3px')
+    $result_border.css('borderColor', 'green');
+  } else {
+    $result_border.css('borderColor', '')
+  }
+}
+$('#email').on('input', validate);
+$('#password').on('input', validatePassword);
+
+function clearErrorMsg() {
+  var errorMessage = document.getElementById("errMsg");
+  errorMessage.innerHTML = "";
+}
+function validateForm() {
+  var email = document.getElementById("email").value;
+  var password = document.getElementById("password").value;
+  var errorMessageContainer = document.getElementById("errMsg");
+  var isValid = true;
+  errorMessageContainer.innerHTML = ""; // Clear previous error messages
+
+  var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  // Check if email is empty
+  if (email.trim() === "" || password === "") {
+    displayErrorMessage("Remplissez tous les champs");
+    isValid = false;
+  } else if (!emailRegex.test(email)) {
+    displayErrorMessage("Adresse e-mail invalide");
+    isValid = false;
+  }
+
+
+  return isValid;
+}
+
+function displayErrorMessage(message) {
+  var errorMessage = document.getElementById("errMsg");
+  errorMessage.innerHTML = message;
+}
+
+
+function closeAlert(){
+  var alertElements = document.getElementsByClassName('alert');
+
+// Loop through each alert element and remove it
+for (var i = 0; i < alertElements.length; i++) {
+    var alertElement = alertElements[i];
+    alertElement.remove(); // Remove the element from the DOM
+}
 }

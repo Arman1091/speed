@@ -60,7 +60,10 @@ class User(db.Model, UserMixin):
         return User.query.filter_by(email=mail).first()
 
     
-    def is_password_correct(self, password_plaintext: str):
+    def is_password_correct(self, password_plaintext:str):
+        if self.password is None:
+            return False
+        
         return check_password_hash(self.password, password_plaintext)
 
     def set_password(self, password_plaintext: str):
@@ -80,6 +83,7 @@ class Client(db.Model):
     addresse = db.Column(db.String(256), nullable=False)
     email = db.Column(db.String(255), unique=True)
     tel = db.Column(db.String(20), nullable=False) 
+    prix_livr = db.Column(db.Float , nullable=False)
     rel_client_commande = relationship("Commande", backref = "client") 
 
     

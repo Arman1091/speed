@@ -1,53 +1,56 @@
 {% extends 'base_header_footer.html' %}
 {% block body %}
 <section id="hero">
-
-    <div class="carousel-item " style='background-image: url("/static/img/accueil_img.jpg")'>
-       
+    <div class="main_div_index" >    
       <div  id ="index_div"class="container d-flex justify-content-center align-items-center ;">
-        <form  class="p-1 "method="POST" style="width: 80%; min-width: 220px;">
-            <h3 class="center " style="color: rgb(110, 191, 63);">Connexion</h3>
+        <form  id="index_form" class="p-1" method="POST" onsubmit="return validateForm()">
+            <h3 class="center connexion-title">Connexion</h3>
             <div class="form-group mt-3">
-              <!-- <label for="email">Email Address</label> -->
               <input
                 type="email"
                 class="form-control "
                 id="email"
                 name="email"
                 placeholder="Votre email"
+                required
               />
             </div>
             <div class="form-group mt-3">
-              <!-- <label for="password">Modt de passe</label> -->
               <input
-                type="password"
+                type="text"
                 class="form-control"
-                id="password"
                 name="password"
+                id="password"
                 placeholder="Votre mot de passe"
+                required
               />
             </div>
             <br />
+            <p id="errMsg"></p>
             <button id="index_submit" type="submit" class="btn text-white" style="background-color: rgb(110, 191, 63);">Connexion</button>
+            
           </form>
+         
       </div>
     </div>
-      <!-- {% with messages = get_flashed_messages(with_categories=true) %} {% if
+     
+   {% with messages = get_flashed_messages(with_categories=true) %} {% if
     messages %} {% for category, message in messages %} {% if category ==
     'error' %}
     <div class="alert alert-danger alter-dismissable fade show" role="alert" style="z-index: 10000;">
       {{ message }}
-      <button type="button" class="close" data-dismiss="alert">
+      <button type="button" class="close" data-dismiss="alert" onclick="closeAlert()">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     {% else %}
-    <div class="alert alert-success alter-dismissable fade show" role="alert" style="width: 90%;">
+    <div class="alert alert-success alter-dismissable fade show" role="alert">
       {{ message }}
-      <button type="button" class="close" data-dismiss="alert">
+      <button type="button" class="close" data-dismiss="alert" onclick="closeAlert()">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    {% endif %} {% endfor %} {% endif %} {% endwith %} -->
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
+ 
   </section>
 {% endblock %}

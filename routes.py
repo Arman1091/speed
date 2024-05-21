@@ -49,7 +49,7 @@ def Usinage():
                     
         clients = get_clients_by_user(current_user)
   
-        return render_template('usinage.html',user=current_user, matieres = matieres, types_matiers= types_matiers, clients=clients, epaisseurs= epaisseurs, types_usinage=types_usinage)
+        return render_template('usinage.html',user=current_user, matieres = matieres, types_matiers= types_matiers, clients=clients, epaisseurs= epaisseurs, types_usinage=types_usinage, page = "Simulation")
     else:
         return redirect(url_for('en_attente'))
    
@@ -61,7 +61,7 @@ def en_attente():
         data = get_en_attentes(current_user)
     else:
        data = get_all_attentes()
-    return render_template('en_attente.html', user = current_user,data=data)
+    return render_template('en_attente.html', user = current_user,data=data, page ="attents")
 
 @app.route('/confirmé' ,  methods=['GET', 'POST'])
 @login_required
@@ -71,7 +71,7 @@ def confirmé():
     else:
         data = get_all_confirmes()
     
-    return render_template('confirmé.html', user = current_user,data=data)
+    return render_template('confirmé.html', user = current_user,data=data, page = "Confirmés")
 @app.route('/usiné' ,  methods=['GET', 'POST'])
 @login_required
 def usiné(): 
@@ -80,7 +80,7 @@ def usiné():
     else:
        data = get_all_usinés()
     
-    return render_template('usiné.html', user = current_user,data=data)
+    return render_template('usiné.html', user = current_user,data=data, page ="Usinés")
 
 @app.route('/livré' ,  methods=['GET', 'POST'])
 @login_required
@@ -90,7 +90,7 @@ def livré():
     else:
        data = get_all_livré()
     
-    return render_template('livré.html', user = current_user,data=data)
+    return render_template('livré.html', user = current_user,data=data, page = "Livrés")
 
 
 @app.before_request
@@ -101,37 +101,43 @@ def session_handler():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = User.filter_by_email(email)
-        if user:
-            if User.is_password_correct(user, password):
-                flash('Connecté avec succès!', category='success')
-                login_user(user, remember=True)
-                if(current_user.role_id == 2 or current_user.role_id==1 ):
-                    # premiere entrer a la page
-                    # Pvc
-                  
-                    return redirect(url_for('Usinage'))
+    if current_user.is_authenticated:
+        print("sdsdsd")
+        return redirect(url_for('en_attente'))
+    else:
+        print("yyyyyyyyyy")
+        if request.method == 'POST':
+            email = request.form.get('email')
+            password = request.form.get('password')
+              
+            user = User.filter_by_email(email)
+            if user:
+                if User.is_password_correct(user, password):
+                    flash('Connecté avec succès!', category='success')
+                    login_user(user, remember=True)
+                    if(current_user.role_id == 2 or current_user.role_id==1 ):
+                        # premiere entrer a la page
+                        # Pvc
+                      
+                        return redirect(url_for('Usinage'))
+                    else:
+                        return redirect(url_for('en_attente'))
+                        # return render_template("en_attente.html",user=current_user)
                 else:
-                    return redirect(url_for('en_attente'))
-                    # return render_template("en_attente.html",user=current_user)
+                    flash('Email ou mot de passe incorrect, réessayez.', category='error')
             else:
                 flash('Email ou mot de passe incorrect, réessayez.', category='error')
-        else:
-            flash('Email ou mot de passe incorrect, réessayez.', category='error')
-    # try:
-    #     matiere = 'Pvc'
-    #     name = 'Mat'
-    #     data = get_data(matiere,name)
-    #     clients = get_clients(current_user)
-    #     return render_template('usinage.html',user=current_user, matiere = matiere, name = name , data = data, clients=clients)
-    # except:
-    #     return render_template("index.html")
-    return render_template("index.html")
+        # try:
+        #     matiere = 'Pvc'
+        #     name = 'Mat'
+        #     data = get_data(matiere,name)
+        #     clients = get_clients(current_user)
+        #     return render_template('usinage.html',user=current_user, matiere = matiere, name = name , data = data, clients=clients)
+        # except:
+        #     return render_template("index.html")
+        return render_template("index.html")
 @app.route('/logout', methods=['GET', 'POST'])
-@login_required
+
 def logout():
 	logout_user()
 	return redirect(url_for('index'))
@@ -236,7 +242,9 @@ def upload():
                 case 5:
                     result = 'assiatante'
             path_folder = "static/members/"+result+'/'+current_user.username
-            file_path = os.path.join('./'+path_folder, preferred_name)
+            file_path = os.path.join(os.getcwd()+'/'+path_folder, preferred_name)
+            print("s")
+            print(os.getcwd())
             file.save(file_path)
             dimension = get_dimension(path_folder)
             plt.rcParams["savefig.facecolor"] = 'black'
@@ -884,7 +892,7 @@ def membres():
     users = get_users_by_role(first_role)
   
         
-    return render_template('membres.html', roles=roles,select_users=users, user = current_user)
+    return render_template('membres.html', roles=roles,select_users=users, user = current_user, page ="Membres")
 
 @app.route('/clients')
 @login_required
@@ -895,7 +903,7 @@ def clients():
     first_rep = representants[0].id
     clients= get_cients_by_rep(first_rep)
 
-    return render_template('clients.html', user = current_user,representants = representants, clients=clients)
+    return render_template('clients.html', user = current_user,representants = representants, clients=clients, page ="Clients")
 
 @app.route('/prix')
 @login_required
@@ -922,7 +930,7 @@ def prix():
     data_matieres = get_data_matieres(first_matiere,first_type,first_type_usinage)
     print(data_matieres)
 
-    return render_template('prix.html', matieres = matieres,types_matieres=types_matieres , types_usinage = types_usinage,data_matieres= data_matieres, user = current_user)
+    return render_template('prix.html', matieres = matieres,types_matieres=types_matieres , types_usinage = types_usinage,data_matieres= data_matieres, user = current_user, page = "Prix")
 
 
 @app.route('/users_by_role_selected', methods=['POST'])
