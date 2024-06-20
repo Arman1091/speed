@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 
 {% block contenue %}
-<a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newUserForm()">Nouvelle utilisateur </a>
+{% if current_user_role =="admin" %}
+    <a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newUserForm()">Nouvelle utilisateur </a>
+{% endif %}
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for message in messages %}
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <strong>Success!</strong> {{ message }}
+<div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between" role="alert">
+    <strong>!{{ message }}</strong> 
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -15,12 +17,9 @@
 {% endif%}
 {% endwith %}
 <div class="mt-4">
-    <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
-        <p id="mt_name">{{name}}</p>
-        </h1> -->
     <label for="role_users"><strong>Rôle</strong></label>
     <select id="role_users" class="form-select form-select-lg mb-3"
-        aria-label=".form-select-lg nouvelle_utilisateur" style="width: 30%;">
+        aria-label=".form-select-lg nouvelle_utilisateur" >
         <!-- <option selected>Select le matiere</option> -->
         {% for role in roles %}
         <option value='{{ role.id}}'>{{ role.name}}</option>
@@ -36,7 +35,9 @@
             <th scope="col">Email</th>
             <th scope="col">Tel</th>
             <th scope="col">Mot de passe</th>
-            <th></th>
+            {% if current_user_role =="admin" %}
+                <th></th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -49,23 +50,23 @@
             <td>+33<span class="user_pure_tel">{{user_row.tel}}</span></td>
             <td>*********
             </td>
+            {% if current_user_role =="admin" %}
             <td>
-                <!-- <a  class="btn btn-warning">Edit</a> -->
-                <!-- <a  class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de supprimer cet utilisateur?')">Delete</a> -->
-                <output class="set_user_id" style="visibility: hidden;">{{user_row.id}}</output>
-                <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                <output class="set_user_id"  >{{user_row.id}}</output>
+                <i class="bi bi-pencil-square getInfoBtn"  ></i>
+                <i type="button" class="delete_icon bi bi-trash text-danger " 
                     onclick="delete_user('{{user.id}}')"></i>
 
             </td>
+            {% endif %}
+            
         </tr>
         {% endfor %}
     </tbody>
 </table>
 <section id="new_users_section" class=" justify-content-center">
-    <div class="card-body "
-        style="width: 70%; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;background-color: #cde2ef;">
-        <form style="margin: 20px;margin-bottom: 40px;" >
+    <div class="card-body">
+        <form class="membres-form" >
             <div class="form-group mt-3">
                 <label for="role_new_user">Role:</label>
                 <div class="input-group">
@@ -118,17 +119,19 @@
                         name="confirm_pwd" required>
                 </div>
             </div>
+            
             <div class="form-group">
                 <label for="telp">Telephone:</label>
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <div class="input-group-text">(+33)</div>
                     </div>
-                    <input type="text" id="telp" class="form-control" placeholder="Telephone" name="telp" required>
+                    <input type="tel" id="telp" class="form-control" placeholder="Telephone" name="telp" required>
                 </div>
             </div>
-            <!-- <div class="mt-2" id="msg_div" style="background-color: rgb(192, 235, 148); display: none;">
-            <p>s</p> -->
+            <div class="mt-2 fs-2 bg-warning p-1" id="err_msg_div">
+                <h6  class=" text-danger"><strong id="err_msg"></strong></h6>
+            </div>
             <div class="form-group d-flex justify-content-center align-items-center mt-5">
                 <button type="button" class="btn btn-success btn-sm" name="submit" onclick="addNewUser()">Ajouter</button>
                 <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;"
@@ -142,9 +145,9 @@
 
 
 <section id="edit_user_section" class=" justify-content-center">
-    <div class="card-body "
-        style="width: 70%; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;background-color: #cde2ef;">
-        <form style="margin: 20px;margin-bottom: 40px;" >
+    <div class="card-body ">
+       
+        <form class="membres-form" >
             <div class="form-group mt-3">
                 <label for="role_edit_user">Role:</label>
                 <div class="input-group">
@@ -225,9 +228,7 @@
                     <input type="text" id="edit_tel" class="form-control" placeholder="Telephone" name="telp" required>
                 </div>
             </div>
-            <output id="edit_user_id" style="visibility: hidden;"></output>
-            <!-- <div class="mt-2" id="msg_div" style="background-color: rgb(192, 235, 148); display: none;">
-            <p>s</p> -->
+            <output id="edit_user_id" ></output>
             <div class="form-group d-flex justify-content-center align-items-center mt-5">
                 <button type="button" class="btn btn-success btn-sm" name="submit" onclick="SaveEditUser()">Ajouter</button>
                 <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;"

@@ -7,47 +7,53 @@
     <div class="row mt-5">
         <div class="col-md-6">
             <div id="perso_detailles" class="row">
-                <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
-                    <p id="mt_name">{{name}}</p>
-                    </h1> -->
                 <div class="row  ">
                     <div class="col col-md-4">
                         <h5>Représentant:</h5>
                     </div>
                     <div class="col-md-8">
-                        <h5  class="text-info text-start"> {{data[16]}}</h5>
+                        <h5 class="text-info text-start"> {{data[15]}}</h5>
                     </div>
                 </div>
-                <!-- <div class="row  ">
-                    <div class="col col-md-4">
-                        <h5>Client:</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <h5 class="text-secondary">shgfdhsdgs dsgsd sd</h5>
-                    </div>
-                
-                </div> -->
             </div>
+            {% if data[18] %}
             <div class="row border border-success mt-3" style="padding: 10px; border-radius: 5px;">
                 <h3 class=" mt-4 text-center">Adresse de livraison</h3>
-                <h5 class="mt-4 text-dark"><strong> {{data[6]}}</strong></h5>
+                <h5 class="mt-4 text-dark"><strong> {{data[5]}}</strong></h5>
                 <div>
+                    {% if current_user_role =="responsable" %}
                     <div>
-                        
-                        <input  type="text" value=  '{{data[9]}}' style="width: 100%">
+                        <input type="text" class="text-center" value={{data[16]}}
+                            style="width: 20%; border-radius: 1px;">
+                        <input type="text" value='{{data[8]}}'>
                         <!-- <input type="text" value="AVENUE DE JAQUES" style="width: 70%;"> -->
                     </div>
                     <div class="mt-3">
-                        <input type="text" class="text-center" value={{data[8]}} style="width: 25%; border-radius: 1px;">
-                        <input type="text" value='{{data[7]}}' style="width: 65%;">
+                        <input type="text" class="text-center" value={{data[7]}}
+                            style="width: 25%; border-radius: 1px;">
+                        <input type="text" value='{{data[6]}}' style="width: 65%;">
                     </div>
+                    {% else %}
+                    <div>
+                        <output type="text" class="text-center" value={{data[16]}}
+                            style="width: 20%; border-radius: 1px;">{{data[16]}}</output>
+                        <output type="text" value='{{data[8]}}'>{{data[8]}}</output>
+                    </div>
+                    <div class="mt-3">
+                        <output type="text" class="text-center" value={{data[7]}}
+                            style="width: 25%; border-radius: 1px;">{{data[7]}}</output>
+                        <output="text" value='{{data[6]}}' style="width: 65%;">{{data[6]}}</output>
+                    </div>
+                    {% endif %}
+                    
 
                 </div>
 
             </div>
+            {% endif %}
 
 
-            <!-- HTML -->
+            {% if data[18] %}
             <div class="row mt-4">
                 <div class="col-md-3">
                     <button id="file_btn_attente" type="button"
@@ -58,22 +64,30 @@
 
                 </div>
                 <div class="col-md-6 d-flex align-items-center">
-                    <span id="tcrg_dxf" confirm onclick="telecharger_pdf('{{user.username}}')">Télécharger le DXF <img
-                            src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}" alt="Logo de pdf"
+                    <span id="tcrg_dxf" onclick="telecharger_dxf('/static/{{path_folder}}', '{{data[13]}}')">Télécharger
+                        le DXF <img src="{{ url_for('static', filename= 'img/logo/dxf_icon.jpg') }}"
                             style="width: 35px;" />
                     </span>
                 </div>
-                <!-- <div class="col-4">
-                    <button id="text_btn_attante" type="button" class="case_btn btn  border  border-secondary  "
-                        style="padding-left: 20px;padding-right: 20px"><i class="bi bi-fonts fs-1"></i>
+
+            </div>
+            {% else %}
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <button id="txt_btn_attente" type="button"
+                        class=" case_btn btn  active-case border  border-secondary">
+                        <h1>T</h1>
                         <p>Text</p>
                     </button>
 
-                </div> -->
-
+                </div>
+                <div class="col-md-6 ">
+                    <h6>Police de caractere</h6>
+                    <p><strong id=name_police>{{data[19]}}</strong></p>
+                </div>
 
             </div>
-           
+            {% endif %}
             <section class="intro mt-4">
                 <div class="bg-image h-100" style="background-color: #6095F0;">
                     <div class="mask d-flex align-items-center h-100">
@@ -84,7 +98,7 @@
                                         <div class="card-header">
                                             <h4 class="text-center">Commande detailles</h4>
                                         </div>
-                                        <div class="card-body">
+                                        <div id='card_body_en_attente' class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table table-borderless mb-0">
                                                     <thead>
@@ -101,14 +115,16 @@
 
                                                             <td id="matiere_detailles">{{data[0]}}</td>
                                                             <td id="matiere_type_detailles">{{data[1]}}</td>
-                                                            <td id="epp_detailles">{{data[12]}} mm</td>
-                                                            <td id="qte_detailles">{{data[13]}}</td>
-                                                            <td
-                                                                class="d-flex justify-content-center align-content-center">
-
-                                                                <input type="date" value= {{data[5]}}
+                                                            <td id="epp_detailles">{{data[11]}} mm</td>
+                                                            <td id="qte_detailles">{{data[12]}}</td>
+                                                            <td class="d-flex justify-content-center align-content-center">
+                                                                {% if current_user_role =="comercial" %}
+                                                                <input type="date" value={{data[4]}}
                                                                     class="form-control" id="dateeInput" name="date">
-
+                                                                {% else %}
+                                                                <output type="date" value={{data[4]}}
+                                                                    class="form-control" id="dateOutput" name="date">{{data[4]}}</output>
+                                                                {% endif %}
 
 
                                                             </td>
@@ -146,10 +162,19 @@
                                                     <div>
                                                         <h6>HT</h6>
                                                     </div>
-
-                                                    <div class="d-flex justify-content-center align-items-center">
-                                                        <input  class="text-center" id="prix_detaille_ht" value={{prix_total_ht}} style="width: 60%; max-width: 120px;min-width: 30px; "><span>€</span>
-                                                    </div>
+                                                    {% if current_user_role =="responsable" %}
+                                                        <div class="d-flex justify-content-center align-items-center">
+                                                            <input class="text-center" id="prix_detaille_ht"
+                                                                value={{data[2]}}>
+                                                            <span>€</span>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="d-flex justify-content-center align-items-center">
+                                                            <output class="text-center" id="prix_detaille_ht"
+                                                                value={{data[2]}}>{{data[2]}}
+                                                            <span>€</span></output>
+                                                        </div>
+                                                    {% endif %}
 
 
                                                 </div>
@@ -160,13 +185,29 @@
                                                         <h6>TTC</h6>
                                                     </div>
 
-                                                    <div class="col-4 d-flex justify-content-center align-items-center" style="width: 100%;">
-                                                        <input class="text-center" id="prix_detaille_ttc" value={{prix_total_ttc}}  style="width: 60%; max-width: 120px;min-width: 30px;"><span>€</span>
+                                                    <div class="col-4 d-flex justify-content-center align-items-center"
+                                                        style="width: 100%;">
+                                                        <output class="text-center"
+                                                            id="prix_detaille_ttc">{{data[2]*1.2}}<span>€</span></output>
                                                     </div>
 
 
                                                 </div>
+
                                             </div>
+                                            {% if data[21] is not none %}
+
+                                            <div id="attents_detaille_prix_livr" class="row mt-4">
+                                                <div class="col-3">
+                                                    <p>Livraison TTC</p>
+                                                </div>
+                                                <div class="col-3">
+
+                                                    <span><strong>{{data[21]}}</strong> €</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
                                         </div>
                                     </div>
                                 </div>
@@ -197,17 +238,11 @@
                                 <div class="accordion-body">
                                     <div>
                                         <div class="p-2 border-2 border-primary border-radius-2">
-                                            <h4 class="text-success ">{{data[16]}}</h4>
+                                            <h4 class="text-success ">{{data[15]}}</h4>
                                             <textarea output="outputText" class="form-control" rows=5 wrap=on
-                                                readonly>dsdffffffffffffffffffffffff sdfffffffffffff dfffffffff dfffffffffffffffffffffffffffffffsdsd</textarea>
+                                                readonly>{{data[22]}}</textarea>
                                         </div>
 
-                                    </div>
-
-                                    <div>
-                                        <h6>Votre message</h6>
-                                        <textarea name="message" class="form-control" rows="3" wrap=on
-                                            placeholder="floor/door lock code/etc."></textarea>
                                     </div>
 
                                 </div>
@@ -219,17 +254,29 @@
                     <button class=" bg-primary">Telecharger le devis</button>
                 </div> -->
             </div>
-            <div id="drop-area-bl" class="mt-4">
-                <h3 class="drop-text">Glissez et déposez le BL </h3>
-                <input type="file" id="fileInputBl" accept=".pdf" />
-                <div id="result-container"></div>
-            </div>
+            {% if current_user_role =="responsable" %}
+
+                <div id="drop-area-bl" class="mt-4">
+                    <h3 class="drop-text">Glissez et déposez le BL </h3>
+                    <input type="file" id="fileInputBl" accept=".pdf" />
+                    <div id="result-container"></div>
+                </div>
+            {% endif %}
         </div>
 
-
         <div class="col-md-6">
-            <iframe class="img_usinage mt-5" src="{{ url_for('static', filename= 'img/usinage/matiers/pvc.jpg') }}"
-                style="height: 55vh;width: 30%;margin-left: 5%; position: fixed;"></iframe>
+            {% if data[13] is not none %}
+
+            <iframe class="img_usinage_attente_detaille mt-5"
+                src="{{ url_for('static', filename= path_folder +'/IMG/'+data[13]+'.png') }}"></iframe>
+            {% else %}
+            <div id="text_div_attente_detaille">
+                <h1 id="text_area" style="overflow-wrap:break-word;font-family: '{{ data[19] }}' "> {{data[20]}}</h1>
+            </div>
+            {% endif %}
+
+
+
 
         </div>
 
@@ -252,15 +299,17 @@
                 </select>
             </div>
 
-
-
-
         </div>
-        
+        {{current_user_role}}
+        {% if current_user_role =="responsable" %}
         <div class="d-flex justify-content-center align-items-center mt-5">
-            <button type="button" class="btn btn-success" onclick="confirmation(' {{data[15]}}')">Confirmer</button>
-            <button type="button" class="btn btn-danger" style="margin-left: 10px;" onclick="supprimer_attente(' {{data[15]}}')" >Suprimer</button>
+            <button type="button" class="btn btn-success" onclick="confirmation(' {{data[14]}}')">Confirmer</button>
+            <button type="button" class="btn btn-danger" style="margin-left: 10px;"
+                onclick="supprimer_attente(' {{data[15]}}')">Suprimer</button>
         </div>
+
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}

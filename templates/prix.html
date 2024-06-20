@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block contenue %}
+<div id ="user_role_div">
+    <output id="output_user_role">{{current_user_role}}</output>
+</div>
 <div class="row ">
     <div class="col-2 ">
         <button id="form_btn_bridge" type="button" class=" case_btn btn  active-case border  border-secondary  "
@@ -85,8 +88,10 @@
                 <th scope="col">Usinage</th>
                 <th scope="col">Epaisseur</th>
                 <th scope="col">Matiere m²</th>
-                <th scope="col">Limeaire m²</th>
+                <th scope="col">Limeaire m</th>
+                {% if current_user_role == "admin" %}
                 <th></th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -99,6 +104,7 @@
                 <td> {{matieres_data_row[1]}}</td>
                 <td> {{matieres_data_row[2]}}</td>
                 <td> {{matieres_data_row[3]}}</td>
+                {% if current_user_role == "admin" %}
                 <td> <input type="text" value='{{matieres_data_row[4]}}' class="prix_matiere_input"> €</td>
                 <td><input type="text" value='{{matieres_data_row[5]}}'class="prix_limeaire_input">€ </td>
                 <td>
@@ -109,6 +115,10 @@
                         onclick="delete_bridge_row(this)"></i>
     
                 </td>
+                {% else %}
+                <td> <output type="text" >{{matieres_data_row[4]}} €</output></td>
+                <td><output type="text" >{{matieres_data_row[5]}} €</output> </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
@@ -126,7 +136,9 @@
                 <th scope="col">Prix 1er m²</th>
                 <th scope="col">Prix 2em m²</th>
                 <th scope="col">Prix 3em m²</th>
+                {% if current_user_role == "admin" %}
                 <th></th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -180,7 +192,9 @@
                 <th scope="col">Epaisseur</th>
                 <th scope="col">Hauteur</th>
                 <th scope="col">Prix</th>
+                {% if current_user_role == "admin" %}
                 <th></th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>

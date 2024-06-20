@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 
 {% block contenue %}
-<a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newClientForm()">Nouvelle client </a>
-{% with messages = get_flashed_messages() %}
+{% if current_user_role =="admin" %}
+    <a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newClientForm()">Nouvelle client </a>
+{% endif %}
+    {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for message in messages %}
 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -38,16 +40,17 @@
             <th scope="col">Cp</th>
             <th scope="col">Ville</th>
             <th scope="col">Email</th>
+            <th scope="col">Livrasion HT</th>
             <th scope="col">Tel</th>
-            <th></th>
+            {% if current_user_role =="admin" %}
+                <th></th>
+            {% endif %}
+          
         </tr>
     </thead>
     <tbody>
         {% for item in clients %}
         <tr>
-
-
-
             <td>*</th>
             <td>{{item[5]}}</td>
             <td>{{item[0]}}</td>
@@ -55,7 +58,9 @@
             <td>{{item[2]}}</td>
             <td>{{item[1]}}</td>
             <td>{{item[6]}}</td>
+            <td>{{item[10]}}</td>
             <td>{{item[7]}}</td>
+            {% if current_user_role =="admin" %}
             <td>
                 
                 <output class="rec_client_id" style="visibility: hidden;">{{item[9]}}</output>
@@ -66,6 +71,8 @@
                 <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                     onclick="delete_client(this,'{{item[9]}}')"></i>
             </td>
+            {% endif %}
+            
 
         </tr>
         {% endfor %}
@@ -128,12 +135,21 @@
                 
             </div>
             <div class="form-group">
-                <label for="email">Email:</label>
+                <label for="email_new_client">Email:</label>
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
                     </div>
-                    <input type="email" id="email" class="form-control" placeholder="E-mail" name="email" required>
+                    <input type="email" id="email_new_client" class="form-control" placeholder="E-mail" name="email_new_client" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="prix_clent_livr">Prix livraison HT:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
+                    </div>
+                    <input type="text" id="prix_clent_livr" class="form-control" placeholder="Prix livraison" name="prix_clent_livr" required>
                 </div>
             </div>
             <div class="form-group">
@@ -149,7 +165,7 @@
             <p>s</p>
         </div>
             <div class="form-group d-flex justify-content-center align-items-center mt-5">
-                <button type="submit" class="btn btn-success btn-sm" name="submit" onclick="addNewClient()">Ajouter</button>
+                <button type="button" class="btn btn-success btn-sm" name="submit" onclick="addNewClient()">Ajouter</button>
                 <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;" onclick="closeFormClient()">Annuler</button>
             </div>
         </form>
@@ -221,7 +237,7 @@
                     <div class="input-group-prepend">
                         <div class="input-group-text d-flex justify-content-center fs-4  text-danger">*</div>
                     </div>
-                    <input type="email" id="email_edit" class="form-control" placeholder="E-mail" name="email" required>
+                    <input type="email" id="email_edit" class="form-control" placeholder="E-mail" name="email_edit" required>
                 </div>
             </div>
             <div class="form-group">
@@ -233,9 +249,18 @@
                     <input type="text" id="telp_edit" class="form-control" placeholder="Telephone" name="telp" required>
                 </div>
             </div>
-        <div class="mt-2" id="msg_div_edit" style="background-color: rgb(192, 235, 148); display: none;">
-            <p>s</p>
-        </div>
+            <div class="form-group">
+                <label for="client_edit_prix_livr">Prix livraison HT:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text d-flex justify-content-center fs-4 text-danger">*</div>
+                    </div>
+                    <input type="text" id="client_edit_prix_livr" class="form-control" placeholder="Prix ..." name="client_edit_prix_livr" required>
+                </div>
+            </div>
+            <div class="mt-2 fs-2 bg-warning p-1" id="err_msg_div">
+                <h6  class=" text-danger"><strong id="err_msg"></strong></h6>
+            </div>
             <div class="form-group d-flex justify-content-center align-items-center mt-5">
                 <button type="button" class="btn btn-success btn-sm" name="submit" onclick="EnregistrerEditClient()">Enregistrer</button>
                 <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;" onclick="closeEditClient()">Annuler</button>

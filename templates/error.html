@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block contenue %}
+{% if message %}
+
+    <div class="alert alert-danger alter-dismissable fade show" role="alert">
+        {{ message }}
+    </div>
+{% endif%}
+{% endblock %}

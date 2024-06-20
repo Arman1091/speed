@@ -30,7 +30,7 @@
   }
 
   /**
-   * Easy on scroll event listener 
+   * Easy on scroll event listener
    */
   const onscroll = (el, listener) => {
     el.addEventListener('scroll', listener)
@@ -171,35 +171,106 @@
       mirror: false
     })
   });
-  if(document.getElementById("errMsg")){
+
+  if (document.getElementById("errMsg")) {
     clearErrorMsg();
   }
-  
+
 
   if (document.getElementsByName('mode_emp')) {
     var radios = document.getElementsByName('mode_emp');
     radios.forEach(function (radio) {
       radio.addEventListener('change', function () {
+
         let verif_file = document.getElementById("fileInput").value;
-        var prix_livr_ht = 0;
+        var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
+        var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
         if (verif_file) {
-          console.log(this.value);
-          var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
-          var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
-          console.log(prix_total_ht);
           if (this.value == "livraison") {
-            prix_livr_ht = 19.50;
-            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) + 19.50;
-            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) + 1.2 * 19.50;
-            document.getElementById("scructure_livraison_form").style.display="block";
-            document.getElementById("mode_livr_envoi").checked = true;
+            var selectDevisProElement = document.getElementById("cients_devis_pro");
+            var selectDevisProOption = selectDevisProElement.options[selectDevisProElement.selectedIndex];
+            var client_id = selectDevisProOption.value;
+            let formData = new FormData();
+            formData.append('client_id', client_id);
+            $.ajax({
+              url: '/get_client_data',
+              type: 'POST',
+              data: formData,
+              contentType: false,
+              processData: false,
+              success: function (data) {
+
+                var prix_livr_ht = data[0]["prix_livr"];
+                document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) + prix_livr_ht).toFixed(2);;
+                document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) + 1.2 * prix_livr_ht).toFixed(2);;
+                document.getElementById("scructure_livraison_form").style.display = "block";
+                document.getElementById("mode_livr_envoi").checked = true;
+                document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+                document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
+
+              },
+              error: function () {
+                alert('L\'erreur du  serveur ');
+              }
+            });
+
+
+
           } else {
-            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) - 19.50;
-            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) - 1.2 * 19.50;
-            document.getElementById("scructure_livraison_form").style.display="none";
+
+            var prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
+            document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
+            document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
+            document.getElementById("scructure_livraison_form").style.display = "none";
             document.getElementById("mode_emp_envoi").checked = true;
+
           }
-          document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+
+        } else {
+          var text_bn = document.getElementById("text_btn");
+
+          // text_bn.classList.add("active-case");
+          if (text_bn.classList.contains("active-case")) {
+            if (this.value == "livraison") {
+              var selectDevisProElement = document.getElementById("cients_devis_pro");
+              var selectDevisProOption = selectDevisProElement.options[selectDevisProElement.selectedIndex];
+              var client_id = selectDevisProOption.value;
+              let formData = new FormData();
+              formData.append('client_id', client_id);
+              $.ajax({
+                url: '/get_client_data',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+
+                  prix_livr_ht = data[0]["prix_livr"];
+                  document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) + parseFloat(prix_livr_ht) ).toFixed(2);
+                  document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) + 1.2 * prix_livr_ht).toFixed(2);
+                  document.getElementById("text_prix_livr_div").style.display = "block";
+                  document.getElementById("mode_livr_envoi").checked = true;
+                  document.getElementById("addresse_div").style.display = "block";
+                  document.getElementById('prix_livr_text').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+                  document.getElementById('prix_livr_text_ht').innerHTML = prix_livr_ht ;
+
+
+                },
+                error: function () {
+                  alert('L\'erreur du  serveur ');
+                }
+              });
+            } else {
+              prix_livr_ht =  document.getElementById('prix_livr_text_ht').innerHTML ;
+              document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
+              document.getElementById("text_prix_livr_div").style.display = "none";
+              document.getElementById("mode_emp_envoi").checked = true;
+              document.getElementById("addresse_div").style.display = "none";
+              document.getElementById('prix_livr_text_ht').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+            }
+          }
+
         }
 
       });
@@ -212,29 +283,102 @@
     radios.forEach(function (radio) {
       radio.addEventListener('change', function () {
         let verif_file = document.getElementById("fileInput").value;
+        var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
+        var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
         var prix_livr_ht = 0;
         if (verif_file) {
-          console.log(this.value);
-          var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
-          var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
-          console.log(prix_total_ht);
+
+          // prix_livr_ht = document.getElementById("prix_livr_ht").innerHTML;
           if (this.value == "livraison") {
-            prix_livr_ht = 19.50;
-            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) + 19.50;
-            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) + 1.2 * 19.50;
-            document.getElementById("scructure_livraison_form").style.display="block";
-            document.getElementById("adresse_envoi_form").reset();
-            document.getElementById("addresse_div").style.display="block";
-            document.getElementById("mode_livr").checked = true;
+            var selectElement = document.getElementById("client_select");
+            var selectOption = selectElement.options[selectElement.selectedIndex];
+            var client_id = selectOption.value;
+            let formData = new FormData();
+            formData.append('client_id', client_id);
+            $.ajax({
+              url: '/get_client_data',
+              type: 'POST',
+              data: formData,
+              contentType: false,
+              processData: false,
+              success: function (data) {
+
+                let prix_livr_ht = data[0]["prix_livr"];
+                document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) + parseFloat(prix_livr_ht)).toFixed(2);
+                document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) + 1.2 * parseFloat(prix_livr_ht)).toFixed(2);;
+                document.getElementById("scructure_livraison_form").style.display = "block";
+                document.getElementById("addresse_div").style.display = "block";
+                document.getElementById("mode_livr").checked = true;
+                document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+                document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
+
+              },
+              error: function () {
+                alert('L\'erreur du  serveur ');
+              }
+            });
+
+
+
           } else {
-            document.getElementById("prix_lin_ht").innerHTML = parseInt(prix_total_ht) - 19.50;
-            document.getElementById("prix_lin_ttc").innerHTML = parseInt(prix_total_ttc) - 1.2 * 19.50;
-            document.getElementById("scructure_livraison_form").style.display="none";
-            document.getElementById("addresse_div").style.display="none";
-            document.getElementById("adresse_envoi_form").reset();
+
+            var prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
+            document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
+            document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
+            document.getElementById("scructure_livraison_form").style.display = "none";
             document.getElementById("mode_emp").checked = true;
+            document.getElementById("addresse_div").style.display = "none";
+
           }
-          document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+        } else {
+          var text_bn = document.getElementById("text_btn");
+          if (text_bn.classList.contains("active-case")) {
+
+            if (this.value == "livraison") {
+              var selectElement = document.getElementById("client_select");
+              var selectOption = selectElement.options[selectElement.selectedIndex];
+              var client_id = selectOption.value;
+              let formData = new FormData();
+              formData.append('client_id', client_id);
+              $.ajax({
+                url: '/get_client_data',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+
+                  let prix_livr_ht = data[0]["prix_livr"];
+                  document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) + prix_livr_ht).toFixed(2);
+                  document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) + 1.2 * prix_livr_ht).toFixed(2);
+                  document.getElementById("text_prix_livr_div").style.display = "block";
+                  // document.getElementById("adresse_envoi_form").reset();
+                  document.getElementById("addresse_div").style.display = "block";
+                  document.getElementById("mode_livr").checked = true;
+
+                  document.getElementById('prix_livr_text').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+                  document.getElementById('prix_livr_text_ht').innerHTML = prix_livr_ht;
+
+                },
+                error: function () {
+                  alert('L\'erreur du  serveur ');
+                }
+              });
+
+
+
+            } else {
+              let prix_livr_ht =document.getElementById('prix_livr_text_ht').innerHTML;
+              document.getElementById("prix_lin_ht").innerHTML = parseFloat(prix_total_ht) - prix_livr_ht;
+              document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
+              document.getElementById("text_prix_livr_div").style.display = "none";
+              document.getElementById("addresse_div").style.display = "none";
+              // document.getElementById('adresse_envoi_form').reset();
+              document.getElementById("mode_emp").checked = true;
+            }
+            // document.getElementById("prix_livr_text_ht").innerHTML = prix_livr_ht.toFixed(2);
+            // document.getElementById('prix_livr_text').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
+          }
         }
 
       });
@@ -454,7 +598,7 @@
           }
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     } else {
@@ -514,7 +658,7 @@
           }
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     }
@@ -580,7 +724,7 @@
         }
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   })
@@ -695,7 +839,7 @@
 
           },
           error: function () {
-            alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+            alert('Une erreur s\'est produite lors de fare l\'operation.');
           }
         });
       }
@@ -747,7 +891,7 @@
           }
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     }
@@ -947,10 +1091,12 @@
           document.getElementById('prix_lettre_ttc').innerHTML = (1.2 * prix_rec).toFixed(2);
           document.getElementById('nbr_lettres').innerHTML = nbr_lettres;
           document.getElementById('qte_text').innerHTML = qte;
-
+          document.getElementById("prix_detailles").style.display = "block";
+          document.getElementById("text_prix_detailles").style.display = "block";
+          document.getElementById("accordionExample").style.display = "none";
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
 
@@ -1096,7 +1242,7 @@
 
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     } else {
@@ -1168,7 +1314,7 @@
           }
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     }
@@ -1311,7 +1457,7 @@
 
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     } else {
@@ -1392,7 +1538,7 @@
           }
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     }
@@ -1403,8 +1549,6 @@
   });
   //changer le role
   $("#role_users").on('change', function () {
-    alert("d");
-    console.log("sjdbs");
     let formData = new FormData();
     var selectRoleElement = document.getElementById("role_users");
     var selectedRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
@@ -1454,7 +1598,7 @@
         };
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
 
@@ -1462,6 +1606,8 @@
 
   //changer la matiere de la liste
   $("#matiere_list").on('change', function () {
+    var current_user_role = document.getElementById("output_user_role").innerHTML;
+
     let formData = new FormData();
     var selectMatiereElement = document.getElementById("matiere_list");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
@@ -1544,7 +1690,10 @@
           var cell4 = row.insertCell(4);
           var cell5 = row.insertCell(5);
           var cell6 = row.insertCell(6);
-          var cell7 = row.insertCell(7);
+          if (current_user_role === "admin"){
+            var cell7 = row.insertCell(7);
+          }
+          
 
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data["liste_data"][i]["matiere_name"]
@@ -1553,28 +1702,31 @@
           cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
 
 
-
-          cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class="prix_matiere_input"> €`;
-          cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class="prix_limeaire_input">€`
-          // 
-          cell7.innerHTML = `
-         
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                    onclick="delete_bridge_row(this)"></i>
-          `;
+          if(current_user_role === "admin"){
+            cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class="prix_matiere_input"> €`;
+            cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class="prix_limeaire_input">€`;
+          
+            cell7.innerHTML = `
+            <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                onclick="delete_bridge_row(this)"></i>`;
+          }else{
+            cell5.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_matiere"] + ` €</output>`;
+            cell6.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_limeaire"] + `€</output>`;
+          }
+          
 
         };
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
 
   });
   //changer le type  de la liste
   $("#type_list").on('change', function () {
-
+    var current_user_role = document.getElementById("output_user_role").innerHTML;
     let formData = new FormData();
     var selectMatiereElement = document.getElementById("matiere_list");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
@@ -1641,35 +1793,42 @@
           var cell4 = row.insertCell(4);
           var cell5 = row.insertCell(5);
           var cell6 = row.insertCell(6);
-          var cell7 = row.insertCell(7);
+          if(current_user_role  === "admin"){
+            var cell7 = row.insertCell(7);
+          }
+         
 
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data["liste_data"][i]["matiere_name"]
           cell2.innerHTML = data["liste_data"][i]["type_name"]
           cell3.innerHTML = data["liste_data"][i]["usinage_name"]
           cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
-
-          cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
-          cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
-          cell7.innerHTML = `
+          if(current_user_role  === "admin"){
+            cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
+            cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`;
+            cell7.innerHTML = `
+  
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_bridge_row(this)"></i>
+            `;
+          } else{
+            cell5.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_matiere"] + ` €</output>`;
+            cell6.innerHTML = `<output type="text" >€ ` + data["liste_data"][i]["prix_limeaire"] + `</output>`;
+          }
          
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                onclick="delete_bridge_row(this)"></i>
-          `;
 
         };
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
 
   });
 
   $("#type_usinage_list").on('change', function () {
-
-    let formData = new FormData();
+    var current_user_role = document.getElementById("output_user_role").innerHTML;    let formData = new FormData();
     var selectMatiereElement = document.getElementById("matiere_list");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
     var selectedMatiereValue = selectedMatiereOption.value;
@@ -1685,7 +1844,9 @@
     var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
 
     var selectedTypeUsinageText = selectedTypeUsinageOption.innerText;
-
+    if(selectedTypeUsinageText == "USIL"){
+      formData.append('is_usil', true);
+    }
 
     formData.append('matiere_id', selectedMatiereValue);
     formData.append('type_id', selectedTypeValue);
@@ -1703,9 +1864,11 @@
       contentType: false,
       processData: false,
       success: function (data) {
-        if ((data["liste_data"])) {
+        var table2 = document.getElementById("matieres_table");
+        if ((data["liste_data"])) {;
           var table = document.getElementById("matieres_table");
           if (table.style.display == "none") {
+           
             table.style.display = "block";
             var matieres_usil_table = document.getElementById("matieres_usil_table");
             matieres_usil_table.style.display = "none";
@@ -1718,7 +1881,6 @@
           for (var i = rowCount - 1; i > 0; i--) {
             table.deleteRow(i);
           }
-          console.log(data['liste_data'].length);
           var nbr = 1;
           for (var i = 0; i < data['liste_data'].length; i++) {
 
@@ -1730,22 +1892,27 @@
             var cell4 = row.insertCell(4);
             var cell5 = row.insertCell(5);
             var cell6 = row.insertCell(6);
-            var cell7 = row.insertCell(7);
+            if(current_user_role == "admin"){
+              var cell7 = row.insertCell(7);
+            }
+            
 
             cell0.innerHTML = nbr++;
             cell1.innerHTML = data["liste_data"][i]["matiere_name"]
             cell2.innerHTML = data["liste_data"][i]["type_name"]
             cell3.innerHTML = data["liste_data"][i]["usinage_name"]
             cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
-
-            cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
-            cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
-            cell7.innerHTML = `
-       
-              <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                  onclick="delete_user('{{user.id}}')"></i>
-        `;
-
+            if(current_user_role == "admin"){
+                cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
+                cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
+                cell7.innerHTML = `
+    
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                      onclick="delete_user('{{user.id}}')"></i>`;
+            }else{
+              cell5.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_matiere"] + ` € </output>`;
+                cell6.innerHTML = `<output type="text">` + data["liste_data"][i]["prix_limeaire"] + ` €</output>`
+            }
           };
         } else {
           if ((data["data_usil"])) {
@@ -1773,28 +1940,35 @@
               var cell5 = row.insertCell(5);
               var cell6 = row.insertCell(6);
               var cell7 = row.insertCell(7);
-              var cell8 = row.insertCell(8);
+              if(current_user_role === "admin"){
+                var cell8 = row.insertCell(8);
+              }
 
               cell0.innerHTML = nbr++;
               cell1.innerHTML = data["data_usil"][i]["matiere_name"]
               cell2.innerHTML = data["data_usil"][i]["type_name"]
               cell3.innerHTML = data["data_usil"][i]["usinage_name"]
               cell4.innerHTML = data["data_usil"][i]["epaisseur_value"]
-
-              cell5.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_1"] + `' class='prix_1_input'> €`;
-              cell6.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_2"] + `'class='prix_2_input'>€`;
-              cell7.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_3"] + `'class='prix_3_input'>€`;
-              cell8.innerHTML = `
-         
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                onclick="delete_bridge_row(this)"></i>
-          `;
+              if(current_user_role === "admin"){
+                cell5.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_1"] + `' class='prix_1_input'> €`;
+                cell6.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_2"] + `'class='prix_2_input'>€`;
+                cell7.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_3"] + `'class='prix_3_input'>€`;
+                cell8.innerHTML = `
+  
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_bridge_row(this)"></i>`;
+              }else{
+                cell5.innerHTML = `<output type="text" > ` + data["data_usil"][i]["prix_1"] + ` €</output>`;
+                cell6.innerHTML = `<output type="text" >` + data["data_usil"][i]["prix_2"] + ` €</output>`;
+                cell7.innerHTML = `<output type="text" >` + data["data_usil"][i]["prix_3"] + ` €</output>`;
+              }
+              
             }
           }
         }
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
 
@@ -1863,54 +2037,113 @@
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
 
   });
 
-  function validateForm() {
-    var name = document.getElementById("name").value;
-    var email = document.getElementById("email").value;
-    var password = document.getElementById("password").value;
-    var confirmPassword = document.getElementById("confirmPassword").value;
-    var errorMessageContainer = document.getElementById("errorMessages");
-    var isValid = true;
-    errorMessageContainer.innerHTML = ""; // Clear previous error messages
 
-    // Check if name is empty
-    if (name.trim() === "") {
-      displayErrorMessage("Name must be filled out");
-      isValid = false;
+
+  $("#cients_devis_pro").on('change', function () {
+    var selectDevisProElement = document.getElementById("cients_devis_pro");
+    var selectDevisProOption = selectDevisProElement.options[selectDevisProElement.selectedIndex];
+    var selectedDevisProValue = selectDevisProOption.value;
+    var select = document.getElementById("client_select");
+    var options = select.options;
+
+    for (var i = 0; i < options.length; i++) {
+      if (options[i].value === selectedDevisProValue) {
+        options[i].selected = true;
+        break;
+      }
     }
 
-    // Check if email is empty
-    if (email.trim() === "") {
-      displayErrorMessage("Email must be filled out");
-      isValid = false;
+    if (selectedDevisProValue == -1) {
+      document.getElementById("devis_mode_reception_div").style.display = "none";
+    } else {
+      document.getElementById("devis_mode_reception_div").style.display = "block";
     }
 
-    // Check if email is valid
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      displayErrorMessage("Invalid email address");
-      isValid = false;
+    var radios = document.getElementsByName('mode_emp');
+    var radio_value;
+    for (var i = 0; i < radios.length; i++) {
+      // Check if the radio button is checked
+      if (radios[i].checked) {
+        // If checked, log its value
+
+        // You can return the value here if needed
+        radio_value = radios[i].value;
+        break;
+      }
     }
 
-    // Check if password is empty
-    if (password === "") {
-      displayErrorMessage("Password must be filled out");
-      isValid = false;
+    if (radio_value == "livraison") {
+      var text_bn = document.getElementById("text_btn");
+      var prix_livr_ht;
+      // text_bn.classList.add("active-case");
+      if (text_bn.classList.contains("active-case")) {
+        prix_livr_ht=document.getElementById('prix_livr_text_ht').innerHTML ;
+              document.getElementById("text_prix_livr_div").style.display= "none";
+
+      } else{
+        prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
+        document.getElementById("scructure_livraison_form").style.display= "none";
+      }
+
+      var prix_total_ht =document.getElementById("prix_lin_ht").innerHTML;
+      var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
+
+      document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
+      document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
+      document.getElementById("mode_emp").checked = true;
+      document.getElementById("mode_emp_envoi").checked = true;
     }
 
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      displayErrorMessage("Passwords do not match");
-      isValid = false;
+
+  });
+
+
+  $("#client_select").on('change', function () {
+    var selectElement = document.getElementById("client_select");
+    var selectOption = selectElement.options[selectElement.selectedIndex];
+    var selectedValue = selectOption.value;
+    var selectedDevisProValue = document.getElementById("cients_devis_pro");
+    var options = selectedDevisProValue.options;
+
+    for (var i = 0; i < options.length; i++) {
+      if (options[i].value === selectedValue) {
+        options[i].selected = true;
+        break;
+      }
+    }
+    var radios = document.getElementsByName('mode_livr');
+    var radio_value;
+    for (var i = 0; i < radios.length; i++) {
+      // Check if the radio button is checked
+      if (radios[i].checked) {
+        // If checked, log its value
+
+        // You can return the value here if needed
+        radio_value = radios[i].value;
+        break;
+      }
     }
 
-    return isValid;
-  }
+    if (radio_value == "livraison") {
+      var prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
+      var prix_total_ht =document.getElementById("prix_lin_ht").innerHTML;
+      var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
+
+      document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
+      document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
+      document.getElementById("mode_emp").checked = true;
+      document.getElementById("scructure_livraison_form").style.display= "none";
+      document.getElementById("mode_emp_envoi").checked = true;
+    }
+    remplie_addresse_case();
+  });
+
   // ***********
   $(document).ready(function () {
     // if (document.getElementById("users_table")) {
@@ -2069,141 +2302,130 @@
       formData.append('selectedTypeValue', selectedTypeValue);
       formData.append('mt_text', mt_text);
       formData.append('usinage_text', usinage_text);
-      // formData.append('qte', qte);
-      $.ajax({
-        url: '/upload',
-        type: 'POST',
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function (data) {
-          var nbr_percage = data['nbr_percage'];
 
-          console.log(nbr_percage);
-          var path_folder = data['path_folder'];
-          let larg = data['dimension']['larg'] / 1000;
-          let long = data['dimension']['long'] / 1000;
+      if (isAnyFormDataEmpty(formData)) {
+        var err_simulation = document.getElementById("err_simulation");
+        err_simulation.textContent = "Un ou plusieurs champs du formulaire sont vides";
+        err_simulation.style.display = "block";
+        setTimeout(() => {
+          err_simulation.style.display = 'none';
+        }, 1500);
 
+      } else {
+        // formData.append('qte', qte);
+        $.ajax({
+          url: '/upload',
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function (data) {
+              console.log(data['path_folder'])
+            var nbr_percage = data['nbr_percage'];
+            var path_folder = data['path_folder'];
+            let larg = data['dimension']['larg'] / 1000;
+            let long = data['dimension']['long'] / 1000;
+            console.log("chaper");
+            console.log(larg);
+            console.log(long);
 
-          let surface = 0, perimetre = 0;
-          if (larg && long) {
-            surface = (larg * long);
-            // console.log(surface);
-          }
-          if (data['perimetre']) {
-            let prix_decoup_mtr = data['prix'][0][0];
-            let prix_matiere_mtr = data['prix'][0][1];
-            // console.log(prix_matiere_mtr);
+            let surface = 0, perimetre = 0;
+            if (larg && long) {
+              surface = (larg * long);
+            }
+            if (data['perimetre']) {
+              let prix_decoup_mtr = data['prix'][0][0];
+              let prix_matiere_mtr = data['prix'][0][1];
+              console.log(prix_matiere_mtr);
 
-            perimetre = data['perimetre'];
-            var radios = document.getElementsByName('mode_emp');
-            var radio_value;
-            for (var i = 0; i < radios.length; i++) {
-              // Check if the radio button is checked
-              if (radios[i].checked) {
-                // If checked, log its value
-                console.log("Checked radio value:", radios[i].value);
-                // You can return the value here if needed
-                radio_value = radios[i].value;
-                break;
+              perimetre = data['perimetre'];
+              let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+              let formattedNumber_decoup = prix_decoup;
+              let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+              let prix_matiere_ht = prix_matiere_mtr * surface;
+
+              let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
+              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+
+              document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+              document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+              document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+              document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+              document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+              document.getElementById("qte_structure").innerHTML = qte;
+              document.getElementById("qte_percage").innerHTML = nbr_percage;
+              document.getElementById("prix_percage").innerHTML = (1.2 * 0.3 * nbr_percage).toFixed(2);
+              document.getElementById("scructure_livraison_form").style.display = "none";
+              document.getElementById("mode_emp").checked = true;
+              if (document.getElementById("devis_mode_reception_div").style.display !== "none") {
+                document.getElementById("devis_mode_reception_div").style.display = "none";
               }
-            }
-            var prix_livraison_ht = 0;
-            if (radio_value == "livraison") {
-              prix_livraison_ht = 19.50;
-            }
-            let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-            let formattedNumber_decoup = prix_decoup;
-            let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-            let prix_matiere_ht = prix_matiere_mtr * surface;
+              var selectElement = document.getElementById('cients_devis_pro');
+              // Set the value of the select element to -1
+              selectElement.value = "-1";
 
-            let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-            let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup) + prix_livraison_ht;
-            let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc) + 1.2 * prix_livraison_ht;
-            // console.log(prix_matiere_ht);
-            // console.log(total_prix_decoup);
-            document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-            document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-            document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-            document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
-            document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-            document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
-            document.getElementById("qte_structure").innerHTML = qte;
-            document.getElementById("qte_percage").innerHTML = nbr_percage;
-            document.getElementById("prix_percage").innerHTML = (0.3 * nbr_percage).toFixed(2);
-            document.getElementById("prix_livr").innerHTML = (1.2 * prix_livraison_ht).toFixed(2);
+              document.getElementById("perimetre_totale").innerHTML = perimetre;
 
-            document.getElementById("perimetre_totale").innerHTML = perimetre;
-
-            var prix_material_div = document.getElementById("prix_material_div");
-            var frais_decoup_div = document.getElementById("frais_decoup_div");
-            if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
-              prix_material_div.style.display = 'flex'
-              frais_decoup_div.style.display = 'flex'
-            }
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+                prix_material_div.style.display = 'flex'
+                frais_decoup_div.style.display = 'flex'
+              }
 
 
-          } else {
-
-            surface = surface.toFixed(2);
-            if (surface < 0.1) {
-
-              var prix_ht_entity = data['prix'][0][0];
-            } else if (surface >= 0.1 && surface <= 0.25) {
-              var prix_ht_entity = data['prix'][0][1];
             } else {
-              var prix_ht_entity = data['prix'][0][2];
+
+              surface = surface.toFixed(2);
+              if (surface < 0.1) {
+
+                var prix_ht_entity = data['prix'][0][0];
+              } else if (surface >= 0.1 && surface <= 0.25) {
+                var prix_ht_entity = data['prix'][0][1];
+              } else {
+                var prix_ht_entity = data['prix'][0][2];
+              }
+              var prix_ht = (qte * prix_ht_entity).toFixed(2);
+              var prix_ttc = (1.2 * prix_ht).toFixed(2);
+
+              document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+              document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+              document.getElementById("qte_structure").innerHTML = qte;
+              var prix_material_div = document.getElementById("prix_material_div");
+              var frais_decoup_div = document.getElementById("frais_decoup_div");
+              if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+                prix_material_div.style.display = 'none'
+                frais_decoup_div.style.display = 'none'
+              }
+
+
             }
-            var prix_ht = (qte * prix_ht_entity).toFixed(2);
-            var prix_ttc = (1.2 * prix_ht).toFixed(2);
-
-            document.getElementById("prix_lin_ht").innerHTML = prix_ht;
-            document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
-            document.getElementById("qte_structure").innerHTML = qte;
-            var prix_material_div = document.getElementById("prix_material_div");
-            var frais_decoup_div = document.getElementById("frais_decoup_div");
-            if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
-              prix_material_div.style.display = 'none'
-              frais_decoup_div.style.display = 'none'
-            }
+            // Change the image source
 
 
+            imageElement.src = path_folder + '/current.png';
+            let myDiv = document.getElementById("accordionExample");
+            myDiv.style.display = "block";
+            let devis_pro = document.getElementById("acardion_format_pro");
+            devis_pro.style.display = "block";
+            let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
+            form_envoyer_usinage_btn.style.display = "block";
+            let total_prix_detailles = document.getElementById("total_prix_detailles");
+            total_prix_detailles.style.display = "flex";
+            document.getElementById("height_img").innerHTML = larg.toFixed(2);
+            document.getElementById("width_img").innerHTML = long.toFixed(2);
+            document.getElementById("prix_detailles").style.display = "block";
+            document.getElementById("text_prix_detailles").style.display = "none";
+          },
+          error: function () {
+            alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
           }
-          // Change the image source
-          imageElement.src = path_folder + '/current.png';
-          let myDiv = document.getElementById("accordionExample");
-          myDiv.style.display = "block";
-          let devis_pro = document.getElementById("acardion_format_pro");
-          devis_pro.style.display = "block";
-          let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
-          form_envoyer_usinage_btn.style.display = "block";
-          let total_prix_detailles = document.getElementById("total_prix_detailles");
-          total_prix_detailles.style.display = "flex";
-          document.getElementById("height_img").innerHTML = larg.toFixed(2);
-          document.getElementById("width_img").innerHTML = long.toFixed(2);
+        });
+      }
 
-          // console.log(data['clients']);
-
-          // if(larg && long){
-          //   surface = 2*(larg+long);
-          // } else if(larg && long ==0){
-          //   surface = larg;
-          // } else if(long && larg == 0){
-          //   surface = long;
-          // }
-
-
-          // let myDiv2 = document.getElementById("prix_total");
-          // myDiv2.style.display = "block";
-
-        },
-        error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
-        }
-      });
     }
-
-
   });
 
 
@@ -2211,13 +2433,13 @@
 
 
   /**
- * Initiate Pure Counter 
+ * Initiate Pure Counter
  */
   $("#qte").on('input', function () {
     let qte = this.value;
-    // alert("dqq");
+
     if (qte < -1) {
-      // alert("d");
+    
       this.value = 1;
     }
     document.getElementById("qte_structure").innerHTML = qte;
@@ -2246,19 +2468,84 @@
 
 })()
 function ouvrir_form_envoi() {
+  // console.log(document.getElementById('simulation_infos'));
+  // document.getElementById('simulation_infos').classList.add('disabled');
+  document.getElementById('simulation_infos').style.zIndex = '-1';
+  document.getElementById("adresse_envoi_form").reset();
   let myDiv = document.getElementById("envoi_div");
   myDiv.style.display = "block";
   document.getElementById("adresse_envoi_form").reset();
-  if(document.getElementById("mode_livr").checked == true){
-    document.getElementById("addresse_div").style.display="block";
-  }
-    
+  if (document.getElementById("mode_livr").checked == true) {
+    document.getElementById("addresse_div").style.display = "block";
 
+
+  }
+  remplie_data();
+
+
+}
+
+function remplie_data() {
+  var selectElement = document.getElementById("client_select");
+  var selectOption = selectElement.options[selectElement.selectedIndex];
+  var selectedValue = selectOption.value;
+
+  let formData = new FormData();
+  formData.append('client_id', selectedValue);
+  $.ajax({
+    url: '/get_client_data',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+      console.log(data[0]["prix_livr"]);
+      prix_livr_ht = data[0]["prix_livr"];
+      document.getElementById("numero_voie_livr").value = data[0]["numero"];
+      document.getElementById("nom_voie_livr").value = data[0]["addresse"];
+      document.getElementById("cp_livr").value = data[0]["cp"];
+      document.getElementById("ville_livr").value = data[0]["ville"];
+      document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+      document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
+    }
+  });
+}
+
+function remplie_addresse_case() {
+  var selectElement = document.getElementById("client_select");
+  var selectOption = selectElement.options[selectElement.selectedIndex];
+  var selectedValue = selectOption.value;
+
+  let formData = new FormData();
+  formData.append('client_id', selectedValue);
+  $.ajax({
+    url: '/get_client_data',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+      document.getElementById("numero_voie_livr").value = data[0]["numero"];
+      document.getElementById("nom_voie_livr").value = data[0]["addresse"];
+      document.getElementById("cp_livr").value = data[0]["cp"];
+      document.getElementById("ville_livr").value = data[0]["ville"];
+      // document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+      // document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
+      // document.getElementById("mode_emp").checked = true;
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
+    }
+  });
 }
 function fermer_envoi() {
   let myDiv = document.getElementById("envoi_div");
   myDiv.style.display = "none";
   document.getElementById("adresse_envoi_form").reset();
+  document.getElementById('simulation_infos').style.zIndex = '1';
 }
 function envoyer_command() {
   let formData = new FormData();
@@ -2268,7 +2555,7 @@ function envoyer_command() {
   var selectedEpesseurValue = selectEpesseuredOption.value;
 
   var selectClientElement = document.getElementById("client_select");
-  console.log(selectClientElement);
+
   var selectedClientOption = selectClientElement.options[selectClientElement.selectedIndex];
   var selectedClientValue = selectedClientOption.value;
 
@@ -2284,19 +2571,66 @@ function envoyer_command() {
   var selectType = document.getElementById("type_usinage");
   var selectedTypeOption = selectType.options[selectType.selectedIndex];
   var selectedTypeValue = selectedTypeOption.value;
-
-  var prix_matiere = document.getElementById("prix_mat_ttc").innerHTML;
-  var prix_limeaire = document.getElementById("frais_decoup_ttc").innerHTML;
-
   var qte = document.getElementById("qte").value;
-  // var mt = document.getElementById("mt").innerText;
-  // var mt_name = document.getElementById("mt_name").innerText;
-  var name_dxf = "test";
+  var statut = "en_attente";
+
   var date_livraison = document.getElementById("dateInput").value;
   var description = document.getElementById("descriptionInput").value;
-  console.log(date_livraison);
 
-  var statut = "en_attente";
+  const selectedRadio = document.querySelector('input[name="mode_livr"]:checked');
+
+  const selectedValue = selectedRadio.value;
+  var is_livr = false;
+  if (selectedValue == "livraison") {
+    var is_livr = true
+    let numero_voie_livr = document.getElementById("numero_voie_livr").value;
+    let nom_voie_livr = document.getElementById("nom_voie_livr").value;
+    let cp_livr = document.getElementById("cp_livr").value;
+    let ville_livr = document.getElementById("ville_livr").value;
+    formData.append('numero_voie_livr', numero_voie_livr);
+    formData.append('nom_voie_livr', nom_voie_livr);
+    formData.append('cp_livr', cp_livr);
+    formData.append('ville_livr', ville_livr);
+  }
+
+  var file_btn = document.getElementById("file_btn");
+  var text_bn = document.getElementById("text_btn");
+  var prix_ht = document.getElementById("prix_lin_ht").innerHTML;
+  formData.append('prix_ht', prix_ht);
+  if (file_btn.classList.contains("active-case")) {
+
+    if (selectedValue == "livraison") {
+      prix_livr_ht = document.getElementById("prix_livr_ht").innerHTML;
+      formData.append('prix_livr_ht', prix_livr_ht);
+    }
+    let file = $('#fileInput')[0].files[0];
+    formData.append('file', file);
+
+
+
+  } else if (text_bn.classList.contains("active-case")) {
+    if (selectedValue == "livraison") {
+      var prix_text_livr_ht = document.getElementById("prix_livr_text_ht").innerHTML;
+      formData.append('prix_livr_ht', prix_text_livr_ht);
+    }
+    var text_input = document.getElementById("text_input").value;
+    var selectHeightElement = document.getElementById("height");
+    var selectedHeightOption = selectHeightElement.options[selectHeightElement.selectedIndex];
+    var height = selectedHeightOption.innerHTML;
+    var selectFontElement = document.getElementById("fontSelect");
+    var selectedFontOption = selectFontElement.options[selectFontElement.selectedIndex];
+    var selectedFontValue = selectedFontOption.value;
+    var selectedFontText = selectedFontOption.innerText;
+
+    formData.append('height', height);
+    formData.append('text_input', text_input);
+    formData.append('name_police', selectedFontText);
+
+
+  }
+
+  // prix_livraison_ttc = document.getElementById("prix_livr_text").innerHTML;
+  // prix_livraison_ht = (prix_livraison_ttc/1.2).toFixed(2);
   formData.append('client_id', selectedClientValue);
   formData.append('statut', statut);
   formData.append('name_matiere', name_matiere);
@@ -2304,13 +2638,13 @@ function envoyer_command() {
 
   formData.append('type_usinage', selectedTypeValue);
   formData.append('count', qte);
-  formData.append('prix_matiere', prix_matiere);
 
-  formData.append('prix_limeaire', prix_limeaire);
-  formData.append('name_dxf', name_dxf);
+
   formData.append('description', description);
   formData.append('date_fin', date_livraison);
   formData.append('epaisseur_id', selectedEpesseurValue);
+  formData.append('is_livr', is_livr);
+
   $.ajax({
     url: '/new_command',
     type: 'POST',
@@ -2318,19 +2652,16 @@ function envoyer_command() {
     contentType: false,
     processData: false,
     success: function (msg) {
-      console.log(msg)
       let myDiv = document.getElementById("envoi_div");
       myDiv.style.display = "none";
-
-
+      window.location.href = "/simulation";
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 }
 function confirmation(id) {
-  alert("ds");
   let formData = new FormData();
   let file = $('#fileInputBl')[0].files[0];
   formData.append("file", file);
@@ -2343,17 +2674,11 @@ function confirmation(id) {
     processData: false,
     success: function (msg) {
 
-      // window.location.href = "/en_attente";
-      // Change the image source
-      //  imageElement.src =  'static/img/upload/current.png';
-      //  let myDiv = document.getElementById("accordionExample");
-      //  myDiv.style.display = "block";
-      // let myDiv2 = document.getElementById("prix_total");
-      // myDiv2.style.display = "block";
+      window.location.href = "/en_attente";
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 }
@@ -2380,7 +2705,7 @@ function supprimer_attente(id) {
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -2398,7 +2723,7 @@ function supprimer_confirmé(id) {
       contentType: false,
       processData: false,
       success: function (msg) {
-        window.location.href = "/confirmé";
+        window.location.href = "/confirme";
 
         // Change the image source
         //  imageElement.src =  'static/img/upload/current.png';
@@ -2409,7 +2734,7 @@ function supprimer_confirmé(id) {
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -2438,7 +2763,7 @@ function supprimer_usiné(id) {
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -2466,7 +2791,7 @@ function passe_usinage(id) {
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 }
@@ -2491,12 +2816,13 @@ function envoie_livraison(id) {
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 }
 
 function telecharger_pdf(user) {
+
   var selectDevisProElement = document.getElementById("cients_devis_pro");
   var selectDevisProOption = selectDevisProElement.options[selectDevisProElement.selectedIndex];
   var selectedDevisProValue = selectDevisProOption.value;
@@ -2507,26 +2833,25 @@ function telecharger_pdf(user) {
     // Check if the radio button is checked
     if (radios[i].checked) {
       // If checked, log its value
-
-      // You can return the value here if needed
       radio_value = radios[i].value;
       break;
     }
   }
-
-  if (radio_value == "livraison") {
-    console.log(radio_value);
-    formData.append('prix_livr_ht', 19.50);
-  }
-  if (selectedDevisProValue == -1) {
-    let text = "Voulez vous continuer sans client?";
-    confirm(text);
-
-  } else {
+  if (selectedDevisProValue != -1) {
     formData.append('client_id', selectedDevisProValue);
+
   }
-
-
+  var file_btn = document.getElementById("file_btn");
+  // text_bn.classList.add("active-case");
+  if (radio_value == "livraison") {
+    var prix_livr_ht;
+    if (file_btn.classList.contains("active-case")){
+      prix_livr_ht =parseFloat(document.getElementById("prix_livr_ht").innerHTML);
+    }else{
+      prix_livr_ht =parseFloat(document.getElementById("prix_livr_text_ht").innerHTML);
+    }
+    formData.append('prix_livr_ht', prix_livr_ht);
+  }
   var selectMatiereElement = document.getElementById("matiere_select");
   var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
   var matiere = selectedMatiereOption.innerText;
@@ -2538,15 +2863,6 @@ function telecharger_pdf(user) {
   var selectEpesseurElement = document.getElementById("epp");
   var selectEpesseuredOption = selectEpesseurElement.options[selectEpesseurElement.selectedIndex];
   var epp = selectEpesseuredOption.innerText;
-
-
-
-
-  // var selectClientElement = document.getElementById("cient_select");
-  // var selectedClientOption = selectClientElement.options[selectClientElement .selectedIndex];
-  // var selectedClientValue = selectedClientOption.value;
-
-
   var selectType = document.getElementById("type_usinage");
   var selectedTypeOption = selectType.options[selectType.selectedIndex];
   var type_usinage = selectedTypeOption.innerText;
@@ -2555,11 +2871,7 @@ function telecharger_pdf(user) {
   // var prix_limeaire = document.getElementById("frais_decoup_ttc").innerHTML;
 
   var qte = parseInt(document.getElementById("qte").value);
-  console.log(typeof qte);
 
-
-
-  // formData.append('client_id', selectedClientValue);
   formData.append('name_matiere', matiere);
   formData.append('type_matiere', type_matiere);
 
@@ -2568,13 +2880,24 @@ function telecharger_pdf(user) {
   formData.append('prix_ht', prix_ht);
   formData.append('epaisseur', epp);
   formData.append('user', user);
+  if (!file_btn.classList.contains("active-case")) {
+   
+    var selectHauteurElement = document.getElementById("height");
+    var selectHauteurOption = selectHauteurElement.options[selectHauteurElement.selectedIndex];
+    var hauteur = selectHauteurOption.innerText;
+    var nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
+    formData.append('hauteur', hauteur);
+    formData.append('nbr_lettres', nbr_lettres);
+  }
+
+
   $.ajax({
     url: '/telecharger_pdf',
     type: 'POST',
     data: formData,
     contentType: false,
     processData: false,
-    success: function (msg) {
+    success: function (src_pdf) {
       var link = document.createElement('a');
       console.log(link)
       link.href = 'static/members/comercial/Eric/output.pdf';  // Replace with the actual path to your PDF file.
@@ -2586,9 +2909,37 @@ function telecharger_pdf(user) {
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
+}
+
+function telecharger_dxf(path_folder, name){
+  var link = document.createElement('a');
+  console.log( path_folder+'/DXF/'+name+'.dxf');
+      link.href = path_folder+'/DXF/'+name+'.dxf';  // Replace with the actual path to your PDF file.
+       link.download = 'dxf_file.png';  // The name you want the downloaded file to have.
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+}
+function telecharger_bc(path_folder, name){
+  var link = document.createElement('a');
+  console.log( path_folder+'/BL/'+name+'.pdf');
+      link.href = path_folder+'/BL/'+name+'.pdf';  // Replace with the actual path to your PDF file.
+       link.download = 'bl_file.pdf';  // The name you want the downloaded file to have.
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+}
+function telecharger_bc_fin(path_folder, name){
+  var link = document.createElement('a');
+  console.log( path_folder+'/BL/'+name+'.pdf');
+      link.href = path_folder+'/BL/'+name+'.pdf';  // Replace with the actual path to your PDF file.
+       link.download = 'bl_file.pdf';  // The name you want the downloaded file to have.
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 }
 // function confirmation(id) {
 //   let formData = new FormData();
@@ -2615,29 +2966,57 @@ function telecharger_pdf(user) {
 //     }
 //   });
 // }
-function usiner(id) {
-  alert("d");
+function usiner(id, path, name) {
+  var selectFormElement = document.getElementById("form_select");
+  var selectedFormOption = selectFormElement.options[selectFormElement.selectedIndex];
+  var plaque = selectedFormOption.innerText;
+  var qte_plaque = document.getElementById("qte_plaque").value;
   let formData = new FormData();
-  formData.append("id", id);
-  $.ajax({
-    url: '/change_statut_usiner',
-    type: 'POST',
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function (msg) {
-      window.location.href = "/confirmé";
+  const selectElement = document.getElementById('mySelect');
+  const selectedValues = [];
 
-      // Change the image source
-      //  imageElement.src =  'static/img/upload/current.png';
-      //  let myDiv = document.getElementById("accordionExample");
-      //  myDiv.style.display = "block";
-      // let myDiv2 = document.getElementById("prix_total");
-      // myDiv2.style.display = "block";
+  for (let i = 0; i < selectElement.options.length; i++) {
+      if (selectElement.options[i].selected) {
+          selectedValues.push(selectElement.options[i].innerHTML);
+      }
+  }
+
+  const selectElementEmplacement = document.getElementById('enpl_select');
+  const selectedValuesEmplacement = [];
+
+  for (let i = 0; i < selectElementEmplacement.options.length; i++) {
+      if (selectElementEmplacement.options[i].selected) {
+        selectedValuesEmplacement.push(selectElementEmplacement.options[i].innerHTML);
+      }
+  }
+
+
+  formData.append("id", id);
+  formData.append("path", path);
+  formData.append("name", name);
+  formData.append("plaque", plaque);
+  formData.append("qte_plaque", qte_plaque);
+  formData.append("selectedValues", selectedValues);
+  formData.append("selectedValuesEmplacement", selectedValuesEmplacement);
+   $.ajax({
+     url: '/change_statut_usiner',
+     type: 'POST',
+     data: formData,
+     contentType: false,
+     processData: false,
+     success: function (msg) {
+       window.location.href = "/confirme";
+
+  //     // Change the image source
+  //     //  imageElement.src =  'static/img/upload/current.png';
+  //     //  let myDiv = document.getElementById("accordionExample");
+  //     //  myDiv.style.display = "block";
+  //     // let myDiv2 = document.getElementById("prix_total");
+  //     // myDiv2.style.display = "block";
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 }
@@ -2671,7 +3050,6 @@ function text_btn_active() {
       contentType: false,
       processData: false,
       success: function (data) {
-        console.log(data);
         var selectMatiereElement = document.getElementById("matiere_select");
         var selectTypeElement = document.getElementById("type_matiere");
         var selectEpaisseurElement = document.getElementById("epp");
@@ -2733,12 +3111,20 @@ function text_btn_active() {
         for (let i = 0; i < length_hauteur; i++) {
           const newOption = document.createElement('option');
           newOption.value = data["hauteurs"][i].id;
-          newOption.text = data["hauteurs"][i].value / 10 + " cm";
+          newOption.text = data["hauteurs"][i].value / 10;
           selectHauteurElement.add(newOption);
+        }
+        document.getElementById("prix_detailles").style.display = "none";
+        document.getElementById("total_prix_detailles").style.display = "none";
+        let verif_file = document.getElementById("fileInput");
+        if (verif_file.value) {
+          verif_file.value = "";
+          var iframe = document.getElementById('img_usinage');
+          iframe.src = 'static/img/usinage/matiers/Pvc.jpg';
         }
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -2827,6 +3213,11 @@ function upload_btn_active() {
           newOption.text = data["types_usinage"][i].name;
           selectTypeUsinageElement.add(newOption);
         }
+        document.getElementById("prix_detailles").style.display = "none";
+        document.getElementById("total_prix_detailles").style.display = "none";
+        document.getElementById("text_input").value = "";
+        document.getElementById("text_area").innerHTML = "";
+
 
       },
       error: function () {
@@ -2941,7 +3332,7 @@ function ajuter_plaque_select() {
 </div>
 <div class="col-4">
   <button class="btn_counter decrement_plaque">-</button>
-  
+
   <input id="qte_plaque" value=1 min="0">
   <button class="btn_counter increment_plaque">+</button>
 </div>`;
@@ -2972,7 +3363,7 @@ function newClientForm() {
   // console.log(testText);
 }
 
-// fermer Form 
+// fermer Form
 
 function closeFormClient() {
 
@@ -2984,12 +3375,9 @@ function addNewClient() {
   var selectRepresentantElement = document.getElementById("rep_new_client");
   var selectRepresentantOption = selectRepresentantElement.options[selectRepresentantElement.selectedIndex];
   var selectedRepresentantValue = selectRepresentantOption.value;
-  console.log(selectedRepresentantValue);
+
   var name = document.getElementById("name");
   var nameText = name.value;
-
-
-
   var numeroVoie = document.getElementById("numero_voie");
   var numeroVoieText = numeroVoie.value;
 
@@ -2998,16 +3386,19 @@ function addNewClient() {
 
   var cp = document.getElementById("cp");
   var cpText = cp.value;
-  console.log(cpText);
-  alert("eed");
+
   var ville = document.getElementById("ville");
   var villeText = ville.value;
 
-  var email = document.getElementById("email");
+  var email = document.getElementById("email_new_client");
   var emailText = email.value;
 
+  var prix_clent_livr = document.getElementById("prix_clent_livr").value;
   var telp = document.getElementById("telp");
   var telpText = telp.value;
+
+
+
   let formData = new FormData();
   formData.append('representant', selectedRepresentantValue);
   formData.append('name', nameText);
@@ -3016,37 +3407,55 @@ function addNewClient() {
   formData.append('cp', cpText);
   formData.append('ville', villeText);
   formData.append('email', emailText);
+  formData.append('prix_clent_livr', prix_clent_livr);
   formData.append('tel', telpText);
-  console.log(formData);
 
-  $.ajax({
-    url: '/new_client',
-    type: 'POST',
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function (msg) {
-
-      console.log(msg)
-      var liste_clients_section = document.getElementById("liste_clients_section");
-      liste_clients_section.style.display = "none";
-      window.location.href = "/clients";
-
-    },
-    error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
-    }
-  });
+  var msg = "";
+  if (isAnyFormDataEmpty(formData)) {
+    msg = "Un ou plusieurs champs du formulaire sont vides";
+  } else if (!validateEmail(email)) {
+    msg = "Respecter les règles  pour rédiger un mail!";
+  } else if (isNumber(numeroVoie) || numeroVoie <= 0) {
+    msg = "Numéro de voie doit être supérieur à 0";
+  } else if (isNumber(cp) || cp <= 0) {
+    msg = "CP  doit être supérieur à 0";
+  } else if (isNumber(cp) || cp <= 0) {
+    msg = "CP  doit être supérieur à 0";
+  }
 
 
 
-  var selectedRepresentantText = selectRepresentantOption.innerHTML;
-  console.log(selectedRepresentantText);
+  if (msg === "") {
+    $.ajax({
+      url: '/new_client',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
+        console.log(msg)
+        var liste_clients_section = document.getElementById("liste_clients_section");
+        liste_clients_section.style.display = "none";
+        window.location.href = "/clients";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
+      }
+    });
+
+  } else {
+    alert("é");
+    var errorMessage = document.getElementById('msg_div');
+    errorMessage.style.display = 'block';
+    document.getElementById("msg_div").innerHTML = "Respecter les règles  pour rédiger un mail!"
+    setTimeout(() => {
+      errorMessage.style.display = 'none';
+    }, 1500);
+  }
+
 }
 
-// function edit_client(id){
-//   alert("test");
-// }
 $('#clients_table').on('click', function (event) {
 
 
@@ -3062,6 +3471,7 @@ $('#clients_table').on('click', function (event) {
     var id = row.cells[0].value;
     var name_rep = row.cells[1].innerText;
     var name_client = row.cells[2].innerText;
+
     var numero_voie_span = row.querySelector('.numero_voie_edit_span');
     var name_voie_span = row.querySelector('.name_voie_edit_span');
 
@@ -3086,7 +3496,9 @@ $('#clients_table').on('click', function (event) {
 
     var ville = row.cells[5].innerText;
     var email = row.cells[6].innerText;
-    var tel = row.cells[7].innerText;
+    var tel = row.cells[8].innerText;
+    var prix_livr = row.cells[7].innerText;
+
 
     document.getElementById("name_client_edit").value = name_client;
     document.getElementById("numero_voie_edit").value = numero_voie_value;
@@ -3097,7 +3509,7 @@ $('#clients_table').on('click', function (event) {
     document.getElementById("email_edit").value = email;
     document.getElementById("telp_edit").value = tel;
     document.getElementById("rec_client_id").innerHTML = rec_client_id;
-
+    document.getElementById("client_edit_prix_livr").value = prix_livr;
 
   }
 });
@@ -3137,6 +3549,9 @@ function EnregistrerEditClient() {
 
   var telp = document.getElementById("telp_edit");
   var telpText = telp.value;
+
+  var livraison = document.getElementById("client_edit_prix_livr");
+  var prix_livr  = client_edit_prix_livr.value;
   let formData = new FormData();
   formData.append('representant', selectedRepresentantValue);
   formData.append('name', nameText);
@@ -3147,6 +3562,7 @@ function EnregistrerEditClient() {
   formData.append('email', emailText);
   formData.append('tel', telpText);
   formData.append('client_id', client_id);
+  formData.append('prix_livr', prix_livr);
   console.log(selectedRepresentantValue);
   console.log(client_id);
   console.log(telpText);
@@ -3156,7 +3572,7 @@ function EnregistrerEditClient() {
   console.log(nameVoieText);
   console.log(nameText);
 
-  alert("eee");
+
   $.ajax({
     url: '/edit_client',
     type: 'POST',
@@ -3172,7 +3588,7 @@ function EnregistrerEditClient() {
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 
@@ -3224,7 +3640,7 @@ $('#matieres_table').on('change', function (event) {
 
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     }
@@ -3236,11 +3652,6 @@ $('#matieres_table').on('change', function (event) {
       var type = row.cells[2].innerHTML;
       var type_usinage = row.cells[3].innerHTML;
       var epaisseur = row.cells[4].innerHTML;
-      console.log(matiere);
-      console.log(type);
-      console.log(type_usinage);
-      console.log(epaisseur);
-      console.log(newValue);
       let formData = new FormData();
       formData.append('new_prix_matiere', newValue);
       formData.append('matiere', matiere);
@@ -3262,7 +3673,7 @@ $('#matieres_table').on('change', function (event) {
 
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
 
@@ -3290,7 +3701,7 @@ function delete_client(current_row, id) {
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -3334,7 +3745,7 @@ function delete_bridge_row(current_bridge_row) {
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -3347,7 +3758,7 @@ function lettres_btn_bridge_active() {
     contentType: false,
     processData: false,
     success: function (data) {
-
+      var current_user_role = document.getElementById("output_user_role").innerHTML;
       var selectMatiereElement = document.getElementById("matiere_list_text");
       var selectTypeElement = document.getElementById("type_list_text");
       var selectEpaisseurElement = document.getElementById("epaisseur_text");
@@ -3434,7 +3845,10 @@ function lettres_btn_bridge_active() {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        var cell7 = row.insertCell(7);
+        if(current_user_role === "admin"){
+          var cell7 = row.insertCell(7);
+        }
+        
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -3443,13 +3857,16 @@ function lettres_btn_bridge_active() {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-
-        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
-        cell7.innerHTML = `
-         
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                onclick="delete_Lettrebridge_row(this)"></i>
-          `;
+        if(current_user_role === "admin"){
+          cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+          cell7.innerHTML = `
+  
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_Lettrebridge_row(this)"></i>
+            `;
+        } else{
+          cell6.innerHTML = `<output type="text" >` + data["prix_lettre_list"][i]["prix"] + ` € </output>`;
+        }
       }
       var text_section = document.getElementById("text_section");
       text_section.style.display = "block";
@@ -3459,7 +3876,7 @@ function lettres_btn_bridge_active() {
       epaisseur_text_div.style.display = "block";
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 
@@ -3478,6 +3895,7 @@ function forms_btn_bridge_active() {
 }
 
 $("#matiere_list_text").on('change', function () {
+  var current_user_role = document.getElementById("output_user_role").innerHTML;
   let formData = new FormData();
   var selectMatiereElement = document.getElementById("matiere_list_text");
   var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
@@ -3565,7 +3983,6 @@ $("#matiere_list_text").on('change', function () {
 
       var nbr = 1;
       for (var i = 0; i < data['prix_lettre_list'].length; i++) {
-        console.log(data["prix_lettre_list"][i]);
 
         var row = table.insertRow();
         var cell0 = row.insertCell(0);
@@ -3575,7 +3992,10 @@ $("#matiere_list_text").on('change', function () {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        var cell7 = row.insertCell(7);
+        if(current_user_role === "admin"){
+          var cell7 = row.insertCell(7);
+        }
+        
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -3584,19 +4004,22 @@ $("#matiere_list_text").on('change', function () {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-
-        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
-        cell7.innerHTML = `
-         
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                onclick="delete_Lettrebridge_row(this)"></i>
-          `;
+        if(current_user_role == "admin"){
+          cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+          cell7.innerHTML = `
+  
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_Lettrebridge_row(this)"></i>
+            `;
+        }else{
+          cell6.innerHTML = `<output type="text" >` + data["prix_lettre_list"][i]["prix"] + ` € </output>`;
+        }
       }
 
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 
@@ -3604,7 +4027,7 @@ $("#matiere_list_text").on('change', function () {
 
 
 $("#type_list_text").on('change', function () {
-
+  var current_user_role = document.getElementById("output_user_role").innerHTML;
   let formData = new FormData();
   var selectMatiereElement = document.getElementById("matiere_list_text");
   var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
@@ -3691,7 +4114,10 @@ $("#type_list_text").on('change', function () {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        var cell7 = row.insertCell(7);
+        if(current_user_role === "admin"){
+          var cell7 = row.insertCell(7);
+        }
+        
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -3700,19 +4126,22 @@ $("#type_list_text").on('change', function () {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-
-        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
-        cell7.innerHTML = `
-         
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                onclick="delete_Lettrebridge_row(this)"></i>
-          `;
+        if(current_user_role === "admin"){
+          cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+          cell7.innerHTML = `
+  
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_Lettrebridge_row(this)"></i>
+            `;
+        }else{
+          cell6.innerHTML = `<output type="text">` + data["prix_lettre_list"][i]["prix"] + ` €</output>`;
+        }
       }
 
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 
@@ -3721,6 +4150,7 @@ $("#type_list_text").on('change', function () {
 
 $("#epaisseur_text").on('change', function () {
 
+  var current_user_role = document.getElementById("output_user_role").innerHTML;
   let formData = new FormData();
   var selectMatiereElement = document.getElementById("matiere_list_text");
   var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
@@ -3795,7 +4225,10 @@ $("#epaisseur_text").on('change', function () {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        var cell7 = row.insertCell(7);
+        if(current_user_role === "admin"){
+          var cell7 = row.insertCell(7);
+        }
+        
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -3804,19 +4237,22 @@ $("#epaisseur_text").on('change', function () {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-
+        if(current_user_role === "admin"){
         cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
-        cell7.innerHTML = `
-         
-                <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
-                onclick="delete_Lettrebridge_row(this)"></i>
-          `;
+          cell7.innerHTML = `
+  
+                  <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
+                  onclick="delete_Lettrebridge_row(this)"></i>
+            `;
+        }else{
+          cell6.innerHTML = `<output type="text" >` + data["prix_lettre_list"][i]["prix"] + ` € </output>`;
+        }
       }
 
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 
@@ -3838,11 +4274,6 @@ function delete_Lettrebridge_row(current_bridge_row) {
     formData.append('type', type);
     formData.append('usinage', usinage);
     formData.append('epaisseur', epaisseur);
-    console.log(matiere);
-    console.log(type);
-    console.log(usinage);
-    console.log(epaisseur);
-    alert("sd");
     $.ajax({
       url: '/delete_Lettrebridge_row',
       type: 'POST',
@@ -3861,7 +4292,7 @@ function delete_Lettrebridge_row(current_bridge_row) {
 
       },
       error: function () {
-        alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
       }
     });
   }
@@ -3908,7 +4339,7 @@ $('#matieres_text_table').on('change', function (event) {
 
         },
         error: function () {
-          alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+          alert('Une erreur s\'est produite lors de fare l\'operation.');
         }
       });
     }
@@ -3940,8 +4371,6 @@ function addNewUser() {
   var pwd = document.getElementById("pwd");
   var pwdText = pwd.value;
 
-  var pwd = document.getElementById("pwd");
-  var pwdText = pwd.value;
 
   var confirm_pwd = document.getElementById("confirm_pwd");
   var confirm_pwdText = confirm_pwd.value;
@@ -3951,32 +4380,51 @@ function addNewUser() {
 
   var tel = document.getElementById("telp");
   var telText = tel.value;
-  let formData = new FormData();
-  formData.append('role', selectedRoleValue);
-  formData.append('username', nameText);
-  formData.append('email', emailText);
-  formData.append('password', pwdText);
-  formData.append('tel', telText);
-  console.log(formData);
+  if (confirm_pwdText != pwdText) {
+    var errorMessage = document.getElementById('err_msg_div');
+    errorMessage.style.display = 'block';
+    document.getElementById("err_msg").innerHTML = "Le mot de passe doit être identique à sa confirmation!"
+    setTimeout(() => {
+      errorMessage.style.display = 'none';
+    }, 1500);
+  } else if (!nameText || !pwdText || !selectedRoleValue || !confirm_pwdText || !telText) {
+    var errorMessage = document.getElementById('err_msg_div');
+    errorMessage.style.display = 'block';
+    document.getElementById("err_msg_membres").innerHTML = "Completez tout les cases demandées!"
+    setTimeout(() => {
+      errorMessage.style.display = 'none';
+    }, 1500);
+  } else {
+    let formData = new FormData();
+    formData.append('role', selectedRoleValue);
+    formData.append('username', nameText);
+    formData.append('email', emailText);
+    formData.append('password', pwdText);
+    formData.append('tel', telText);
+    formData.append('prix_livr_user', prix_livr_user);
 
-  $.ajax({
-    url: '/new_user',
-    type: 'POST',
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function (msg) {
+    console.log(formData);
 
-      console.log(msg)
-      var new_users_section = document.getElementById("new_users_section");
-      new_users_section.style.display = "none";
-      window.location.href = "/membres";
+    $.ajax({
+      url: '/new_user',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
 
-    },
-    error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
-    }
-  });
+        console.log(msg)
+        var new_users_section = document.getElementById("new_users_section");
+        new_users_section.style.display = "none";
+        window.location.href = "/membres";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
+      }
+    });
+  }
+
 }
 
 function closeEditUser() {
@@ -4002,8 +4450,6 @@ $('#users_table').on('click', function (event) {
     var user_output = row.querySelector('.set_user_id');
     var user_output_id = user_output.textContent.trim();
 
-    console.log(user_output_id);
-    alert("zzz");
 
     document.getElementById("name_edit_user").value = username;
     document.getElementById("edit_email").value = email;
@@ -4100,8 +4546,7 @@ function closeNewPasswordSpace() {
 
 function SaveEditUser() {
   var edit_user_id = document.getElementById("edit_user_id").innerHTML;
-  console.log(edit_user_id);
-  alert("test");
+
   var selectRoleElement = document.getElementById("role_edit_user");
   var selectRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
   var selectedRoleValue = selectRoleOption.value;
@@ -4130,23 +4575,22 @@ function SaveEditUser() {
     processData: false,
     success: function (msg) {
 
-      console.log(msg)
-      alert("d");
 
     },
     error: function () {
-      alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
+      alert('Une erreur s\'est produite lors de fare l\'operation.');
     }
   });
 }
 
+
 const validateEmail = (email) => {
-  return email.match(
-    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  );
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
 };
 
 const validate = () => {
+
   clearErrorMsg();
   const $result_border = $('#email');
   const email = $('#email').val();
@@ -4167,7 +4611,7 @@ function validatePassword() {
   clearErrorMsg();
   const $result_border = $('#password');
   const pwd = $('#password').val();
-  if (pwd !== "" && pwd.length>4 ) {
+  if (pwd !== "" && pwd.length > 4) {
     $result_border.css('borderWidth', '3px')
     $result_border.css('borderColor', 'green');
   } else {
@@ -4182,15 +4626,18 @@ function clearErrorMsg() {
   errorMessage.innerHTML = "";
 }
 function validateForm() {
+
   var email = document.getElementById("email").value;
   var password = document.getElementById("password").value;
+
+
   var errorMessageContainer = document.getElementById("errMsg");
   var isValid = true;
   errorMessageContainer.innerHTML = ""; // Clear previous error messages
 
   var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   // Check if email is empty
-  if (email.trim() === "" || password === "") {
+  if (email.trim() == "" || password =="") {
     displayErrorMessage("Remplissez tous les champs");
     isValid = false;
   } else if (!emailRegex.test(email)) {
@@ -4205,15 +4652,108 @@ function validateForm() {
 function displayErrorMessage(message) {
   var errorMessage = document.getElementById("errMsg");
   errorMessage.innerHTML = message;
+  document.getElementById("errMsg").style.display = "block"
+  setTimeout(() => {
+    errorMessage.style.display = 'none';
+  }, 2000);
 }
 
 
-function closeAlert(){
+function closeAlert() {
   var alertElements = document.getElementsByClassName('alert');
 
-// Loop through each alert element and remove it
-for (var i = 0; i < alertElements.length; i++) {
+  // Loop through each alert element and remove it
+  for (var i = 0; i < alertElements.length; i++) {
     var alertElement = alertElements[i];
     alertElement.remove(); // Remove the element from the DOM
+  }
 }
+
+function formValidatreCliennt(formData) {
+
+  var representant = formData.get("representant");
+  var name = formData.get('name');
+  var numeroVoie = formData.get('numeroVoie');
+  var nameVoie = formData.get('nameVoie');
+  var cp = formData.get('cp');
+  var ville = formData.get('ville');
+  var email = formData.get('email');
+  var prix_clent_livr = formData.get('prix_clent_livr');
+  var tel = formData.get('tel');
+  let msg = "";
+  if (isAnyFormDataEmpty(formData)) {
+    msg = "Un ou plusieurs champs du formulaire sont vides";
+  } else {
+    msg = "ggg"
+  }
+
 }
+function isAnyFormDataEmpty(formData) {
+  for (let [key, value] of formData.entries()) {
+    if (typeof value === 'string' && value.trim() === "") {
+      return true;
+    }
+  }
+  return false;
+}
+function isNumber(value) {
+  return !isNaN(Number(value));
+}
+
+// function validateForm() {
+//   var name = document.getElementById("name").value;
+//   var email = document.getElementById("email").value;
+//   var password = document.getElementById("password").value;
+//   var confirmPassword = document.getElementById("confirmPassword").value;
+//   var errorMessageContainer = document.getElementById("errorMessages");
+//   var isValid = true;
+//   errorMessageContainer.innerHTML = ""; // Clear previous error messages
+
+//   // Check if name is empty
+//   if (name.trim() === "") {
+//     displayErrorMessage("Name must be filled out");
+//     isValid = false;
+//   }
+
+//   // Check if email is empty
+//   if (email.trim() === "") {
+//     displayErrorMessage("Email must be filled out");
+//     isValid = false;
+//   }
+
+//   // Check if email is valid
+//   var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//   if (!emailRegex.test(email)) {
+//     displayErrorMessage("Invalid email address");
+//     isValid = false;
+//   }
+
+//   // Check if password is empty
+//   if (password === "") {
+//     displayErrorMessage("Password must be filled out");
+//     isValid = false;
+//   }
+
+//   // Check if passwords match
+//   if (password !== confirmPassword) {
+//     displayErrorMessage("Passwords do not match");
+//     isValid = false;
+//   }
+
+//   return isValid;
+// }
+
+
+
+  window.setTimeout(function() {
+    var alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+
+      alert.classList.remove('show');
+      alert.classList.add('fade');
+      alert.style.display="block";
+      window.setTimeout(function() {
+        alert.style.display = 'none';
+      }, 150);  // Wait for the fade transition to complete (Bootstrap default transition time is 150ms)
+    });
+  }, 2000);

@@ -1,0 +1,476 @@
+{% extends 'base.html' %}
+
+
+{% block contenue %}
+{% with messages = get_flashed_messages(with_categories=true) %} {% if
+messages %} {% for category, message in messages %} {% if category ==
+'error' %}
+<div class="alert alert-danger alter-dismissable fade show" role="alert">
+    {{ message }}
+</div>
+{% else %}
+<div class="alert alert-success alter-dismissable fade show" role="alert">
+    {{ message }}
+</div>
+{% endif %} {% endfor %} {% endif %} {% endwith %}
+<div id ="success_msg" class="alert alert-success alter-dismissable fade show" role="alert" style="z-index: 10000; display: none;">
+</div> 
+<div id="usinage_container" class="container ">
+    <div class="row mt-2">
+        <div id="simulation_infos" class="col-md-6 ">
+            <div class="row ">
+                <div class=" col-5 col-md-4 col-xl-3 d-flex justify-content-center">
+                    <button id="file_btn" type="button" class=" case_btn btn  active-case border  border-secondary  "
+                     onclick="upload_btn_active()"><i
+                            class="bi bi-folder fs-1"></i>
+                        <p>Form</p>
+                    </button>
+
+                </div>
+                <div class="col-5  col-md-4 col-xl-3 d-flex justify-content-start ">
+                    <button id="text_btn" type="button" class="case_btn btn  border  border-secondary  "
+                         onclick="text_btn_active()"><i
+                            class="bi bi-fonts fs-1"></i>
+                        <p>Text</p>
+                    </button>
+
+                </div>
+
+
+            </div>
+            <div class="mt-4">
+                <label for="matiere_select"><strong>Choisissez la matiere</strong></label>
+                <select id="matiere_select" class="form-select form-select-lg mb-3"
+                    aria-label=".form-select-lg example">
+                    <!-- <option selected>Select le matiere</option> -->
+                    {% for item in matieres %}
+                    <option value='{{ item.id}}'>{{ item.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="type_matiere"><strong>Choisissez le type</strong></label>
+                <select id="type_matiere" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+                    <!-- <option selected>Select le matiere</option> -->
+                    {% for item in types_matiers %}
+                    <option value='{{ item.id}}'>{{ item.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mt-5">
+                <label for="epp"><strong>L'épaisseur de la matiere</strong></label>
+                <select id="epp" class="form-select mt-1" aria-label="Default select example" style="width: 60%;">
+
+                    {% for item in epaisseurs %}
+
+                    <option value='{{ item.id}}'>{{ item.value}}</option>
+                    {% endfor %}
+
+
+                </select>
+                <label for="type_usinage"><strong>Type d'usinage</strong></label>
+                <select id="type_usinage" class="form-select mt-1" aria-label="Default select example">
+
+                    {% for item in types_usinage %}
+
+                    <option value='{{ item.id}}'>{{ item.name}}</option>
+                    {% endfor %}
+
+
+                </select>
+            </div>
+            <div id="drop-area" class="mt-4">
+                <h3 class="drop-text">Glissez et déposez un fichier DXF ici</h3>
+                <input type="file" id="fileInput" accept=".dxf" />
+                <div id="result-container"></div>
+            </div>
+            <div class="counter-container mt-4">
+                <label class="mt-3" for="qte"><strong>Qte</strong></label>
+                <button class="btn_counter" id="decrement">-</button>
+                <!-- <span id="counter">1</span> -->
+                <input id="qte" value=1 min="1">
+                <button class="btn_counter" id="increment">+</button>
+            </div>
+
+            <div id="text-section" class="mt-3" style="display: none;">
+                <form class="mt-4" action="/generate_dxf" method="post">
+                    <label class="form-label" for="text_input">Saisissez le texte:</label>
+                    <input id="text_input" class="form-control" type="text" name="text" required>
+                    <label for="font" class="form-label">Select a font:</label>
+                    <select class="form-select" id="fontSelect" name="font" required>
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Lucida Console">Lucida Console</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Palatino Linotype">Palatino Linotype</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Franklin Gothic Medium">Franklin Gothic Medium</option>
+                        <option value="Garamond">Garamond</option>
+                        <option value="Copperplate">Copperplate</option>
+                        <option value="Book Antiqua">Book Antiqua</option>
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Century Gothic">Century Gothic</option>
+                        <option value="Candara">Candara</option>
+                        <option value="Californian FB">Californian FB</option>
+                        <option value="Constantia">Constantia</option>
+                        <option value="Corbel">Corbel</option>
+                        <option value="Ebrima">Ebrima</option>
+                        <option value="Gabriola">Gabriola</option>
+                        <option value="Javanese Text">Javanese Text</option>
+                        <option value="Leelawadee UI">Leelawadee UI</option>
+                        <option value="Microsoft JhengHei">Microsoft JhengHei</option>
+                        <option value="MS Gothic">MS Gothic</option>
+                        <option value="MV Boli">MV Boli</option>
+                        <option value="Nirmala UI">Nirmala UI</option>
+                        <option value="Segoe Print">Segoe Print</option>
+                        <option value="Courier">Courier</option>
+                        <option value="Brush Script MT">Brush Script MT</option>
+                        <option value="OCR A Std">OCR A Std</option>
+                        <option value="Rockwell">Rockwell</option>
+                        <option value="Tw Cen MT">Tw Cen MT</option>
+                        <option value="Century Schoolbook">Century Schoolbook</option>
+                        <option value="Monotype Corsiva">Monotype Corsiva</option>
+                        <option value="Bodoni MT">Bodoni MT</option>
+                        <option value="Freestyle Script">Freestyle Script</option>
+                        <option value="Papyrus">Papyrus</option>
+                    </select>
+
+                    <label for="height"><strong>Hauteur du text:</strong></label>
+                    <select id="height" class="form-select mt-1" aria-label="Hauteur du text" >
+
+                    </select>
+                </form>
+            </div>
+            <div id="total_prix_detailles" class=" mt-5 justify-content-between align-items-center">
+                <div class="bg-light">
+                    <p><strong>Total prix:</strong></p>
+                </div>
+                <div class="bg-light">
+                    <p>HT</p>
+                    <h6> <strong id="prix_lin_ht">0</strong>€</h6>
+                </div>
+                <div class="col-3 bg-light">
+                    <p>TTC</p>
+
+                    <h6> <strong id="prix_lin_ttc">0</strong>€</h6>
+
+                </div>
+            </div>
+            <div id="prix_detailles" class="row   mt-3">
+
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    La structure de prix
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <div id="prix_material_div" class="row">
+                                        <div class="col-4">
+                                            <p>Prix matériel</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="prix_mat_ht">0€ </strong>&nbsp;HT</h6>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="prix_mat_ttc">0€ </strong>&nbsp; TTC</h6>
+                                        </div>
+                                    </div>
+                                    <div id="frais_decoup_div" class="row">
+                                        <div class="col-4">
+                                            <p>Frais de découpe</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="frais_decoup_ht"> </strong>€&nbsp;HT</h6>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="frais_decoup_ttc"></strong>€&nbsp;TTC</h6>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <p>Percage</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="qte_percage">5</strong></h6>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="prix_percage"> 2</strong>€&nbsp;TTC</h6>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <p><strong>Qte</strong></p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="qte_structure">1 </strong></h6>
+                                        </div>
+                                    </div>
+                                    <div id="scructure_livraison_form" class="row">
+                                        <div class="col-4">
+                                            <p><strong>Livraison</strong></p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6><strong id="prix_livr"></strong>€&nbsp;TTC</h6>
+                                            <h6 id="prix_livr_ht"></h6>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="text_prix_detailles" class="row   mt-3">
+
+                    <div class="accordion" id="text_structure_accordion">
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="text_structure_header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#text_structure_prix_collapse" aria-expanded="false"
+                                        aria-controls="text_structure_prix_collapse">
+                                        La structure de prix
+                                    </button>
+                                </h2>
+                                <div id="text_structure_prix_collapse" class="accordion-collapse collapse"
+                                    aria-labelledby="text_structure_header" data-bs-parent="#text_structure_accordion">
+                                    <div class="accordion-body">
+                                        <div id="prix_materi_div" class="row">
+                                            <div class="col-6">
+                                                <p>Découpe à la lettre</p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="prix_lettre_ht">0€ </strong>&nbsp;HT</h6>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="prix_lettre_ttc">0€ </strong>&nbsp; TTC</h6>
+                                            </div>
+                                        </div>
+                                        <div id="nbr_div" class="row">
+                                            <div class="col-9">
+                                                <p><strong>Nombre des lettres</strong></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="nbr_lettres">1 </strong></h6>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-9">
+                                                <p><strong>Qte</strong></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="qte_text"> </strong></h6>
+                                            </div>
+                                        </div>
+                                        <div id="text_prix_livr_div" class="row" >
+                                            <div class="col-9">
+                                                <p><strong>Livraison</strong></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <h6><strong id="prix_livr_text"></strong>€&nbsp;TTC</h6>
+                                                <h6 id="prix_livr_text_ht"></h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion " id="acardion_format_pro">
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapsePro" aria-expanded="false" aria-controls="collapsePro">
+                                    Devis professionnel
+                                </button>
+                            </h2>
+                            <div id="collapsePro" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                data-bs-parent="#acardion_format_pro">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <select id="cients_devis_pro" class="form-select custom-select"
+                                            aria-label="Default select example" >
+                                            <option value=-1 selected>Sélectionnez une client</option>
+
+                                            {% for item in clients %}
+
+                                            <option value='{{ item.id}}'>{{ item.name}}</option>
+                                            {% endfor %}
+
+                                        </select>
+                                    </div>
+                                    <div id="devis_mode_reception_div" class="mt-3">
+                                        <fieldset>
+                                            <legend>Mode du reception</legend>
+                                            <div>
+                                                <input type="radio" id="mode_emp" name="mode_emp" value="enlevement"
+                                                    checked />
+                                                <label for="mode_emp">Enlevement</label>
+                                            </div>
+                                            <div>
+                                                <input type="radio" id="mode_livr" name="mode_emp" value="livraison" />
+                                                <label for="mode_livr">Livraison</label>
+                                            </div>
+
+
+
+                                        </fieldset>
+
+                                    </div>
+                                    <div class="mt-2">
+                                        <span id="tcrg_span" 
+                                            onclick="telecharger_pdf('{{user.username}}')">Télécharger le devis <img id="pdf_img"
+                                                src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}"
+                                                alt="Logo de pdf"  />
+                                        </span>
+
+
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div id="visualisation_div" class="col-md-6 d-flex justify-content-center align-items-center "
+            style="overflow-wrap: break-word; text-wrap: wrap;">
+            <div id="text_div"  class="mt-2">
+                <h1 id="text_area" style="overflow-wrap:break-word; "></h1>
+            </div>
+            <iframe id="img_usinage" class="img_usinage mt-5"
+                src="{{ url_for('static', filename= 'img/usinage/matiers/pvc.jpg') }}"
+            ></iframe>
+
+            <output>
+                <p id="height_img" style="display: none;"></p>
+            </output>
+            <output>
+                <p id="width_img" style="display: none;"></p>
+            </output>
+            <output>
+                <p id="perimetre_totale" style="display: none;"cun></p>
+            </output>
+
+        </div>
+
+        <div class="mt-3 d-flex justify-content-center align-items-center">
+            <button id="form_envoyer_usinage_btn" class=" btn btn-primary btn-block bg-success "
+                onclick="ouvrir_form_envoi()">Envoyer usinage</button>
+            <!-- <button  id=" btn btn-primary btn-block bg-primary  " onclick="ouvrir_form_envoi()" style="padding: 2px; background-color: blue;">Partager</i></button> -->
+        </div>
+
+        <div id="envoi_div" class="container">
+
+            <div class="mb-3">
+                <label for="dateInput" class="form-label">Date de livraison:</label>
+
+                <input type="date" class="form-control" id="dateInput" name="date">
+            </div>
+            <div class="mb-3">
+                <select id="client_select" class="form-select custom-select" aria-label="Default select example">
+                    <!-- <option selected>Select une slient</option> -->
+                    {% for item in clients %}
+
+                    <option value='{{ item.id}}'>{{ item.name}}</option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            <div class="mt-3">
+                <fieldset>
+                    <legend>Mode du reception</legend>
+                    <div>
+                        <input type="radio" id="mode_emp_envoi" name="mode_livr" value="enlevement" checked />
+                        <label for="mode_emp_envoi">Enlevement</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="mode_livr_envoi" name="mode_livr" value="livraison" />
+                        <label for="mode_livr_envoi">Livraison</label>
+                    </div>
+
+
+
+                </fieldset>
+
+            </div>
+            <div id="addresse_div">
+                <form id="adresse_envoi_form" class="mt-4">
+
+                    <div class="form-group">
+                        <label for="numero_voie">Addresse:</label>
+                        <div class="input-group ">
+                            <div class="input-group-prepend">
+                                <div class=" col-1 input-group-text d-flex justify-content-center  text-danger fs-4 addresse_input ">*
+                                </div>
+                            </div>
+                            <div class="col-3 ">
+                                <input type="text" id="numero_voie_livr" class="form-control addresse_input" placeholder="N°"
+                                    name="numero_voie"  required>
+
+                            </div>
+                            <div class="col-7 " style="margin-left: 5px;">
+                                <input type="text" id="nom_voie_livr" class="form-control addresse_input" placeholder="Nom de rue"
+                                    name="nom_voie"  required>
+                            </div>
+
+                        </div>
+                        <div class="input-group mt-2">
+                            <div class="input-group-prepend">
+                                <div class=" col-2 input-group-text d-flex justify-content-center  text-danger fs-4 addresse_input ">*
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" id="cp_livr" class="form-control addresse_input" placeholder="Cp" name="cp"
+                                   required>
+
+                            </div>
+                            <div class="col-6 " style="margin-left: 5px;">
+                                <input type="text" id="ville_livr" class="form-control addresse_input" placeholder="Ville" name="ville"
+                                     required>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+            <div class="mb-3">
+                <label for="descriptionInput" class="form-label">Description:</label>
+                <input type="text" class="form-control" id="descriptionInput" name="description">
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary " style="background-color: rgb(110, 191, 63);"
+                    onclick="envoyer_command()">Envoyer</button>
+                <button type="submit" class="btn btn-primary " style="margin-left: 5px;"
+                    onclick="fermer_envoi()">Fermer</button>
+            </div>
+
+
+        </div>
+    </div>
+    <div id="err_simulation"></div>
+</div>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from extensions import db
-from sqlalchemy import create_engine, ForeignKey,select, text,Date
+from sqlalchemy import create_engine, ForeignKey,select, text,Date, desc
 from sqlalchemy.orm import relationship ,sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
@@ -99,7 +99,8 @@ class Client(db.Model):
             'numero':self.numero,
             'addresse':self.addresse,
             'email':self.email,
-            'tel':self.tel
+            'tel':self.tel,
+            'prix_livr':self.prix_livr
            
         }
     def save (self):
@@ -122,21 +123,7 @@ class Statut(db.Model):
         db.session.add (self)
         db.session.commit()
 
-# class Sectors(db.Model):
-#     __tablename__ = "sectors"
-#     id = db.Column(db.Integer, primary_key=True , autoincrement=True)
-#     name = db.Column(db.String(50), nullable=False )
-#     rel_matiere_bridge = relationship("Commande", backref = "sectors")
 
-#     #property
-#     def _data (self):
-#         return{
-#             'id':self.id,
-#             'name':self.name
-#         }
-#     def save (self):
-#         db.session.add (self)
-#         db.session.commit()
 class Commande(db.Model):
     __tablename__ = 'commande'
     id = db.Column(db.Integer, autoincrement=True,primary_key=True )
@@ -148,18 +135,17 @@ class Commande(db.Model):
     epaisseur_id = db.Column(db.Integer, ForeignKey('epaisseur.id'),nullable=False )
     count = db.Column(db.Integer ,default=1,nullable=False)
     count_persage = db.Column(db.Integer ,default=0)
-    prix_matiere = db.Column(db.Float , nullable=False)
-    prix_limeaire = db.Column(db.Float, nullable=False)
+    prix_ht= db.Column(db.Float, nullable=False)
     name_dxf = db.Column(db.String(256), nullable=True )
     name_bl = db.Column(db.String(256), nullable=True )
+    name_police = db.Column(db.String(50), nullable=True )
     text = db.Column(db.String(256), nullable=True )
     hauteur_text = db.Column(db.Float , nullable=True)
     description_commercial_responsable = db.Column(db.String(1000), nullable=True)
-    description_responsable_comercial = db.Column(db.String(1000), nullable=True)
-    date_envoi = db.Column(Date, nullable=False)
-    date_confirmation = db.Column(Date, nullable=True)
-    date_usinage = db.Column(Date, nullable=True)
-    date_fin = db.Column(Date, nullable=False)
+    date_envoi = db.Column(db.String(256), nullable=False)
+    date_confirmation = db.Column(db.String(32), nullable=True)
+    date_usinage = db.Column(db.String(32), nullable=True)
+    date_fin = db.Column(db.String(32), nullable=False)
     responsable = db.Column(db.String(100),nullable=True )
     assistante = db.Column(db.String(100),nullable=True )
     is_livr = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.true())
@@ -171,7 +157,7 @@ class Commande(db.Model):
     is_vu_confirmé = db.Column(db.Boolean(),server_default=sqlalchemy.sql.expression.false())
     is_vu_usiné = db.Column(db.Boolean(),server_default=sqlalchemy.sql.expression.false())
     is_form = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.true())
-
+    prix_livr_ht= db.Column(db.Float, nullable=True)
 
     
       #property
@@ -186,14 +172,11 @@ class Commande(db.Model):
             'type_matiere':self.type_matiere,
             'epaisseur_id':epaisseur_id,
             'count':self.count,
-            'prix_matiere':self.prix_matiere,
-            'prix_limeaire':self.prix_limeaire,
             'name_dxf':self.name_dxf,
             'name_bl':self.name_bl,
             'text':self.text,
             'hauteur_text':self.hauteur_text,
             'description_commercial_responsable':description_commercial_responsable,
-            'description_responsable_comercial': description_responsable_comercial,
             'date_envoi':self.date_envoi,
             'date_confirmation':self.date_confirmation, 
             'date_usinage':self.date_usinage,
@@ -209,7 +192,10 @@ class Commande(db.Model):
             'is_vu_confirmé': self.is_vu_confirmé,
             'is_vu_usiné':self.is_vu_usiné,
             'is_form':self.is_form,
-            'count_persage':self.count_persage 
+            'count_persage':self.count_persage,
+            'name_police':self.name_police,
+            'prix_ht':self.prix_ht,
+            'prix_livr_ht':self.prix_livr_ht
         }
     
     
@@ -243,7 +229,11 @@ class Matiere(db.Model):
 
     #property
     def get_all_matiere():
-        return Matiere.query.all()
+        try:
+            return Matiere.query.all()
+        except Exception as e:
+            print(f"Error fetching all matieres: {str(e)}")
+            return None
     def _data (self):
         return{
             'id':self.id,
@@ -447,96 +437,480 @@ def get_prix_pmma_usil(mt,mt_name, epaisseur,type_usinage):
     return result
 
 def get_clients_by_user(current_user):
-        clients = db.session.query(Client).join(User, Client.user_id == User.id  ).filter(User.id == current_user.id).all() 
-        # print( clients)
-        # result = []
-        # for row in  clients : 
-        #     result.append(row._data) 
-
+    try:
+        clients = (
+            db.session.query(Client)
+            .join(User, Client.user_id == User.id)
+            .filter(User.id == current_user.id)
+            .all()
+        )
         return clients
+    
+    except Exception as e:
+        # Log the error message if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return []
 
 def get_en_attentes(current_user):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="en_attente").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                User.username
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .filter(Client.user_id == current_user.id)
+            .join(User, Client.user_id == User.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "en_attente")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .order_by(desc(Commande.date_envoi))
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+            
+        return result
     
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    except Exception as e:
+        # Log the error message if  a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return []
 def get_all_attentes():
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="en_attente").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                User.username
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "en_attente")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+            
+        return result
     
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
     
 def get_en_attente_by_id(id):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Client.ville,Client.cp,Client.addresse,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).filter(Commande.id ==id).first() 
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Commande.date_fin,
+                Client.name,
+                Commande.ville_livr,
+                Commande.cp_livr,
+                Commande.addresse_livr,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                User.username,
+                Commande.numero_livr,
+                Commande.is_livr,
+                Commande.is_form,
+                Commande.name_police,
+                Commande.text,
+                Commande.prix_livr_ht,
+                Commande.description_commercial_responsable,
+                Commande.count_persage,
+                Role.name
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .join(Role, User.role_id == Role.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .filter(Commande.id == id)
+            .first()
+        )
+        
+        if data:
+            return data._data
+        else:
+            return None
     
-    result = []
-   
-    result.append(data._data) 
-    return data
-def change_confirmer(changed_id, name):
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+def change_confirmer(changed_id, name,current_date ):
     current_commande = Commande.query.filter_by(id= changed_id).first()
     current_commande.statut_id=2
-    current_commande.name_dxf=name
+    current_commande.name_bl=name
+    current_commande.date_confirmation = current_date
     db.session.commit()
+
+
 def change_livré(changed_id):
-    current_commande = Commande.query.filter_by(id= changed_id).first()
-    current_commande.statut_id=4
-    db.session.commit()
+    try:
+        # Fetch the current commande
+        current_commande = Commande.query.filter_by(id=changed_id).first()
+        
+        # Check if the commande exists
+        if current_commande is None:
+            raise ValueError(f"No Commande found with id {changed_id}")
+        
+        # Change the status to "livré"
+        current_commande.statut_id = 4
+        
+        # Commit the changes to the database
+        db.session.commit()
+    
+    except ValueError as ve:
+        # Log the specific error if you have a logging system in place
+        # For now, just print the error message
+        print(f"ValueError: {ve}")
+        raise
+    
+    except Exception as e:
+        # Log the general error if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        
+        # Rollback the session to avoid partial commits
+        db.session.rollback()
+        
+        # Raise the exception again to propagate the error
+        raise
 
 def get_confirmes(current_user):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="confirmé").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Commande.date_fin,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                Commande.date_confirmation,
+                User.username
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .filter(User.id == current_user.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "confirmé")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .order_by(desc(Commande.date_envoi))
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+            
+        return result
+    
+    except Exception as e:
+        # Log the error message if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return []
+
 def get_all_confirmes():
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="confirmé").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Commande.date_fin,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                Commande.date_confirmation,
+                User.username
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "confirmé")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+            
+        return result
+    
+    except Exception as e:
+        # Log the error message if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return []
 
 def get_usinés(current_user):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="usiné").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_usinage,
+                Commande.date_fin,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                Commande.date_confirmation,
+                User.username,
+                Commande.name_bl,
+                Role.name
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .filter(Client.user_id == current_user.id)
+            .join(User, Client.user_id == User.id)
+            .join(Role, User.role_id == Role.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "usiné")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+            
+        return result
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
 def get_all_usinés():
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="usiné").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_usinage,
+                Commande.date_fin,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                Commande.date_confirmation,
+                User.username,
+                Role.name
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .join(Role, User.role_id == Role.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "usiné")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+            
+        return result
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
 
 def get_livré(current_user):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).filter(Client.user_id == current_user.id).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="livré").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Commande.date_fin,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_bl,
+                Commande.id,
+                Commande.date_confirmation,
+                User.username,
+                Commande.name_bl,
+                Role.name
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .filter(Client.user_id == current_user.id)
+            .join(User, Client.user_id == User.id)
+            .join(Role, User.role_id == Role.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "livré")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .order_by(desc(Commande.date_envoi))
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+        
+        return result
+    
+    except Exception as e:
+        # Log the error message if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return []
 def get_all_livré():
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,Commande.date_confirmation,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).filter(Statut.name =="livré").join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).all() 
-    result = []
-    for row in  data : 
-        result.append(row._data) 
-    return result
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Commande.date_fin,
+                Client.name,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_bl,
+                Commande.id,
+                Commande.date_confirmation,
+                User.username,
+                Role.name
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .join(Role, User.role_id == Role.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .filter(Statut.name == "livré")
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .all()
+        )
+        
+        result = []
+        for row in data:
+            result.append(row._data)
+        
+        return result
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
 
 def get_confirmé_by_id(id):
-    data = db.session.query(Commande.name_matiere, Commande.type_matiere,Commande.prix_matiere,Commande.prix_limeaire,Commande.date_envoi,Commande.date_fin,Client.name,Client.ville,Client.cp,Client.addresse,Statut.name,Type_usinage.name,Epaisseur.value,Commande.count,Commande.name_dxf,Commande.id,User.username).join(Client,Commande.client_id== Client.id ).join(User,Client.user_id== User.id ).join(Statut,Commande.statut_id== Statut.id ).join(Type_usinage,Commande.usinage_id== Type_usinage.id ).join(Epaisseur,Commande.epaisseur_id== Epaisseur.id ).filter(Commande.id ==id).first() 
+    try:
+        data = (
+            db.session.query(
+                Commande.name_matiere,
+                Commande.type_matiere,
+                Commande.prix_ht,
+                Commande.date_envoi,
+                Commande.date_fin,
+                Client.name,
+                Commande.numero_livr,
+                Commande.addresse_livr,
+                Commande.cp_livr,
+                Commande.ville_livr,
+                Statut.name,
+                Type_usinage.name,
+                Epaisseur.value,
+                Commande.count,
+                Commande.name_dxf,
+                Commande.id,
+                User.username,
+                Commande.name_bl,
+                Role.name
+            )
+            .join(Client, Commande.client_id == Client.id)
+            .join(User, Client.user_id == User.id)
+            .join(Role, User.role_id == Role.id)
+            .join(Statut, Commande.statut_id == Statut.id)
+            .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
+            .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .filter(Commande.id == id)
+            .first()
+        )
+        
+        if data:
+            return data._data
+        else:
+            return None
     
-    result = []
-   
-    result.append(data._data) 
-    return data
+    except Exception as e:
+        # Log the error message if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return None
 
-def change_usiner(changed_id):
+def change_usiner(changed_id, current_date):
     current_commande = Commande.query.filter_by(id= changed_id).first()
     current_commande.statut_id=3
+    current_commande.date_usinage=current_date
     db.session.commit()
 def  supprimer_commande_attente(id):
     row_to_delete = Commande.query.get(id)
@@ -602,7 +976,7 @@ def get_all_representants():
     return User.query.filter_by(role_id=2).all()
 
 def get_cients_by_rep(first_rep_id):
-    clients=db.session.query(Client.name,Client.ville,Client.cp,Client.numero,Client.addresse,User.username,Client.email,Client.tel,User.id,Client.id).join(User,Client.user_id== User.id ).filter(Client.user_id == first_rep_id ).all()
+    clients=db.session.query(Client.name,Client.ville,Client.cp,Client.numero,Client.addresse,User.username,Client.email,Client.tel,User.id,Client.id,Client.prix_livr).join(User,Client.user_id== User.id ).filter(Client.user_id == first_rep_id ).all()
     result = []
     for row in  clients : 
         result.append(row._data) 
@@ -623,6 +997,7 @@ def edit_client_data(Edit_data):
     current_client.addresse=Edit_data[0]['addresse']
     current_client.email=Edit_data[0]['email']
     current_client.tel=Edit_data[0]['tel']
+    current_client.prix_livr=Edit_data[0]['prix_livr']
 
     db.session.commit()
 
@@ -705,7 +1080,7 @@ def delete_bridge_lettre_row(matiere,type_mt ,usinage ,epaisseur):
         delete_row = db.session.query(BridgeLettres).join(Matiere,  BridgeLettres.matiere_id== Matiere.id ).filter(Matiere.name == matiere.strip()).join(Type,BridgeLettres.type_id == Type.id  ).filter(Type.name == type_mt.strip()).join(Epaisseur,BridgeLettres.epaisseur_id == Epaisseur.id).filter(Epaisseur.value == epaisseur).join(Type_usinage, BridgeLettres.usinage_id ==Type_usinage.id  ).filter(Type_usinage.name == usinage).first()
         db.session.delete(delete_row)
         db.session.commit()
-        print("sddxxxxxxxxxxxxxxxxxxxxxx")
+
         
     except Exception as e:
         print(e)
