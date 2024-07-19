@@ -3,6 +3,7 @@ from models import models
 from models.models import get_client_detailles_by_id
 
 import dxfgrabber
+import ezdxf
 import math
 
 from reportlab.lib.pagesizes import letter
@@ -11,12 +12,13 @@ from reportlab.lib import colors
 from PyPDF2 import PdfReader, PdfWriter
 # from io import BytesIO
 from datetime import datetime
-import io
 from io import BytesIO
+import io
+
 import os
 
 
-def get_dimension(path_folder):
+def get_dimension( path_folder):
 # Ouvrir le fichier DXF
     dxf = dxfgrabber.readfile(path_folder+"/current.dxf")
     larg = 0
@@ -52,6 +54,22 @@ def get_dimension(path_folder):
             # Calculer les points minimaux et maximaux
             min_point = (min(p[0] for p in points), min(p[1] for p in points), min(p[2] if len(p) > 2 else 0 for p in points))
             max_point = (max(p[0] for p in points), max(p[1] for p in points), max(p[2] if len(p) > 2 else 0 for p in points))
+        elif entity_type == "INSERT":
+            # Pour une INSERT, les coordonnées sont le point d'insertion et les dimensions du bloc
+            insert_point = entity.insert
+            block_name = entity.name
+            block = dxf.blocks.get(block_name)
+
+            if block:
+                block_min_x = min(ent.start[0] if hasattr(ent, 'start') else ent.center[0] - ent.radius for ent in block if hasattr(ent, 'start') or hasattr(ent, 'center'))
+                block_max_x = max(ent.end[0] if hasattr(ent, 'end') else ent.center[0] + ent.radius for ent in block if hasattr(ent, 'end') or hasattr(ent, 'center'))
+                block_min_y = min(ent.start[1] if hasattr(ent, 'start') else ent.center[1] - ent.radius for ent in block if hasattr(ent, 'start') or hasattr(ent, 'center'))
+                block_max_y = max(ent.end[1] if hasattr(ent, 'end') else ent.center[1] + ent.radius for ent in block if hasattr(ent, 'end') or hasattr(ent, 'center'))
+
+                min_point = (insert_point[0] + block_min_x, insert_point[1] + block_min_y, insert_point[2])
+                max_point = (insert_point[0] + block_max_x, insert_point[1] + block_max_y, insert_point[2])
+            else:
+                continue
         # Calculer la distance entre les points minimaux et maximaux
         if max_point[0] > max_x:
             max_x = max_point[0]
@@ -61,6 +79,7 @@ def get_dimension(path_folder):
             max_y = max_point[1]
         if min_point[1] < min_y:
             min_y = min_point[1]
+    
 
     long = math.hypot(max_x - min_x)
     larg = math.hypot(max_y - min_y)
@@ -72,7 +91,7 @@ def get_dimension(path_folder):
 
 
 
-def create_pdf( data ):
+def create_pdf( data , path, dir_name):
     name_matiere = data ['name_matiere']
     type_matiere= data['type_matiere']
 
@@ -86,13 +105,11 @@ def create_pdf( data ):
     montant_total_ht = prix_ht
     montant_ht = prix_ht
     montant_tva = round(0.2*montant_total_ht, 2)
-    print("eee")
-    print(montant_total_ht)
-    print(montant_tva)
+
     if 'prix_livr_ht' in data:
 
         prix_livr_ht= data["prix_livr_ht"]
-        montant_ht =round(float(montant_ht) -float(prix_livr_ht))
+        montant_ht =float(f"{(float(montant_ht) -float(prix_livr_ht)):.2f}")
 
 
 
@@ -100,16 +117,15 @@ def create_pdf( data ):
 
     current_date = str(datetime.now().date())
 
-    devisVide_path = "static/img/devis_vide.png"
-    output_filename = "static/members/comercial/Eric/output.pdf"
+    devisVide_path = dir_name+"/static/img/devis_vide.png"
+    output_filename = path+"/output.pdf"
     buffer = BytesIO()
     c = canvas.Canvas(output_filename, pagesize=letter)
 
     if devisVide_path:
         c.drawInlineImage(devisVide_path, 0, 0, c._pagesize[0], height=c._pagesize[1])
     # Ajouter le titre
-    c.setFont("Helvetica", 8)
-    c.drawString(350, 729, "9SDHS564SD")
+
     c.setFont("Helvetica-Bold", 9)
     c.drawString(28, 580, "Devis N°")
     # Date value
@@ -148,6 +164,10 @@ def create_pdf( data ):
 
     c.setFont("Helvetica", 9)
     c.drawString(90, 515, "USINAGE MECA:"+name_matiere+" "+ type_matiere+" "+ str(epaisseur)+" mm")
+
+    if 'nbr_lettres' in data:
+        c.setFont("Helvetica", 9)
+        c.drawString(90, 495, "Text: "+data ['nbr_lettres']+" lettres  en "+ str(data ['hauteur'])+" mm")
 # qte
     c.setFont("Helvetica", 9)
     c.drawString(315, 515, str(qte))
@@ -267,3 +287,73 @@ def add_content_to_pdf(input_pdf_path, output_pdf_path,data):
     # Write the modified content to a new PDF
     with open(output_pdf_path, 'wb') as f:
         writer.write(f)
+
+def calculate_perimeter_and_drilling_count(path_folder):
+    # Ouvrir le fichier DXF
+    doc = ezdxf.readfile(path_folder + "/current.dxf")
+    msp = doc.modelspace()
+    perimetre = 0
+    nbr_percage = 0
+
+    def calculate_perimeter_for_entity(entity):
+        nonlocal perimetre, nbr_percage
+
+        if entity.dxftype() == 'CIRCLE':
+            dc = 2 * math.pi * entity.dxf.radius
+            if dc < 30:
+                nbr_percage += 1
+            else:
+                perimetre += dc
+        elif entity.dxftype() == 'LINE':
+            start = entity.dxf.start
+            end = entity.dxf.end
+            length = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2 + (end[2] - start[2]) ** 2)
+            perimetre += length
+        elif entity.dxftype() == 'LWPOLYLINE':
+            points = entity.get_points('xyb')
+            perimetre_entity = 0
+            for i in range(len(points) - 1):
+                dx = points[i + 1][0] - points[i][0]
+                dy = points[i + 1][1] - points[i][1]
+                perimetre_entity += math.sqrt(dx ** 2 + dy ** 2)
+            if perimetre_entity < 30:
+                nbr_percage += 1
+            else:
+                perimetre += perimetre_entity
+        elif entity.dxftype() == 'POLYLINE':
+            points = list(entity.points())
+            perimetre_entity = 0
+            for i in range(len(points) - 1):
+                dx = points[i + 1][0] - points[i][0]
+                dy = points[i + 1][1] - points[i][1]
+                perimetre_entity += math.sqrt(dx ** 2 + dy ** 2)
+            if perimetre_entity < 30:
+                nbr_percage += 1
+            else:
+                perimetre += perimetre_entity
+        elif entity.dxftype() == 'ARC':
+            radius = entity.dxf.radius
+            start_angle = math.radians(entity.dxf.start_angle)
+            end_angle = math.radians(entity.dxf.end_angle)
+            arc_length = radius * abs(end_angle - start_angle)
+            perimetre += arc_length
+        elif entity.dxftype() == 'INSERT':
+            block_name = entity.dxf.name
+            insert_point = entity.dxf.insert
+            block = doc.blocks.get(block_name)
+
+            if block:
+                for block_entity in block:
+                    if hasattr(block_entity, 'dxf'):
+                        original_insert = block_entity.dxf.insert if block_entity.dxftype() == 'INSERT' else None
+                        if original_insert:
+                            block_entity.dxf.insert = [insert_point[0] + original_insert[0], insert_point[1] + original_insert[1], insert_point[2] + original_insert[2]]
+                        calculate_perimeter_for_entity(block_entity)
+                        if original_insert:
+                            block_entity.dxf.insert = original_insert
+
+    # Parcourir toutes les entités dans l'espace modèle
+    for e in msp:
+        calculate_perimeter_for_entity(e)
+
+    return {'perimetre': perimetre, 'nbr_percage': nbr_percage}

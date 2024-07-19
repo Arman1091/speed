@@ -13,25 +13,25 @@ messages %} {% for category, message in messages %} {% if category ==
     {{ message }}
 </div>
 {% endif %} {% endfor %} {% endif %} {% endwith %}
-<div id ="success_msg" class="alert alert-success alter-dismissable fade show" role="alert" style="z-index: 10000; display: none;">
-</div> 
+<!-- <div id ="errMsgSimulation" class="alert alert-danger alter-dismissable fade show" role="alert" style="z-index: 10000;">
+    </div> -->
+
+
 <div id="usinage_container" class="container ">
     <div class="row mt-2">
         <div id="simulation_infos" class="col-md-6 ">
             <div class="row ">
                 <div class=" col-5 col-md-4 col-xl-3 d-flex justify-content-center">
                     <button id="file_btn" type="button" class=" case_btn btn  active-case border  border-secondary  "
-                     onclick="upload_btn_active()"><i
-                            class="bi bi-folder fs-1"></i>
-                        <p>Form</p>
+                        onclick="upload_btn_active()"><i class="bi bi-folder fs-1"></i>
+                        <p>Forme</p>
                     </button>
 
                 </div>
                 <div class="col-5  col-md-4 col-xl-3 d-flex justify-content-start ">
                     <button id="text_btn" type="button" class="case_btn btn  border  border-secondary  "
-                         onclick="text_btn_active()"><i
-                            class="bi bi-fonts fs-1"></i>
-                        <p>Text</p>
+                        onclick="text_btn_active()"><i class="bi bi-fonts fs-1"></i>
+                        <p>Texte</p>
                     </button>
 
                 </div>
@@ -39,7 +39,7 @@ messages %} {% for category, message in messages %} {% if category ==
 
             </div>
             <div class="mt-4">
-                <label for="matiere_select"><strong>Choisissez la matiere</strong></label>
+                <label for="matiere_select"><strong>Choisissez la matière</strong></label>
                 <select id="matiere_select" class="form-select form-select-lg mb-3"
                     aria-label=".form-select-lg example">
                     <!-- <option selected>Select le matiere</option> -->
@@ -58,7 +58,7 @@ messages %} {% for category, message in messages %} {% if category ==
                 </select>
             </div>
             <div class="mt-5">
-                <label for="epp"><strong>L'épaisseur de la matiere</strong></label>
+                <label for="epp"><strong>L'épaisseur de la matière</strong></label>
                 <select id="epp" class="form-select mt-1" aria-label="Default select example" style="width: 60%;">
 
                     {% for item in epaisseurs %}
@@ -91,12 +91,36 @@ messages %} {% for category, message in messages %} {% if category ==
                 <input id="qte" value=1 min="1">
                 <button class="btn_counter" id="increment">+</button>
             </div>
+            <div id="section_surface_usinage">
+                <div  id ="surface_usinage_form" class=" mt-5 d-flex justify-content-between align-items-center" >
+                    <div class="bg-light">
+                        <p><strong>Usinage par chute(s):</strong></p>
+                    </div>
+                    <div class="bg-light " >
+                        <h6> <strong id="surface_usinage">0</strong>&nbsp m2</h6>
+                        <p id="surface_usinage_hidden"></p>
+                    </div>
+    
+                </div>
+    
+                <div class="mt-2 surface_usinage_plaques" >
+                    <h5 class="text-center">Plaques</h5>
+                    <div id="plaque_div" class=" mt-3 plaque_div" >
+                    </div>
+                </div>
+                <div id="add_new_plaque" class="text-center " style="border-bottom: 1px solid  darkcyan;">
+                    <button type="button .bg-success "
+                        style="padding: 1px; font-size: 15px;"
+                        onclick="ajuter_plaque_select()">+</button>
+                </div>
+            </div>
+           
 
             <div id="text-section" class="mt-3" style="display: none;">
                 <form class="mt-4" action="/generate_dxf" method="post">
                     <label class="form-label" for="text_input">Saisissez le texte:</label>
                     <input id="text_input" class="form-control" type="text" name="text" required>
-                    <label for="font" class="form-label">Select a font:</label>
+                    <label for="font" class="form-label">Police d'écriture:</label>
                     <select class="form-select" id="fontSelect" name="font" required>
                         <option value="Arial">Arial</option>
                         <option value="Times New Roman">Times New Roman</option>
@@ -140,8 +164,8 @@ messages %} {% for category, message in messages %} {% if category ==
                         <option value="Papyrus">Papyrus</option>
                     </select>
 
-                    <label for="height"><strong>Hauteur du text:</strong></label>
-                    <select id="height" class="form-select mt-1" aria-label="Hauteur du text" >
+                    <label for="height"><strong>Hauteur du texte:</strong></label>
+                    <select id="height" class="form-select mt-1" aria-label="Hauteur du text">
 
                     </select>
                 </form>
@@ -160,6 +184,9 @@ messages %} {% for category, message in messages %} {% if category ==
                     <h6> <strong id="prix_lin_ttc">0</strong>€</h6>
 
                 </div>
+            </div>
+            <div style="display:none;">
+                <p id="prix_matiere_hidden"></p>
             </div>
             <div id="prix_detailles" class="row   mt-3">
 
@@ -259,7 +286,7 @@ messages %} {% for category, message in messages %} {% if category ==
                                         </div>
                                         <div id="nbr_div" class="row">
                                             <div class="col-9">
-                                                <p><strong>Nombre des lettres</strong></p>
+                                                <p><strong>Nombre de lettres</strong></p>
                                             </div>
                                             <div class="col-3">
                                                 <h6><strong id="nbr_lettres">1 </strong></h6>
@@ -274,7 +301,7 @@ messages %} {% for category, message in messages %} {% if category ==
                                                 <h6><strong id="qte_text"> </strong></h6>
                                             </div>
                                         </div>
-                                        <div id="text_prix_livr_div" class="row" >
+                                        <div id="text_prix_livr_div" class="row">
                                             <div class="col-9">
                                                 <p><strong>Livraison</strong></p>
                                             </div>
@@ -303,8 +330,8 @@ messages %} {% for category, message in messages %} {% if category ==
                                 <div class="accordion-body">
                                     <div class="mb-3">
                                         <select id="cients_devis_pro" class="form-select custom-select"
-                                            aria-label="Default select example" >
-                                            <option value=-1 selected>Sélectionnez une client</option>
+                                            aria-label="Default select example">
+                                            <option value=-1 selected>Sélectionnez un client</option>
 
                                             {% for item in clients %}
 
@@ -332,10 +359,10 @@ messages %} {% for category, message in messages %} {% if category ==
 
                                     </div>
                                     <div class="mt-2">
-                                        <span id="tcrg_span" 
-                                            onclick="telecharger_pdf('{{user.username}}')">Télécharger le devis <img id="pdf_img"
+                                        <span id="tcrg_span" onclick="telecharger_pdf('{{user.username}}')">Télécharger
+                                            le devis <img id="pdf_img"
                                                 src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}"
-                                                alt="Logo de pdf"  />
+                                                alt="Logo de pdf" />
                                         </span>
 
 
@@ -353,15 +380,33 @@ messages %} {% for category, message in messages %} {% if category ==
         </div>
 
 
-        <div id="visualisation_div" class="col-md-6 d-flex justify-content-center align-items-center "
+        <div id="visualisation_div" class="col-md-6 d-flex justify-content-center align-items-center flex-column "
             style="overflow-wrap: break-word; text-wrap: wrap;">
-            <div id="text_div"  class="mt-2">
+            <div id="text_div" class="mt-2">
                 <h1 id="text_area" style="overflow-wrap:break-word; "></h1>
             </div>
-            <iframe id="img_usinage" class="img_usinage mt-5"
+            <!-- <iframe id="img_usinage" class="img_usinage mt-5"
                 src="{{ url_for('static', filename= 'img/usinage/matiers/pvc.jpg') }}"
-            ></iframe>
+            ></iframe> -->
+            <div class="image-container d-flex justify-content-center align-items-center">
+                <img id="img_usinage" src="{{ url_for('static', filename= 'img/usinage/matiers/pvc.jpg') }}"
+                    alt="Zoomable Image">
 
+                <div class="label width-label">Longeur - <span id="width_label"></span>m</div>
+                <div class="label height-label">Hauteur - <span id="height_label"></span>m</div>
+            </div>
+
+            <!-- Modale -->
+            <div id="myModal" class="modal">
+                <span class="close">&times;</span>
+                <div class="img-container">
+                    <img class="modal-content" id="modalImage">
+                </div>
+                <div class="controls">
+                    <button id="zoomIn">+</button>
+                    <button id="zoomOut">-</button>
+                </div>
+            </div>
             <output>
                 <p id="height_img" style="display: none;"></p>
             </output>
@@ -369,21 +414,22 @@ messages %} {% for category, message in messages %} {% if category ==
                 <p id="width_img" style="display: none;"></p>
             </output>
             <output>
-                <p id="perimetre_totale" style="display: none;"cun></p>
+                <p id="perimetre_totale" style="display: none;" cun></p>
             </output>
 
-        </div>
 
+        </div>
+        {% if current_user_role =="comercial"  or current_user_role =="admin" %}
         <div class="mt-3 d-flex justify-content-center align-items-center">
             <button id="form_envoyer_usinage_btn" class=" btn btn-primary btn-block bg-success "
                 onclick="ouvrir_form_envoi()">Envoyer usinage</button>
             <!-- <button  id=" btn btn-primary btn-block bg-primary  " onclick="ouvrir_form_envoi()" style="padding: 2px; background-color: blue;">Partager</i></button> -->
         </div>
-
+        {% endif %}
         <div id="envoi_div" class="container">
 
             <div class="mb-3">
-                <label for="dateInput" class="form-label">Date de livraison:</label>
+                <label for="dateInput" class="form-label"><strong>Date de livraison:</strong></label>
 
                 <input type="date" class="form-control" id="dateInput" name="date">
             </div>
@@ -421,33 +467,37 @@ messages %} {% for category, message in messages %} {% if category ==
                         <label for="numero_voie">Addresse:</label>
                         <div class="input-group ">
                             <div class="input-group-prepend">
-                                <div class=" col-1 input-group-text d-flex justify-content-center  text-danger fs-4 addresse_input ">*
+                                <div
+                                    class=" col-1 input-group-text d-flex justify-content-center  text-danger fs-4 addresse_input ">
+                                    *
                                 </div>
                             </div>
                             <div class="col-3 ">
-                                <input type="text" id="numero_voie_livr" class="form-control addresse_input" placeholder="N°"
-                                    name="numero_voie"  required>
+                                <input type="text" id="numero_voie_livr" class="form-control addresse_input"
+                                    placeholder="N°" name="numero_voie" required>
 
                             </div>
                             <div class="col-7 " style="margin-left: 5px;">
-                                <input type="text" id="nom_voie_livr" class="form-control addresse_input" placeholder="Nom de rue"
-                                    name="nom_voie"  required>
+                                <input type="text" id="nom_voie_livr" class="form-control addresse_input"
+                                    placeholder="Nom de rue" name="nom_voie" required>
                             </div>
 
                         </div>
                         <div class="input-group mt-2">
                             <div class="input-group-prepend">
-                                <div class=" col-2 input-group-text d-flex justify-content-center  text-danger fs-4 addresse_input ">*
+                                <div
+                                    class=" col-2 input-group-text d-flex justify-content-center  text-danger fs-4 addresse_input ">
+                                    *
                                 </div>
                             </div>
                             <div class="col-3">
-                                <input type="text" id="cp_livr" class="form-control addresse_input" placeholder="Cp" name="cp"
-                                   required>
+                                <input type="text" id="cp_livr" class="form-control addresse_input" placeholder="Cp"
+                                    name="cp" required>
 
                             </div>
                             <div class="col-6 " style="margin-left: 5px;">
-                                <input type="text" id="ville_livr" class="form-control addresse_input" placeholder="Ville" name="ville"
-                                     required>
+                                <input type="text" id="ville_livr" class="form-control addresse_input"
+                                    placeholder="Ville" name="ville" required>
                             </div>
 
                         </div>
@@ -456,8 +506,8 @@ messages %} {% for category, message in messages %} {% if category ==
 
                 </form>
             </div>
-            <div class="mb-3">
-                <label for="descriptionInput" class="form-label">Description:</label>
+            <div class="mb-3 mt-2">
+                <label for="descriptionInput" class="form-label"><strong>Commentaire:</strong></label>
                 <input type="text" class="form-control" id="descriptionInput" name="description">
             </div>
             <div class="d-flex justify-content-center">
@@ -470,7 +520,8 @@ messages %} {% for category, message in messages %} {% if category ==
 
         </div>
     </div>
-    <div id="err_simulation"></div>
+    <div id="msg_simulation" class="alert-danger" role="alert">
+    </div>
 </div>
 
 {% endblock %}

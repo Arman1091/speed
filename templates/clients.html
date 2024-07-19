@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block contenue %}
-{% if current_user_role =="admin" %}
+{% if current_user_role =="admin"  or current_user_role =="comercial" %}
     <a href="#" class="btn btn-primary" style="margin-bottom: 1.3rem;" onclick="newClientForm()">Nouvelle client </a>
 {% endif %}
     {% with messages = get_flashed_messages() %}
@@ -16,6 +16,9 @@
 {% endfor %}
 {% endif%}
 {% endwith %}
+<div id ="user_role_div_client">
+    <output id="output_user_client_role">{{current_user_role}}</output>
+</div>
 <table id="clients_table" class="table">
     <div class="mt-4">
         <!-- <h3>Matiere: <strong id="mt">{{matiere}}</strong>
@@ -42,7 +45,8 @@
             <th scope="col">Email</th>
             <th scope="col">Livrasion HT</th>
             <th scope="col">Tel</th>
-            {% if current_user_role =="admin" %}
+        
+            {% if current_user_role =="admin" or current_user_role =="comercial"%}
                 <th></th>
             {% endif %}
           
@@ -60,7 +64,7 @@
             <td>{{item[6]}}</td>
             <td>{{item[10]}}</td>
             <td>{{item[7]}}</td>
-            {% if current_user_role =="admin" %}
+            {% if current_user_role =="admin" or current_user_role =="comercial"%}
             <td>
                 
                 <output class="rec_client_id" style="visibility: hidden;">{{item[9]}}</output>

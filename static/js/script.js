@@ -131,6 +131,58 @@
 
 
   window.addEventListener('load', () => {
+    const modal = document.getElementById('myModal');
+    const img = document.getElementById('img_usinage');
+    const modalImg = document.getElementById('modalImage');
+    const closeBtn = document.getElementsByClassName('close')[0];
+    const zoomInBtn = document.getElementById('zoomIn');
+    const zoomOutBtn = document.getElementById('zoomOut');
+    let scale = 1;
+    let originX = 0;
+    let originY = 0;
+
+    img.onclick = function () {
+      modal.style.display = 'block';
+      modalImg.src = this.src;
+      scale = 1;
+      modalImg.style.transform = `scale(${scale})`;
+      modalImg.style.transformOrigin = `center center`;
+    }
+
+    closeBtn.onclick = function () {
+      modal.style.display = 'none';
+    }
+
+    zoomInBtn.onclick = function () {
+      scale += 0.1;
+      modalImg.style.transform = `scale(${scale})`;
+    }
+
+    zoomOutBtn.onclick = function () {
+      if (scale > 0.1) {
+        scale -= 0.1;
+        modalImg.style.transform = `scale(${scale})`;
+      }
+    }
+
+    modalImg.onclick = function (event) {
+      const rect = modalImg.getBoundingClientRect();
+      originX = ((event.clientX - rect.left) / rect.width) * 100;
+      originY = ((event.clientY - rect.top) / rect.height) * 100;
+
+      modalImg.style.transformOrigin = `${originX}% ${originY}%`;
+
+      scale += 0.1;
+      modalImg.style.transform = `scale(${scale})`;
+    }
+
+    // Close the modal when clicking outside of the image
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+
     $(".prix_ttc_value").each(function (index, element) {
       let value = parseFloat($(element).text()).toFixed(2);
       $(element).html(value);
@@ -205,7 +257,7 @@
                 document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) + 1.2 * prix_livr_ht).toFixed(2);;
                 document.getElementById("scructure_livraison_form").style.display = "block";
                 document.getElementById("mode_livr_envoi").checked = true;
-                document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+                document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
                 document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
 
               },
@@ -218,7 +270,7 @@
 
           } else {
 
-            var prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
+            var prix_livr_ht = document.getElementById('prix_livr_ht').innerHTML;
             document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
             document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
             document.getElementById("scructure_livraison_form").style.display = "none";
@@ -246,13 +298,13 @@
                 success: function (data) {
 
                   prix_livr_ht = data[0]["prix_livr"];
-                  document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) + parseFloat(prix_livr_ht) ).toFixed(2);
+                  document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) + parseFloat(prix_livr_ht)).toFixed(2);
                   document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) + 1.2 * prix_livr_ht).toFixed(2);
                   document.getElementById("text_prix_livr_div").style.display = "block";
                   document.getElementById("mode_livr_envoi").checked = true;
                   document.getElementById("addresse_div").style.display = "block";
                   document.getElementById('prix_livr_text').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
-                  document.getElementById('prix_livr_text_ht').innerHTML = prix_livr_ht ;
+                  document.getElementById('prix_livr_text_ht').innerHTML = prix_livr_ht;
 
 
                 },
@@ -261,7 +313,7 @@
                 }
               });
             } else {
-              prix_livr_ht =  document.getElementById('prix_livr_text_ht').innerHTML ;
+              prix_livr_ht = document.getElementById('prix_livr_text_ht').innerHTML;
               document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
               document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
               document.getElementById("text_prix_livr_div").style.display = "none";
@@ -309,7 +361,7 @@
                 document.getElementById("scructure_livraison_form").style.display = "block";
                 document.getElementById("addresse_div").style.display = "block";
                 document.getElementById("mode_livr").checked = true;
-                document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+                document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
                 document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
 
               },
@@ -322,7 +374,7 @@
 
           } else {
 
-            var prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
+            var prix_livr_ht = document.getElementById('prix_livr_ht').innerHTML;
             document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
             document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
             document.getElementById("scructure_livraison_form").style.display = "none";
@@ -356,7 +408,7 @@
                   document.getElementById("addresse_div").style.display = "block";
                   document.getElementById("mode_livr").checked = true;
 
-                  document.getElementById('prix_livr_text').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+                  document.getElementById('prix_livr_text').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
                   document.getElementById('prix_livr_text_ht').innerHTML = prix_livr_ht;
 
                 },
@@ -368,7 +420,7 @@
 
 
             } else {
-              let prix_livr_ht =document.getElementById('prix_livr_text_ht').innerHTML;
+              let prix_livr_ht = document.getElementById('prix_livr_text_ht').innerHTML;
               document.getElementById("prix_lin_ht").innerHTML = parseFloat(prix_total_ht) - prix_livr_ht;
               document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
               document.getElementById("text_prix_livr_div").style.display = "none";
@@ -416,12 +468,7 @@
       document.getElementById("qte_structure").innerHTML = count;
     }
   }
-  function incrementPlaque() {
-    const counterElement = document.getElementById('qte_plaque');
-    let count = counterElement.value;
-    count++;
-    counterElement.value = count;
-  }
+
 
   function decrementCounter() {
     const counterElement = document.getElementById('qte');
@@ -444,6 +491,16 @@
       document.getElementById("qte_structure").innerHTML = count;
     }
   }
+
+
+  function incrementPlaque() {
+    alert("sd");
+    const counterElement = document.getElementById('qte_plaque');
+    let count = counterElement.value;
+    count++;
+    counterElement.value = count;
+  }
+
   function decrementPlaque() {
 
     const counterElement = document.getElementById('qte_plaque');
@@ -459,11 +516,15 @@
   }
 
   if (incrementButtonsPlaque && decrementButtonsPlaque) {
+
     for (let i = 0; i < incrementButtonsPlaque.length; i++) {
+
       let currentElement = incrementButtonsPlaque[i];
+
       // var elementBefore = currentElement.previousElementSibling;
       // Perform some action on each element (e.g., change its style)
       if (currentElement) {
+        alert("ddd");
         currentElement.addEventListener('click', incrementPlaque);
       }
     }
@@ -1328,6 +1389,8 @@
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
     var selectedMatiereValue = selectedMatiereOption.value;
     var matiereText = selectedMatiereOption.innerText;
+
+
     var selectTypeElement = document.getElementById("type_matiere");
     var selectTypeUsinageElement = document.getElementById("type_usinage");
     let formData = new FormData();
@@ -1351,6 +1414,7 @@
         contentType: false,
         processData: false,
         success: function (data) {
+
           while (selectTypeElement.options.length > 0) {
             selectTypeElement.remove(0);
           }
@@ -1385,9 +1449,10 @@
             newOption.text = data["types_usinage"][i].name;
             selectTypeUsinageElement.add(newOption);
           }
-
+          var nbr_percage = parseInt(document.getElementById("qte_percage").innerHTML);
 
           if (data['prix']) {
+
             let larg = document.getElementById('height_img').innerHTML;
             let long = document.getElementById('width_img').innerHTML;
             let surface = 0;
@@ -1396,8 +1461,16 @@
               surface = (larg * long);
               // console.log(surface);
             }
-
-            if (matiereText = 'Pmma' && data["types_usinage"][0].name == 'USIL') {
+            var selects = document.getElementsByClassName('select_plaque_div');
+            for (var i = 0; i < selects.length; i++) {
+              selects[i].remove();
+            }
+            if (matiereText === "Newbond") {
+              document.getElementById("section_surface_usinage").style.display = "block";
+            } else {
+              document.getElementById("section_surface_usinage").style.display = "none";
+            }
+            if (matiereText == 'Pmma' && data["types_usinage"][0].name == 'USIL') {
 
               if (surface < 0.1) {
 
@@ -1425,6 +1498,7 @@
               var prix_material_div = document.getElementById("prix_material_div");
               var frais_decoup_div = document.getElementById("frais_decoup_div");
               var qte = document.getElementById("qte").value;
+              console.log(data['prix'][0]);
               let prix_decoup_mtr = data['prix'][0][0];
               let prix_matiere_mtr = data['prix'][0][1];
               console.log("perim" + perimetre);
@@ -1435,9 +1509,14 @@
               let prix_matiere_ht = prix_matiere_mtr * surface;
 
               let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup + 0.3 * nbr_percage);
+              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc + 0.36 * nbr_percage);
               // console.log(total_prix_decoup);
+              if (matiereText === "Newbond") {
+                document.getElementById("prix_matiere_hidden").innerHTML = prix_matiere_mtr;
+                console.log("zz");
+                console.log(prix_matiere_mtr);
+              }
               document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
               document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
               document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
@@ -1452,8 +1531,9 @@
               }
             }
 
-          }
 
+
+          }
 
         },
         error: function () {
@@ -1549,6 +1629,7 @@
   });
   //changer le role
   $("#role_users").on('change', function () {
+
     let formData = new FormData();
     var selectRoleElement = document.getElementById("role_users");
     var selectedRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
@@ -1557,6 +1638,7 @@
 
 
     formData.append('role_value', selectedRoleValue);
+    console.log(selectedRoleValue);
 
 
 
@@ -1578,7 +1660,7 @@
         }
         var nbr = 1;
         for (var i = 0; i < data['users_by_role'].length; i++) {
-
+         
           var row = table.insertRow();
           var cell0 = row.insertCell(0);
           var cell1 = row.insertCell();
@@ -1590,11 +1672,14 @@
           cell1.innerHTML = data['users_by_role'][i]['username'];
           cell2.innerHTML = data['users_by_role'][i]['email'];
           cell3.innerHTML = `+33<span class="user_pure_tel">` + data['users_by_role'][i]['tel'] + `</span>`;
-          cell4.innerHTML = "************"
-          cell5.innerHTML = `
-          <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
-                    <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_bridge_row(this)"></i>
-          `;
+          cell4.innerHTML = "************";
+        
+            cell5.innerHTML = `
+            <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
+                      <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_bridge_row(this)"></i>
+            `;
+     
+ 
         };
       },
       error: function () {
@@ -1690,10 +1775,10 @@
           var cell4 = row.insertCell(4);
           var cell5 = row.insertCell(5);
           var cell6 = row.insertCell(6);
-          if (current_user_role === "admin"){
+          if (current_user_role === "admin") {
             var cell7 = row.insertCell(7);
           }
-          
+
 
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data["liste_data"][i]["matiere_name"]
@@ -1702,18 +1787,18 @@
           cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
 
 
-          if(current_user_role === "admin"){
+          if (current_user_role === "admin") {
             cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class="prix_matiere_input"> €`;
             cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class="prix_limeaire_input">€`;
-          
+
             cell7.innerHTML = `
             <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                 onclick="delete_bridge_row(this)"></i>`;
-          }else{
+          } else {
             cell5.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_matiere"] + ` €</output>`;
             cell6.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_limeaire"] + `€</output>`;
           }
-          
+
 
         };
 
@@ -1793,29 +1878,29 @@
           var cell4 = row.insertCell(4);
           var cell5 = row.insertCell(5);
           var cell6 = row.insertCell(6);
-          if(current_user_role  === "admin"){
+          if (current_user_role === "admin") {
             var cell7 = row.insertCell(7);
           }
-         
+
 
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data["liste_data"][i]["matiere_name"]
           cell2.innerHTML = data["liste_data"][i]["type_name"]
           cell3.innerHTML = data["liste_data"][i]["usinage_name"]
           cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
-          if(current_user_role  === "admin"){
+          if (current_user_role === "admin") {
             cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
             cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`;
             cell7.innerHTML = `
-  
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                   onclick="delete_bridge_row(this)"></i>
             `;
-          } else{
+          } else {
             cell5.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_matiere"] + ` €</output>`;
             cell6.innerHTML = `<output type="text" >€ ` + data["liste_data"][i]["prix_limeaire"] + `</output>`;
           }
-         
+
 
         };
 
@@ -1828,7 +1913,7 @@
   });
 
   $("#type_usinage_list").on('change', function () {
-    var current_user_role = document.getElementById("output_user_role").innerHTML;    let formData = new FormData();
+    var current_user_role = document.getElementById("output_user_role").innerHTML; let formData = new FormData();
     var selectMatiereElement = document.getElementById("matiere_list");
     var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
     var selectedMatiereValue = selectedMatiereOption.value;
@@ -1844,7 +1929,7 @@
     var selectedTypeUsinageValue = selectedTypeUsinageOption.value;
 
     var selectedTypeUsinageText = selectedTypeUsinageOption.innerText;
-    if(selectedTypeUsinageText == "USIL"){
+    if (selectedTypeUsinageText == "USIL") {
       formData.append('is_usil', true);
     }
 
@@ -1865,10 +1950,11 @@
       processData: false,
       success: function (data) {
         var table2 = document.getElementById("matieres_table");
-        if ((data["liste_data"])) {;
+        if ((data["liste_data"])) {
+          ;
           var table = document.getElementById("matieres_table");
           if (table.style.display == "none") {
-           
+
             table.style.display = "block";
             var matieres_usil_table = document.getElementById("matieres_usil_table");
             matieres_usil_table.style.display = "none";
@@ -1892,26 +1978,26 @@
             var cell4 = row.insertCell(4);
             var cell5 = row.insertCell(5);
             var cell6 = row.insertCell(6);
-            if(current_user_role == "admin"){
+            if (current_user_role == "admin") {
               var cell7 = row.insertCell(7);
             }
-            
+
 
             cell0.innerHTML = nbr++;
             cell1.innerHTML = data["liste_data"][i]["matiere_name"]
             cell2.innerHTML = data["liste_data"][i]["type_name"]
             cell3.innerHTML = data["liste_data"][i]["usinage_name"]
             cell4.innerHTML = data["liste_data"][i]["epaisseur_value"]
-            if(current_user_role == "admin"){
-                cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
-                cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
-                cell7.innerHTML = `
-    
+            if (current_user_role == "admin") {
+              cell5.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_matiere"] + `' class='prix_matiere_input'> €`;
+              cell6.innerHTML = `<input type="text" value='` + data["liste_data"][i]["prix_limeaire"] + `'class='prix_limeaire_input'>€`
+              cell7.innerHTML = `
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                       onclick="delete_user('{{user.id}}')"></i>`;
-            }else{
+            } else {
               cell5.innerHTML = `<output type="text" >` + data["liste_data"][i]["prix_matiere"] + ` € </output>`;
-                cell6.innerHTML = `<output type="text">` + data["liste_data"][i]["prix_limeaire"] + ` €</output>`
+              cell6.innerHTML = `<output type="text">` + data["liste_data"][i]["prix_limeaire"] + ` €</output>`
             }
           };
         } else {
@@ -1940,7 +2026,7 @@
               var cell5 = row.insertCell(5);
               var cell6 = row.insertCell(6);
               var cell7 = row.insertCell(7);
-              if(current_user_role === "admin"){
+              if (current_user_role === "admin") {
                 var cell8 = row.insertCell(8);
               }
 
@@ -1949,20 +2035,20 @@
               cell2.innerHTML = data["data_usil"][i]["type_name"]
               cell3.innerHTML = data["data_usil"][i]["usinage_name"]
               cell4.innerHTML = data["data_usil"][i]["epaisseur_value"]
-              if(current_user_role === "admin"){
+              if (current_user_role === "admin") {
                 cell5.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_1"] + `' class='prix_1_input'> €`;
                 cell6.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_2"] + `'class='prix_2_input'>€`;
                 cell7.innerHTML = `<input type="text" value='` + data["data_usil"][i]["prix_3"] + `'class='prix_3_input'>€`;
                 cell8.innerHTML = `
-  
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                   onclick="delete_bridge_row(this)"></i>`;
-              }else{
+              } else {
                 cell5.innerHTML = `<output type="text" > ` + data["data_usil"][i]["prix_1"] + ` €</output>`;
                 cell6.innerHTML = `<output type="text" >` + data["data_usil"][i]["prix_2"] + ` €</output>`;
                 cell7.innerHTML = `<output type="text" >` + data["data_usil"][i]["prix_3"] + ` €</output>`;
               }
-              
+
             }
           }
         }
@@ -1975,6 +2061,8 @@
   });
   //change representant
   $("#representant").on('change', function () {
+    var current_user_role = document.getElementById("output_user_client_role").innerHTML;
+   
 
     let formData = new FormData();
     var selectRepresentantElement = document.getElementById("representant");
@@ -2027,13 +2115,16 @@
           cell5.innerHTML = data['clients'][i][1];
           cell6.innerHTML = data['clients'][i][6];
           cell7.innerHTML = data['clients'][i][7];
-          cell8.innerHTML = `
+          if (current_user_role == "admin") {
+            cell8.innerHTML = `
             <output class="rec_client_id" style="visibility: hidden;">`+ data['clients'][i][9] + `</output>
             <output class="rec_user_id" style="visibility: hidden;">`+ data['clients'][i][8] + `</output>
             <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;"></i>
             <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_user('{{user.id}}')"></i>
           `;
-        };
+          };
+        }
+
 
       },
       error: function () {
@@ -2083,15 +2174,15 @@
       var prix_livr_ht;
       // text_bn.classList.add("active-case");
       if (text_bn.classList.contains("active-case")) {
-        prix_livr_ht=document.getElementById('prix_livr_text_ht').innerHTML ;
-              document.getElementById("text_prix_livr_div").style.display= "none";
+        prix_livr_ht = document.getElementById('prix_livr_text_ht').innerHTML;
+        document.getElementById("text_prix_livr_div").style.display = "none";
 
-      } else{
-        prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
-        document.getElementById("scructure_livraison_form").style.display= "none";
+      } else {
+        prix_livr_ht = document.getElementById('prix_livr_ht').innerHTML;
+        document.getElementById("scructure_livraison_form").style.display = "none";
       }
 
-      var prix_total_ht =document.getElementById("prix_lin_ht").innerHTML;
+      var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
       var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
 
       document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
@@ -2131,14 +2222,14 @@
     }
 
     if (radio_value == "livraison") {
-      var prix_livr_ht=document.getElementById('prix_livr_ht').innerHTML ;
-      var prix_total_ht =document.getElementById("prix_lin_ht").innerHTML;
+      var prix_livr_ht = document.getElementById('prix_livr_ht').innerHTML;
+      var prix_total_ht = document.getElementById("prix_lin_ht").innerHTML;
       var prix_total_ttc = document.getElementById("prix_lin_ttc").innerHTML;
 
       document.getElementById("prix_lin_ht").innerHTML = (parseFloat(prix_total_ht) - prix_livr_ht).toFixed(2);
       document.getElementById("prix_lin_ttc").innerHTML = (parseFloat(prix_total_ttc) - 1.2 * prix_livr_ht).toFixed(2);
       document.getElementById("mode_emp").checked = true;
-      document.getElementById("scructure_livraison_form").style.display= "none";
+      document.getElementById("scructure_livraison_form").style.display = "none";
       document.getElementById("mode_emp_envoi").checked = true;
     }
     remplie_addresse_case();
@@ -2271,7 +2362,7 @@
       console.log(file);
       let formData = new FormData();
       formData.append('file', file);
-      let imageElement = document.getElementsByClassName("img_usinage")[0];
+      let imageElement = document.getElementById("img_usinage");
       var selectElement = document.getElementById("epp");
       var selectedOption = selectElement.options[selectElement.selectedIndex];
       var selectedValue = selectedOption.value;
@@ -2320,11 +2411,11 @@
           contentType: false,
           processData: false,
           success: function (data) {
-              console.log(data['path_folder'])
+            console.log(data['path_folder'])
             var nbr_percage = data['nbr_percage'];
             var path_folder = data['path_folder'];
-            let larg = data['dimension']['larg'] / 1000;
-            let long = data['dimension']['long'] / 1000;
+            let long = data['dimension']['larg'] / 1000;
+            let larg = data['dimension']['long'] / 1000;
             console.log("chaper");
             console.log(larg);
             console.log(long);
@@ -2340,18 +2431,19 @@
 
               perimetre = data['perimetre'];
               let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+
               let formattedNumber_decoup = prix_decoup;
               let prix_decoup_ttc = formattedNumber_decoup * 1.2;
               let prix_matiere_ht = prix_matiere_mtr * surface;
 
               let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-              let total_prix_decoup = qte * (prix_matiere_ht + formattedNumber_decoup);
-              let total_prix_matiere = qte * (prix_decoup_ttc + prix_matiere_ttc);
+              let total_prix_ht = qte * (prix_matiere_ht + formattedNumber_decoup + nbr_percage * 0.3);
+              let total_prix_ttc = qte * (prix_decoup_ttc + prix_matiere_ttc + nbr_percage * 0.36);
 
               document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
               document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-              document.getElementById("prix_lin_ht").innerHTML = total_prix_decoup.toFixed(2);
-              document.getElementById("prix_lin_ttc").innerHTML = total_prix_matiere.toFixed(2);
+              document.getElementById("prix_lin_ht").innerHTML = total_prix_ht.toFixed(2);
+              document.getElementById("prix_lin_ttc").innerHTML = total_prix_ttc.toFixed(2);
               document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
               document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
               document.getElementById("qte_structure").innerHTML = qte;
@@ -2359,8 +2451,22 @@
               document.getElementById("prix_percage").innerHTML = (1.2 * 0.3 * nbr_percage).toFixed(2);
               document.getElementById("scructure_livraison_form").style.display = "none";
               document.getElementById("mode_emp").checked = true;
+              document.getElementById("height_label").innerHTML = larg.toFixed(2);
+              document.getElementById("width_label").innerHTML = long.toFixed(2);
               if (document.getElementById("devis_mode_reception_div").style.display !== "none") {
                 document.getElementById("devis_mode_reception_div").style.display = "none";
+              }
+              if (mt_text === "Newbond") {
+                document.getElementById("section_surface_usinage").style.display = "block";
+                document.getElementById("prix_matiere_hidden").innerHTML = prix_matiere_mtr;
+
+              }
+
+              let labels = document.getElementsByClassName("label");
+
+              // Iterate through each element and set the display property to "block"
+              for (let i = 0; i < labels.length; i++) {
+                labels[i].style.display = "block";
               }
               var selectElement = document.getElementById('cients_devis_pro');
               // Set the value of the select element to -1
@@ -2404,20 +2510,26 @@
             }
             // Change the image source
 
-
-            imageElement.src = path_folder + '/current.png';
+            let timestamp = new Date().getTime();
+            imageElement.src = `${path_folder}/current.png?${timestamp}`;
             let myDiv = document.getElementById("accordionExample");
             myDiv.style.display = "block";
             let devis_pro = document.getElementById("acardion_format_pro");
             devis_pro.style.display = "block";
             let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
-            form_envoyer_usinage_btn.style.display = "block";
+            if (form_envoyer_usinage_btn) {
+              form_envoyer_usinage_btn.style.display = "block";
+            }
+
+
             let total_prix_detailles = document.getElementById("total_prix_detailles");
             total_prix_detailles.style.display = "flex";
             document.getElementById("height_img").innerHTML = larg.toFixed(2);
             document.getElementById("width_img").innerHTML = long.toFixed(2);
             document.getElementById("prix_detailles").style.display = "block";
             document.getElementById("text_prix_detailles").style.display = "none";
+            document.getElementById("surface_usinage").innerHTML = surface.toFixed(2)
+            document.getElementById("surface_usinage_hidden").innerHTML = surface.toFixed(2)
           },
           error: function () {
             alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
@@ -2438,8 +2550,8 @@
   $("#qte").on('input', function () {
     let qte = this.value;
 
-    if (qte < -1) {
-    
+    if (qte < 0) {
+
       this.value = 1;
     }
     document.getElementById("qte_structure").innerHTML = qte;
@@ -2468,19 +2580,35 @@
 
 })()
 function ouvrir_form_envoi() {
+  var selectClient = document.getElementById("client_select");
+  var selectedClientOption = selectClient.options[selectClient.selectedIndex];
+  if (selectedClientOption) {
+    document.getElementById("adresse_envoi_form").reset();
+    let myDiv = document.getElementById("envoi_div");
+    myDiv.style.display = "block";
+    myDiv.style.zIndex = "9999";
+    document.getElementById("adresse_envoi_form").reset();
+    if (document.getElementById("mode_livr").checked == true) {
+      document.getElementById("addresse_div").style.display = "block";
+
+
+    }
+    remplie_data();
+
+  } else {
+    var msg = document.getElementById("msg_simulation");
+    msg.style.display = "block";
+    msg.style.color = "orangered"
+    msg.textContent = "Vous n'avez pas le client, veuillez ajouter les clients pour pouvoir envoyer la production!";
+    setTimeout(function () {
+      msg.style.display = "none";
+      msg.style.color = "green"
+    }, 2000);
+  }
+
   // console.log(document.getElementById('simulation_infos'));
   // document.getElementById('simulation_infos').classList.add('disabled');
-  document.getElementById('simulation_infos').style.zIndex = '-1';
-  document.getElementById("adresse_envoi_form").reset();
-  let myDiv = document.getElementById("envoi_div");
-  myDiv.style.display = "block";
-  document.getElementById("adresse_envoi_form").reset();
-  if (document.getElementById("mode_livr").checked == true) {
-    document.getElementById("addresse_div").style.display = "block";
-
-
-  }
-  remplie_data();
+  // document.getElementById('simulation_infos').style.zIndex = '-1';
 
 
 }
@@ -2505,7 +2633,7 @@ function remplie_data() {
       document.getElementById("nom_voie_livr").value = data[0]["addresse"];
       document.getElementById("cp_livr").value = data[0]["cp"];
       document.getElementById("ville_livr").value = data[0]["ville"];
-      document.getElementById('prix_livr').innerHTML = (1.2*prix_livr_ht).toFixed(2);
+      document.getElementById('prix_livr').innerHTML = (1.2 * prix_livr_ht).toFixed(2);
       document.getElementById('prix_livr_ht').innerHTML = prix_livr_ht;
     },
     error: function () {
@@ -2605,6 +2733,27 @@ function envoyer_command() {
     }
     let file = $('#fileInput')[0].files[0];
     formData.append('file', file);
+    if (name_matiere === "Newbond") {
+      var selects = document.querySelectorAll('#plaque_div select');
+      var selectedValues = [];
+      var selectedQte = [];
+      var input = "";
+      let i = 0;
+      var qte = parseFloat(document.getElementById("qte").value);
+      selects.forEach(function (select) {
+
+        let text = select.selectedOptions[0].text;
+        selectedValues[i] = text;
+        input = select.nextElementSibling;
+        selectedQte[i] = input.querySelector('input.qte_plaque').value;
+        i++;
+      });
+      if (selectedValues.length) {
+        formData.append('plaques', selectedValues);
+        formData.append('qte_plaques', selectedQte);
+      }
+    }
+
 
 
 
@@ -2652,9 +2801,16 @@ function envoyer_command() {
     contentType: false,
     processData: false,
     success: function (msg) {
+
       let myDiv = document.getElementById("envoi_div");
       myDiv.style.display = "none";
-      window.location.href = "/simulation";
+
+      var msg_simulation = document.getElementById("msg_simulation");
+      msg_simulation.textContent = msg;
+      msg_simulation.style.display = "block";
+      setTimeout(function () {
+        window.location.href = "/simulation";
+      }, 300);
     },
     error: function () {
       alert('Une erreur s\'est produite lors de fare l\'operation.');
@@ -2845,10 +3001,10 @@ function telecharger_pdf(user) {
   // text_bn.classList.add("active-case");
   if (radio_value == "livraison") {
     var prix_livr_ht;
-    if (file_btn.classList.contains("active-case")){
-      prix_livr_ht =parseFloat(document.getElementById("prix_livr_ht").innerHTML);
-    }else{
-      prix_livr_ht =parseFloat(document.getElementById("prix_livr_text_ht").innerHTML);
+    if (file_btn.classList.contains("active-case")) {
+      prix_livr_ht = parseFloat(document.getElementById("prix_livr_ht").innerHTML);
+    } else {
+      prix_livr_ht = parseFloat(document.getElementById("prix_livr_text_ht").innerHTML);
     }
     formData.append('prix_livr_ht', prix_livr_ht);
   }
@@ -2871,7 +3027,7 @@ function telecharger_pdf(user) {
   // var prix_limeaire = document.getElementById("frais_decoup_ttc").innerHTML;
 
   var qte = parseInt(document.getElementById("qte").value);
-
+  console.log(prix_ht);
   formData.append('name_matiere', matiere);
   formData.append('type_matiere', type_matiere);
 
@@ -2881,13 +3037,15 @@ function telecharger_pdf(user) {
   formData.append('epaisseur', epp);
   formData.append('user', user);
   if (!file_btn.classList.contains("active-case")) {
-   
+
     var selectHauteurElement = document.getElementById("height");
     var selectHauteurOption = selectHauteurElement.options[selectHauteurElement.selectedIndex];
     var hauteur = selectHauteurOption.innerText;
     var nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
+    var prix_pu = document.getElementById("prix_lettre_ht").innerHTML;
     formData.append('hauteur', hauteur);
     formData.append('nbr_lettres', nbr_lettres);
+    formData.append('prix_pu', prix_pu);
   }
 
 
@@ -2898,10 +3056,11 @@ function telecharger_pdf(user) {
     contentType: false,
     processData: false,
     success: function (src_pdf) {
+      ;
+      console.log(src_pdf["path"]);
       var link = document.createElement('a');
-      console.log(link)
-      link.href = 'static/members/comercial/Eric/output.pdf';  // Replace with the actual path to your PDF file.
-      link.download = 'test.pdf';  // The name you want the downloaded file to have.
+      link.href = src_pdf["path"] + '/output.pdf';
+      link.download = 'devis.pdf';
       document.body.appendChild(link);
       console.log(link)
       link.click();
@@ -2914,32 +3073,32 @@ function telecharger_pdf(user) {
   });
 }
 
-function telecharger_dxf(path_folder, name){
+function telecharger_dxf(path_folder, name) {
   var link = document.createElement('a');
-  console.log( path_folder+'/DXF/'+name+'.dxf');
-      link.href = path_folder+'/DXF/'+name+'.dxf';  // Replace with the actual path to your PDF file.
-       link.download = 'dxf_file.png';  // The name you want the downloaded file to have.
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  console.log(path_folder + '/DXF/' + name + '.dxf');
+  link.href = path_folder + '/DXF/' + name + '.dxf';  // Replace with the actual path to your PDF file.
+  link.download = 'dxf_file.png';  // The name you want the downloaded file to have.
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
-function telecharger_bc(path_folder, name){
+function telecharger_bc(path_folder, name) {
   var link = document.createElement('a');
-  console.log( path_folder+'/BL/'+name+'.pdf');
-      link.href = path_folder+'/BL/'+name+'.pdf';  // Replace with the actual path to your PDF file.
-       link.download = 'bl_file.pdf';  // The name you want the downloaded file to have.
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  console.log(path_folder + '/BL/' + name + '.pdf');
+  link.href = path_folder + '/BL/' + name + '.pdf';  // Replace with the actual path to your PDF file.
+  link.download = 'bl_file.pdf';  // The name you want the downloaded file to have.
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
-function telecharger_bc_fin(path_folder, name){
+function telecharger_bc_fin(path_folder, name) {
   var link = document.createElement('a');
-  console.log( path_folder+'/BL/'+name+'.pdf');
-      link.href = path_folder+'/BL/'+name+'.pdf';  // Replace with the actual path to your PDF file.
-       link.download = 'bl_file.pdf';  // The name you want the downloaded file to have.
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  console.log(path_folder + '/BL/' + name + '.pdf');
+  link.href = path_folder + '/BL/' + name + '.pdf';  // Replace with the actual path to your PDF file.
+  link.download = 'bl_file.pdf';  // The name you want the downloaded file to have.
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 // function confirmation(id) {
 //   let formData = new FormData();
@@ -2976,18 +3135,18 @@ function usiner(id, path, name) {
   const selectedValues = [];
 
   for (let i = 0; i < selectElement.options.length; i++) {
-      if (selectElement.options[i].selected) {
-          selectedValues.push(selectElement.options[i].innerHTML);
-      }
+    if (selectElement.options[i].selected) {
+      selectedValues.push(selectElement.options[i].innerHTML);
+    }
   }
 
   const selectElementEmplacement = document.getElementById('enpl_select');
   const selectedValuesEmplacement = [];
 
   for (let i = 0; i < selectElementEmplacement.options.length; i++) {
-      if (selectElementEmplacement.options[i].selected) {
-        selectedValuesEmplacement.push(selectElementEmplacement.options[i].innerHTML);
-      }
+    if (selectElementEmplacement.options[i].selected) {
+      selectedValuesEmplacement.push(selectElementEmplacement.options[i].innerHTML);
+    }
   }
 
 
@@ -2998,21 +3157,21 @@ function usiner(id, path, name) {
   formData.append("qte_plaque", qte_plaque);
   formData.append("selectedValues", selectedValues);
   formData.append("selectedValuesEmplacement", selectedValuesEmplacement);
-   $.ajax({
-     url: '/change_statut_usiner',
-     type: 'POST',
-     data: formData,
-     contentType: false,
-     processData: false,
-     success: function (msg) {
-       window.location.href = "/confirme";
+  $.ajax({
+    url: '/change_statut_usiner',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (msg) {
+      window.location.href = "/confirme";
 
-  //     // Change the image source
-  //     //  imageElement.src =  'static/img/upload/current.png';
-  //     //  let myDiv = document.getElementById("accordionExample");
-  //     //  myDiv.style.display = "block";
-  //     // let myDiv2 = document.getElementById("prix_total");
-  //     // myDiv2.style.display = "block";
+      //     // Change the image source
+      //     //  imageElement.src =  'static/img/upload/current.png';
+      //     //  let myDiv = document.getElementById("accordionExample");
+      //     //  myDiv.style.display = "block";
+      //     // let myDiv2 = document.getElementById("prix_total");
+      //     // myDiv2.style.display = "block";
 
     },
     error: function () {
@@ -3031,7 +3190,15 @@ function text_btn_active() {
     text_bn.classList.add("active-case");
     text_section = document.getElementById("text-section");
     text_section.style.display = "block"
+    if (document.getElementById("section_surface_usinage").style.display == "block") {
+      document.getElementById("section_surface_usinage").style.display = "none";
+    }
+    let labels = document.getElementsByClassName("label");
 
+    // Iterate through each element and set the display property to "block"
+    for (let i = 0; i < labels.length; i++) {
+      labels[i].style.display = "none";
+    }
 
     if (file_btn.classList.contains("active-case")) {
       file_btn.classList.remove("active-case");
@@ -3313,34 +3480,126 @@ function forms_btn_active() {
   }
 }
 function ajuter_plaque_select() {
-  var myDiv = document.getElementById("plaque_div");
+  let formData = new FormData();
+  var selectMatiereElement = document.getElementById("matiere_select");
+  var selectedMatiereOption = selectMatiereElement.options[selectMatiereElement.selectedIndex];
+  var selectedMatiereValue = selectedMatiereOption.value;
+  var matiereText = selectedMatiereOption.innerHTML;
 
-  // HTML code to append
-  var htmlCode = `<div class=" mt-3 col-7">
-  <select class="form-select" aria-label="Default select example">
-      <option selected>Plaque sorti</option>
-      <option value="1">4000x2000</option>
-      <option value="2">3000x2000</option>
-      <option value="3">4000x1500</option>
-      <option value="4">3000x1500</option>
-      <option value="5">4000x1000</option>
-      <option value="6">3000x1000</option>
-      <option value="7">4000x2000</option>
-      <option value="8">3000x1250</option>
-      <option value="9">2250x1250</option>
-  </select>
-</div>
-<div class="col-4">
-  <button class="btn_counter decrement_plaque">-</button>
+  var selectTypeElement = document.getElementById("type_matiere");
+  var selectedTypeOption = selectTypeElement.options[selectTypeElement.selectedIndex];
+  var selectedTypeValue = selectedTypeOption.value;
 
-  <input id="qte_plaque" value=1 min="0">
-  <button class="btn_counter increment_plaque">+</button>
-</div>`;
+  var selectEpaisseurElement = document.getElementById("epp");
+  var selectedEpaisseurOption = selectEpaisseurElement.options[selectEpaisseurElement.selectedIndex];
+  var selectedEpaisseurValue = selectedEpaisseurOption.value;
 
-  // Append HTML using innerHTML
-  myDiv.innerHTML += htmlCode;
+  formData.append('matiere_id', selectedMatiereValue);
+  formData.append('type_id', selectedTypeValue);
+  formData.append('epaisseur_id', selectedEpaisseurValue);
+
+  $.ajax({
+    url: '/get_plaques_usinage',
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+
+      var myDiv = document.getElementById("plaque_div");
+      if (data["plaques"].length > 0) {
+        var htmlCode = `
+          <div class=" mt-3 row select_plaque_div">
+            <select class=" col col-md-5 form-select select-plaque " aria-label="select plaques" style="  width: 60%;" onchange="selectOptionChanged()">`;
+
+        for (let i = 0; i < data["plaques"].length; i++) {
+          htmlCode += `<option value=` + data["plaques"][i]["prix_plaque"] + `>` + data["plaques"][i]["dimonsion_plaque"] + `</option>`;
+        }
+
+        htmlCode += `
+            </select>
+         
+          <div class="col col-md-4">
+            <button class="btn_counter decrement_plaque_surface" onclick="decrementPlaqueSurface(this)">-</button>
+            <input class="qte_plaque" value="1" min="0"  oninput="change_input_plaque_surface(this)" >
+            <button class="btn_counter increment_plaque_surface" onclick="incrimentPlaqueSurface(this)">+</button>
+          </div>
+           </div>`;
+
+        // Utilisez insertAdjacentHTML pour ajouter le nouveau contenu sans remplacer l'existant
+        myDiv.insertAdjacentHTML('beforeend', htmlCode);
+        checkPlaquesValues();
+
+      }
+    },
+    error: function () {
+      alert('Une erreur s\'est produite lors de faire l\'opération.');
+    }
+  });
+
 }
+function selectOptionChanged() {
+  checkPlaquesValues();
+}
+function checkPlaquesValues() {
+  var selects = document.querySelectorAll('#plaque_div select');
+  var selectedValues = [];
+  var selectedSurface = [];
+  var selectedQte = [];
+  var input2 = "";
+  let width, height, current_surface = 0;
+  let parts = [];
+  var qte = parseFloat(document.getElementById("qte").value);
+  var nbr_percage = parseInt(document.getElementById("qte_percage").innerHTML);
+  let frais_decoup_ht = parseFloat(document.getElementById("frais_decoup_ht").innerHTML);
+  selects.forEach(function (select) {
+    let value = select.value;
+    let text = select.selectedOptions[0].text;
+    parts = text.split('x');
+    // // Convert the parts to floating-point numbers
 
+    width = (parseFloat(parts[0]) - 20) / 1000;
+    height = (parseFloat(parts[1]) - 20) / 1000;
+    current_surface = (width * height).toFixed(2);
+
+    console.log(current_surface);
+    selectedSurface.push(current_surface);
+    selectedValues.push(value);
+    input2 = select.nextElementSibling;
+
+    selectedQte.push(input2.querySelector('input.qte_plaque').value);
+
+  });
+  console.log(selectedSurface);
+  console.log(selectedValues);
+  var result_surface = 0;
+  var result_prix = 0;
+  for (let i = 0; i < selectedSurface.length; i++) {
+
+    result_surface += parseFloat(selectedSurface[i]) * parseFloat(selectedQte[i]);
+    result_prix += parseFloat(selectedValues[i]) * parseFloat(selectedQte[i]);
+  }
+
+  let value_surface_chutes = parseFloat(document.getElementById("surface_usinage_hidden").innerText);
+  if (value_surface_chutes < result_surface) {
+    document.getElementById("add_new_plaque").style.display = "none";
+    document.getElementById("surface_usinage").innerHTML = 0;
+
+  } else {
+    document.getElementById("add_new_plaque").style.display = "block";
+    document.getElementById("surface_usinage").innerHTML = (value_surface_chutes - result_surface).toFixed(2);
+  }
+  let prix_matiere_chute = parseFloat(document.getElementById("prix_matiere_hidden").innerHTML);
+  let surface_chutes = parseFloat(document.getElementById("surface_usinage").innerHTML);
+  let prix_matiere_ht = result_prix + surface_chutes * prix_matiere_chute;
+  let prix_matiere_ttc = 1.2 * prix_matiere_ht;
+  let prix_total_ht = qte * (prix_matiere_ht + frais_decoup_ht + 0.3 * nbr_percage);
+  let prix_total_ttc = 1.2 * prix_total_ht;
+  document.getElementById("prix_lin_ht").innerHTML = prix_total_ht.toFixed(2);
+  document.getElementById("prix_lin_ttc").innerHTML = prix_total_ttc.toFixed(2);
+  document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+  document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+}
 // ouvre nes user form
 function newClientForm() {
   var liste_clients_section = document.getElementById("liste_clients_section");
@@ -3409,13 +3668,12 @@ function addNewClient() {
   formData.append('email', emailText);
   formData.append('prix_clent_livr', prix_clent_livr);
   formData.append('tel', telpText);
-
+//  else if (!validateEmail(email)) {
+//     msg = "Respecter les règles  pour rédiger un mail!"
   var msg = "";
   if (isAnyFormDataEmpty(formData)) {
     msg = "Un ou plusieurs champs du formulaire sont vides";
-  } else if (!validateEmail(email)) {
-    msg = "Respecter les règles  pour rédiger un mail!";
-  } else if (isNumber(numeroVoie) || numeroVoie <= 0) {
+  }  else if (isNumber(numeroVoie) || numeroVoie <= 0) {
     msg = "Numéro de voie doit être supérieur à 0";
   } else if (isNumber(cp) || cp <= 0) {
     msg = "CP  doit être supérieur à 0";
@@ -3551,7 +3809,7 @@ function EnregistrerEditClient() {
   var telpText = telp.value;
 
   var livraison = document.getElementById("client_edit_prix_livr");
-  var prix_livr  = client_edit_prix_livr.value;
+  var prix_livr = client_edit_prix_livr.value;
   let formData = new FormData();
   formData.append('representant', selectedRepresentantValue);
   formData.append('name', nameText);
@@ -3845,10 +4103,10 @@ function lettres_btn_bridge_active() {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        if(current_user_role === "admin"){
+        if (current_user_role === "admin") {
           var cell7 = row.insertCell(7);
         }
-        
+
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -3857,14 +4115,14 @@ function lettres_btn_bridge_active() {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-        if(current_user_role === "admin"){
+        if (current_user_role === "admin") {
           cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
           cell7.innerHTML = `
-  
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                   onclick="delete_Lettrebridge_row(this)"></i>
             `;
-        } else{
+        } else {
           cell6.innerHTML = `<output type="text" >` + data["prix_lettre_list"][i]["prix"] + ` € </output>`;
         }
       }
@@ -3992,10 +4250,10 @@ $("#matiere_list_text").on('change', function () {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        if(current_user_role === "admin"){
+        if (current_user_role === "admin") {
           var cell7 = row.insertCell(7);
         }
-        
+
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -4004,14 +4262,14 @@ $("#matiere_list_text").on('change', function () {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-        if(current_user_role == "admin"){
+        if (current_user_role == "admin") {
           cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
           cell7.innerHTML = `
-  
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                   onclick="delete_Lettrebridge_row(this)"></i>
             `;
-        }else{
+        } else {
           cell6.innerHTML = `<output type="text" >` + data["prix_lettre_list"][i]["prix"] + ` € </output>`;
         }
       }
@@ -4114,10 +4372,10 @@ $("#type_list_text").on('change', function () {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        if(current_user_role === "admin"){
+        if (current_user_role === "admin") {
           var cell7 = row.insertCell(7);
         }
-        
+
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -4126,14 +4384,14 @@ $("#type_list_text").on('change', function () {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-        if(current_user_role === "admin"){
+        if (current_user_role === "admin") {
           cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
           cell7.innerHTML = `
-  
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                   onclick="delete_Lettrebridge_row(this)"></i>
             `;
-        }else{
+        } else {
           cell6.innerHTML = `<output type="text">` + data["prix_lettre_list"][i]["prix"] + ` €</output>`;
         }
       }
@@ -4225,10 +4483,10 @@ $("#epaisseur_text").on('change', function () {
         var cell4 = row.insertCell(4);
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
-        if(current_user_role === "admin"){
+        if (current_user_role === "admin") {
           var cell7 = row.insertCell(7);
         }
-        
+
 
         cell0.innerHTML = nbr++;
         cell1.innerHTML = data["prix_lettre_list"][i]["matiere_name"];
@@ -4237,14 +4495,14 @@ $("#epaisseur_text").on('change', function () {
         cell4.innerHTML = data["prix_lettre_list"][i]["epaisseur_value"];
         cell5.innerHTML = data["prix_lettre_list"][i]["hauteur_value"] / 10;
 
-        if(current_user_role === "admin"){
-        cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
+        if (current_user_role === "admin") {
+          cell6.innerHTML = `<input type="text" value='` + data["prix_lettre_list"][i]["prix"] + `'class='prix_text_input'>€`;
           cell7.innerHTML = `
-  
+
                   <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;"
                   onclick="delete_Lettrebridge_row(this)"></i>
             `;
-        }else{
+        } else {
           cell6.innerHTML = `<output type="text" >` + data["prix_lettre_list"][i]["prix"] + ` € </output>`;
         }
       }
@@ -4401,7 +4659,7 @@ function addNewUser() {
     formData.append('email', emailText);
     formData.append('password', pwdText);
     formData.append('tel', telText);
-    formData.append('prix_livr_user', prix_livr_user);
+
 
     console.log(formData);
 
@@ -4637,7 +4895,7 @@ function validateForm() {
 
   var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   // Check if email is empty
-  if (email.trim() == "" || password =="") {
+  if (email.trim() == "" || password == "") {
     displayErrorMessage("Remplissez tous les champs");
     isValid = false;
   } else if (!emailRegex.test(email)) {
@@ -4745,15 +5003,68 @@ function isNumber(value) {
 
 
 
-  window.setTimeout(function() {
-    var alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
+window.setTimeout(function () {
+  var alerts = document.querySelectorAll('.alert');
+  alerts.forEach(function (alert) {
 
-      alert.classList.remove('show');
-      alert.classList.add('fade');
-      alert.style.display="block";
-      window.setTimeout(function() {
-        alert.style.display = 'none';
-      }, 150);  // Wait for the fade transition to complete (Bootstrap default transition time is 150ms)
-    });
-  }, 2000);
+    alert.classList.remove('show');
+    alert.classList.add('fade');
+    alert.style.display = "block";
+    window.setTimeout(function () {
+      alert.style.display = 'none';
+    }, 150);  // Wait for the fade transition to complete (Bootstrap default transition time is 150ms)
+  });
+}, 2000);
+
+
+function incrimentPlaqueSurface(button) {
+  // Get the input element associated with this button
+  const input = button.previousElementSibling;
+  if (input && input.classList.contains('qte_plaque')) {
+    // Get the current value of the input
+    let currentValue = parseInt(input.value);
+    if (!isNaN(currentValue)) {
+      // Increment the value
+      input.value = currentValue + 1;
+      checkPlaquesValues();
+      if (document.getElementById("add_new_plaque").style.display == "none") {
+        input.value -= 1;
+      }
+    }
+  }
+}
+
+function decrementPlaqueSurface(button) {
+  // Get the input element associated with this button
+  const input = button.nextElementSibling;
+  if (input && input.classList.contains('qte_plaque')) {
+    // Get the current value of the input
+    let currentValue = parseInt(input.value);
+    if (!isNaN(currentValue)) {
+      if (currentValue > 1) {
+        // Decrement the value
+        input.value = currentValue - 1;
+      } else if (currentValue == 1) {
+        if (confirm("Voulez-vous supprimer cette sélection ?")) {
+          const parentDiv = button.closest('.select_plaque_div');
+          if (parentDiv) {
+            parentDiv.remove();
+          }
+        }
+      }
+      checkPlaquesValues();
+
+    }
+  }
+}
+
+
+
+function change_input_plaque_surface(current) {
+  let qte = current.value;
+
+  if (qte < 0) {
+
+    current.value = 1;
+  }
+};

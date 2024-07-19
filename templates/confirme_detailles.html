@@ -25,7 +25,7 @@
                     <div class="col-md-8">
                         <h5 class="text-secondary">shgfdhsdgs dsgsd sd</h5>
                     </div>
-                
+
                 </div> -->
             </div>
             <div class="row border border-success mt-3" style="padding: 10px; border-radius: 5px;">
@@ -211,7 +211,7 @@
                                                 </div>
 
                                             </div>
-                                          
+
                                         </div>
                                     </div>
                                 </div>
@@ -221,7 +221,7 @@
                 </div>
             </section>
             {% endif %}
-            
+
             <!-- <div>
                 <label class="mt-3" for="qte"><strong>Qte</strong></label>
                 <input id="qte" value=1 min="1">
@@ -236,7 +236,7 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseAttente" aria-expanded="false"
                                     aria-controls="collapseAttente">
-                                    Description
+                                    Commentaire
                                 </button>
                             </h2>
                             <div id="collapseAttente" class="accordion-collapse collapse" aria-labelledby="headingTwo"
@@ -261,13 +261,13 @@
                 </div> -->
             </div>
             <div class="col-md-6 d-flex align-items-center">
-                <span id="tcrg_bonne_commande" confirm onclick="telecharger_bc('/static{{path_folder}}', '{{data[17]}}')">Télécharger la BON COMMANDE  <img
+                <span id="tcrg_bonne_commande" confirm onclick="telecharger_bc('/static{{path_folder}}', '{{data[17]}}')">Télécharger le BON COMMANDE  <img
                         src="{{ url_for('static', filename= 'img/logo/icon_pdf.jpg') }}" alt="Logo de pdf"
                         style="width: 35px;" />
                 </span>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <iframe class="img_usinage mt-5" src="{{ url_for('static', filename= path_folder +'/IMG/'+data[14]+'.png') }}"
                 style="height: 55vh;width: 30%;margin-left: 5%; position: fixed;"></iframe>

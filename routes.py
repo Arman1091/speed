@@ -1,9 +1,9 @@
 from flask import Flask,Blueprint, render_template,request,jsonify,flash,send_file, session,redirect,url_for
 
 
-from models.models   import User,Client, Commande,Matiere,Role,BridgeLettres,get_epaisseurs,get_prix,get_prix_pmma_usil, get_clients_by_user,get_en_attentes, get_en_attente_by_id, get_confirmes,get_usinés,get_livré ,get_confirmé_by_id,change_confirmer, change_usiner, change_livré,supprimer_commande_attente,supprimer_commande_confirmé,supprimer_commande_usiné,get_types_by_matiere,get_types_usinage,Matiere,Commande,get_all_attentes,get_all_confirmes,get_all_usinés,get_all_livré,get_types_lettre_by_matiere,get_epaisseurs_lettre,get_usinage_types_lettre,get_hauteurs_lettre,get_users_by_role,get_data_matieres,get_all_representants,get_cients_by_rep,edit_client_data,get_prix_lettre,change_matiere_prix,change_limeaire_prix,get_types_usinage_prix,get_pmma_usil_list,delete_commande_client,delete_bridge_form_row,get_liste_prix_lettre,delete_bridge_lettre_row,change_lettre_prix
+from models.models   import User,Client, Commande,Matiere,Role,BridgeLettres, BridgeCommandePlaques,get_epaisseurs,get_prix,get_prix_pmma_usil, get_clients_by_user,get_en_attentes, get_en_attente_by_id, get_confirmes,get_usinés,get_livré ,get_confirmé_by_id,change_confirmer, change_usiner, change_livré,supprimer_commande_attente,supprimer_commande_confirmé,supprimer_commande_usiné,get_types_by_matiere,get_types_usinage,Matiere,Commande,get_all_attentes,get_all_confirmes,get_all_usinés,get_all_livré,get_types_lettre_by_matiere,get_epaisseurs_lettre,get_usinage_types_lettre,get_hauteurs_lettre,get_users_by_role,get_data_matieres,get_all_representants,get_cients_by_rep,edit_client_data,get_prix_lettre,change_matiere_prix,change_limeaire_prix,get_types_usinage_prix,get_pmma_usil_list,delete_commande_client,delete_bridge_form_row,get_liste_prix_lettre,delete_bridge_lettre_row,change_lettre_prix,get_plaques,get_plaque_id
 from flask_login import login_user, login_required, logout_user, current_user
-from controllers.functions import get_dimension , create_pdf, create_bl
+from controllers.functions import get_dimension , create_pdf, create_bl,calculate_perimeter_and_drilling_count
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ def Simulation():
     except Exception as e:
         return f"Error fetching current user role: {str(e)}"
 
-    if current_user_role=="comercial":
+    if current_user_role=="comercial" or current_user_role == "admin":
         try:
             matieres = Matiere.get_all_matiere()
             result_matieres = [row_mt._data() for row_mt in matieres]
@@ -64,11 +64,14 @@ def Simulation():
             result_usinage = [row_usinage._data() for row_usinage in usinage_type]
         except Exception as e:
             return f"Error fetching usinage types: {str(e)}"
-
-        try:
-            clients = get_clients_by_user(current_user)
-        except Exception as e:
-            return f"Error fetching clients: {str(e)}"
+            
+        if current_user_role=="comercial" or current_user_role=="admin" :
+            try:
+                clients = get_clients_by_user(current_user)
+            except Exception as e:
+                return f"Error fetching clients: {str(e)}"
+        else:
+            clients =[]
         return render_template('simulation.html', user=current_user,current_user_role = current_user_role, matieres=matieres, types_matiers=types_matiers, clients=clients, epaisseurs=epaisseurs, types_usinage=usinage_type, page="Simulation")
     else:
         return redirect(url_for('en_attente'))
@@ -145,6 +148,7 @@ def confirme():
 def usiner():
     try:
             current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+          
     except Exception as e:
             return f"Error fetching current user role: {str(e)}"
     if current_user_role == "comercial":
@@ -176,6 +180,12 @@ def session_handler():
 def index():
     try:
         if current_user.is_authenticated:
+            try:
+                current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+            except Exception as e:
+                return f"Error fetching current user role: {str(e)}"
+            if current_user_role == "comercial" or current_user_role == "admin":
+                    return redirect(url_for('Simulation'))
             return redirect(url_for('en_attente'))
 
         if request.method == 'POST':
@@ -192,7 +202,7 @@ def index():
                     flash('Connecté avec succès!', category='success')
                     login_user(user, remember=True)
                     current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
-                    if current_user_role == "comercial":
+                    if current_user_role == "comercial" or current_user_role == "admin":
                         return redirect(url_for('Simulation'))
                     else:
                         return redirect(url_for('en_attente'))
@@ -317,7 +327,7 @@ def confirme_detailles():
 def upload():
 
     if request.method == 'POST':
-
+       
         file = request.files['file']
         if file:
             data = request.form.to_dict()
@@ -342,10 +352,10 @@ def upload():
             if not os.path.exists(fulle_path_folder):
                 os.makedirs(fulle_path_folder)
             file.save(file_path)
-
+            print("sdfdfdfdxxxxxxxxx")
+            print(fulle_path_folder)
             dimension = get_dimension(fulle_path_folder)
-
-
+            print(dimension)
             plt.rcParams["savefig.facecolor"] = 'black'
             plt.rcParams['axes.facecolor'] = 'black'
             dwg = ezdxf.readfile(fulle_path_folder+"/current.dxf")
@@ -369,59 +379,12 @@ def upload():
             else:
                 prix = get_prix(mt,mt_name,epp,type_usinage)
                 # os.remove('static/img/upload/current.png')
-
-                # os.remove(file_path)
-                perimetre = 0
-                nbr_percage = 0
-                # Parcourir toutes les entités dans l'espace modèle
-                for e in msp:
-                    if e.dxftype() == 'CIRCLE':
-                        dc = 2*math.pi*e.dxf.radius
-                        if dc < 30:
-                            nbr_percage+=1
-                        else:
-                            perimetre += perimetre_entity
-                        perimetre +=dc
-                    if e.dxftype() == 'LINE':
-                        # Extract start and end points
-                        length = e.dxf.start.distance(e.dxf.end)
-                        # Calculate distance and add to total length
-                        perimetre +=length
-                    elif e.dxftype() == 'LWPOLYLINE':
-                        points = e.get_points()
-                        points = list(points)
-                        perimetre_entity = 0
-                        for i in range(x- 1):
-                            dx = points[i+1][0] - points[i][0]
-                            dy = points[i+1][1] - points[i][1]
-                            perimetre_entity+=math.sqrt(dx**2 + dy**2)
-                        if perimetre_entity < 30:
-                            nbr_percage+=1
-                        else:
-                            perimetre += perimetre_entity
-
-                    # Si l'entité est une POLYLINE
-                    elif e.dxftype() == 'POLYLINE':
-
-                        points = e.points()
-                        points = list(points)
-                        perimetre_entity = 0
-                        for i in range(len(points) - 1):
-                            dx = points[i+1][0] - points[i][0]
-                            dy = points[i+1][1] - points[i][1]
-                            perimetre_entity+=math.sqrt(dx**2 + dy**2)
-                        if perimetre_entity < 30:
-                            nbr_percage+=1
-                        else:
-                            perimetre += perimetre_entity
-                    elif e.dxftype() == 'ARC':
-                        radius = e.dxf.radius
-                        start_angle = math.radians(e.dxf.start_angle)
-                        end_angle = math.radians(e.dxf.end_angle)
-                        arc_length = radius * abs(end_angle - start_angle)
-                        perimetre += arc_length
-                result = {'perimetre': perimetre,'dimension': dimension, 'prix': prix, 'path_folder':path_folder,'nbr_percage':nbr_percage}
-                return jsonify(result)
+            print("zzzz")
+            data = calculate_perimeter_and_drilling_count(fulle_path_folder)
+            
+            print(data)
+            result = {'perimetre': data['perimetre'],'dimension': dimension, 'prix': prix, 'path_folder':path_folder,'nbr_percage':data['nbr_percage']}
+            return jsonify(result)
 
 
 @app.route('/new_command', methods=['POST'])
@@ -512,6 +475,7 @@ def new_command():
             elif is_livr.lower() == 'false':
                 is_livr = False
                 new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id, prix_ht=prix_ht, name_dxf= first_full_name  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form)
+           
 
         else:
             if 'text_input' in data:
@@ -539,7 +503,27 @@ def new_command():
             # db.session.add(new_commande)
             # db.session.commit()
         Commande.save(new_commande)
+        if 'plaques' in data:
+            last_inserted_id = new_commande.id
+            arr_plaques = plaques = request.form.get('plaques', '')
+            qtePlaques = request.form.get('qte_plaques', '') 
+            if isinstance(arr_plaques, str):
+                # Split the comma-separated string into a list
+                plaques = arr_plaques.split(',')
+                
+                print(plaques)  # ['value1', 'value2', 'value3']
+            if isinstance(qtePlaques, str):
+                # Split the comma-separated string into a list
+                arr_qtePlaques  = qtePlaques.split(',')
+            for index, element in enumerate(plaques):
+                print("abc")
+               
+          
+                current_qte = arr_qtePlaques[index]
+                current_plaque_id = get_plaque_id(element)
 
+                new_plaque_commande =BridgeCommandePlaques(commande_id = last_inserted_id ,plaque_id = current_plaque_id,nbr_plaque =current_qte  )
+                BridgeCommandePlaques.save(new_plaque_commande)
         return "Super,La commande a été bien enregistrer!"
 
 @app.route('/change_statut_confirmer', methods=['POST'])
@@ -605,7 +589,7 @@ def change_statut_livré():
         return "it's ok"
 
     except ValueError as ve:
-  
+
         print(f"ValueError: {ve}")
         return f"Error: {ve}", 400
 
@@ -685,11 +669,17 @@ def telecharger_pdf():
 
     if request.method == 'POST':
         # Get other data from the request
-         
-        data = request.form.to_dict()
-        create_pdf(data)
 
-    return "c"
+        data = request.form.to_dict()
+        current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+        dir_name = os.path.dirname(__file__)
+        path_folder = "static/members/"+ current_user_role+'/'+current_user.username
+        fulle_path_folder = os.path.dirname(__file__)+"/"+ path_folder
+        create_pdf(data, fulle_path_folder, dir_name)
+        result_envoi = {'path': path_folder }
+        return jsonify(result_envoi)
+
+
 
 
 # **************************
@@ -803,9 +793,9 @@ def change_matiere():
     result_epp = []
     for row_epp in  epaisseurs :
         result_epp.append(row_epp._data())
-    epaisseur_id = result_epp[0]['value']
+    epaisseur_id = result_epp[0]['id']
+ 
 
-    # print(epaisseur_id)
 
     types_usinage= get_types_usinage(matiere_id,first_type,epaisseur_id)
     # # print("****<<<<<<*******")
@@ -1084,15 +1074,39 @@ def charge_form_data():
     result_envoi = {"matieres":result_matieres,"types":result_type_matieres,'epaisseurs': result_epaisseurs, "types_usinage":result_usinage}
     return jsonify(result_envoi)
 
+
+@app.route('/get_plaques_usinage', methods=['POST'])
+def get_plaques_usinage():
+    data = request.form.to_dict()
+    matiere_id = data ['matiere_id']
+    type_id= data ['type_id']
+    epaisseur_id = data['epaisseur_id']
+
+    
+    plaques = get_plaques(matiere_id,type_id,epaisseur_id)
+    result_plaques = []
+    for row in  plaques:
+    
+        result_plaques.append({
+            "dimonsion_plaque": row[0],
+            "surface_plaque": row[1],
+            "prix_plaque": row[2],
+        })
+    result_envoi = { "plaques":result_plaques}
+    return jsonify(result_envoi)
+
+
+
 @app.route('/membres')
 @login_required
 def membres():
     try:
         current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+ 
     except Exception as e:
         return f"Error fetching current user role: {str(e)}"
-    if current_user_role != "admin" and current_user_role != "responsable":
-        return render_template("error.html", message="probleme d'autorisation d'accès"), 500
+    # if current_user_role != "admin" and current_user_role != "responsable":
+    #     return render_template("error.html", message="probleme d'autorisation d'accès"), 500
     try:
         roles = Role.get_all_roles()
         if not roles:
@@ -1112,12 +1126,19 @@ def clients():
         current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
     except Exception as e:
         return f"Error fetching current user role: {str(e)}"
-    if current_user_role != "admin" and current_user_role != "responsable":
-        return render_template("error.html", message="probleme d'autorisation d'accès"), 500
-    representants = get_all_representants()
+    if current_user_role == "admin" :
+        representants = get_all_representants()
+        print(representants)
+        first_rep = representants[0].id
+        clients= get_cients_by_rep(first_rep)
+    elif current_user_role == "comercial":
+        representants = []
+        representants.append(current_user)
 
-    first_rep = representants[0].id
-    clients= get_cients_by_rep(first_rep)
+        clients= get_cients_by_rep(current_user.id)
+        print("xxxxxxxxxxx")
+        print(current_user.username)
+
     return render_template('clients.html', user = current_user,current_user_role = current_user_role,representants = representants, clients=clients, page ="Clients")
 
 @app.route('/prix')
@@ -1127,8 +1148,8 @@ def prix():
         current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
     except Exception as e:
         return f"Error fetching current user role: {str(e)}"
-    if current_user_role != "admin" and current_user_role != "responsable":
-        return render_template("error.html", message="probleme d'autorisation d'accès"), 500
+    # if current_user_role != "admin" and current_user_role != "responsable":
+    #     return render_template("error.html", message="probleme d'autorisation d'accès"), 500
     matieres= Matiere.get_all_matiere()
 
     result_matieres = []
@@ -1149,7 +1170,7 @@ def prix():
     first_type_usinage = result_types_usinage[0]['id']
 
     data_matieres = get_data_matieres(first_matiere,first_type,first_type_usinage)
-  
+
 
     return render_template('prix.html', matieres = matieres,types_matieres=types_matieres , types_usinage = types_usinage,data_matieres= data_matieres, user = current_user, current_user_role = current_user_role,page = "Prix")
 

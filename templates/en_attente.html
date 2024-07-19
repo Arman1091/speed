@@ -2,27 +2,26 @@
 {% block search %}
 <div class="form d-flex">
   <i class="fa fa-search"></i>
-  <input id="search_en_attants" type="text" class="form-control form-input" placeholder="Comandes...">
+  <input id="search_en_attants" type="text" class="form-control form-input" placeholder="Rechercher...">
 </div>
 {% endblock %}
 {% block contenue %}
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between" role="alert">
-    <strong>!{{ message }}</strong> 
-    <!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button> -->
-</div>
-{% endfor %}
-{% endif%}
-{% endwith %}
+{% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %} {% if category ==
+  'error' %}
+  <div class="alert alert-danger alter-dismissable fade show" role="alert" >
+    {{ message }}
+  </div>
+  {% else %}
+  <div class="alert alert-success alter-dismissable fade show" role="alert">
+    {{ message }}
+  </div>
+  {% endif %} {% endfor %} {% endif %} {% endwith %}
   <div class="commande_main">
 
   <div class="commande_div">
     <div class="commande_div_head">
-      <div class="title attents_title"> Des commandes en attents </div>
+      <div class="title attents_title"> Des commandes en attente </div>
       <div class="icon_bubble msg"> </div>
     </div>
     <div class="divider"> </div>
@@ -30,7 +29,7 @@
       <ul id="en_attents_list" style="list-style: none;">
         {% for item in data %}
         {{item[12]}}
-                   
+
         <li value={{item[12]}} class="commande_li">
           <a href="{{ url_for('en_attente_detailles', id=item[10] ) }}" onclick="setisvu()">
             <div class="commande">

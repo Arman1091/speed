@@ -1,5 +1,5 @@
 from extensions import db
-from sqlalchemy import create_engine, ForeignKey,select, text,Date, desc
+from sqlalchemy import create_engine, ForeignKey,select, text,Date, desc,or_
 from sqlalchemy.orm import relationship ,sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
@@ -124,6 +124,26 @@ class Statut(db.Model):
         db.session.commit()
 
 
+class Plaque(db.Model):
+    __tablename__ = 'plaque'
+    id = db.Column(db.Integer,autoincrement=True, primary_key=True)
+    value = db.Column(db.String(32), nullable=False)
+    surface= db.Column(db.Float, nullable=False)
+    rel_plaque_bridge = relationship("BridgePlaques", backref = "plaque") 
+    rel_commande_plaques_bridge = relationship("BridgeCommandePlaques", backref = "plaque") 
+    
+
+    def _data (self):
+        return{
+            'id':self.id,
+            'value':self.value,
+            'surface':self.surface
+        }
+    def save (self):
+        db.session.add (self)
+        db.session.commit()
+
+
 class Commande(db.Model):
     __tablename__ = 'commande'
     id = db.Column(db.Integer, autoincrement=True,primary_key=True )
@@ -158,6 +178,9 @@ class Commande(db.Model):
     is_vu_usiné = db.Column(db.Boolean(),server_default=sqlalchemy.sql.expression.false())
     is_form = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.true())
     prix_livr_ht= db.Column(db.Float, nullable=True)
+    is_chute = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.true())
+    is_plaque = db.Column(db.Boolean(), server_default=sqlalchemy.sql.expression.false())
+    rel_commande_commande_plaques_bridge = relationship("BridgeCommandePlaques", backref = "commande") 
 
     
       #property
@@ -195,7 +218,9 @@ class Commande(db.Model):
             'count_persage':self.count_persage,
             'name_police':self.name_police,
             'prix_ht':self.prix_ht,
-            'prix_livr_ht':self.prix_livr_ht
+            'prix_livr_ht':self.prix_livr_ht,
+            'is_chute':self.is_chute,
+            'is_plaque':self.is_plaque
         }
     
     
@@ -226,7 +251,7 @@ class Matiere(db.Model):
     name = db.Column(db.String(50), nullable=False )
     rel_matiere_bridge = relationship("Bridge", backref = "matiere")
     rel_matiere_lettre = relationship("BridgeLettres", backref = "matiere")
-
+    rel_matiere_plaque = relationship("BridgePlaques", backref = "matiere")
     #property
     def get_all_matiere():
         try:
@@ -249,6 +274,8 @@ class Type(db.Model):
     name = db.Column(db.String(50), nullable=False )
     rel_type_bridge = relationship("Bridge", backref = "type")
     rel_type_lettre = relationship("BridgeLettres", backref = "type")
+    rel_type_plaque = relationship("BridgePlaques", backref = "type")
+    
 
     #property
     
@@ -280,7 +307,7 @@ class Epaisseur(db.Model):
     rel_essaisseur_bridge = relationship("Bridge", backref = "epaisseur")
     rel_essaisseur_commande = relationship("Commande", backref = "epaisseur")
     rel_essaisseur_lettre = relationship("BridgeLettres", backref = "epaisseur")
-
+    rel_essaisseur_plaque= relationship("BridgePlaques", backref = "epaisseur")
     #property
     def _data (self):
         return{
@@ -354,6 +381,29 @@ class Bridge(db.Model):
         db.session.add (self)
         db.session.commit()
 
+class BridgePlaques(db.Model):
+    __tablename__ = 'bridge_plaques'
+
+    matiere_id = db.Column(db.Integer,ForeignKey('matiere.id') ,primary_key=True)
+    type_id = db.Column(db.Integer,ForeignKey('type.id') ,primary_key=True)
+    epaisseur_id = db.Column(db.Integer , ForeignKey('epaisseur.id') ,primary_key=True)
+    plaque_id = db.Column(db.Integer , ForeignKey('plaque.id') ,primary_key=True)
+    prix_plaque = db.Column(db.Float, nullable=False)
+      
+
+     #property
+    def _data (self):
+        return{
+            'matiere_id':self.matiere_id,
+            'type_id':self.type_id,
+            'epaisseur_id':self.epaisseur_id,
+            'prix_plaque':self.prix_plaque,
+            'plaque_id':plaque_id
+        }
+    def save (self):
+        db.session.add (self)
+        db.session.commit()
+
 class BridgeLettres(db.Model):
     __tablename__ = 'bridge_lettres'
      
@@ -381,8 +431,29 @@ class BridgeLettres(db.Model):
     def save (self):
         db.session.add (self)
         db.session.commit()
-    
 
+
+class BridgeCommandePlaques(db.Model):
+    __tablename__ = 'bridge_commande_plaques'
+  
+    id = db.Column(db.Integer, autoincrement=True,primary_key=True )
+    commande_id = db.Column(db.Integer,ForeignKey('commande.id') ,nullable=False)
+    plaque_id = db.Column(db.Integer,ForeignKey('plaque.id') ,nullable=False)
+    nbr_plaque = db.Column(db.Integer ,nullable=False)
+
+      
+
+     #property
+    def _data (self):
+        return{
+            'id':self.id,
+            'commande_id':self.commande_id,
+            'plaque_id':self.plaque_id,
+            'nbr_plaque':self.nbr_plaque
+        }
+    def save (self):
+        db.session.add (self)
+        db.session.commit()
 def get_epaisseurs(matiere_id,type_id):
 
     return db.session.query(Epaisseur).join(Bridge,Bridge.epaisseur_id== Epaisseur.id ).filter(Bridge.matiere_id == matiere_id, Bridge.type_id == type_id).all() 
@@ -403,11 +474,12 @@ def get_epaisseurs(matiere_id,type_id):
 
 
 def get_prix(mt,mt_name, epaisseur,type_usinage):
-    print(type_usinage)
+
+    
     result =[]
     
     # filtered = db.session.query(Pvc_bridge.prix_limeaire,Pvc_bridge.prix_matiere  ).join(Epaisseur,Epaisseur.id==Pvc_bridge.epaisseur_id).filter_by(value = epaisseur).join(Pvc, Pvc.id == Pvc_bridge.pvc_id ).filter_by(name = mt_name).first()
-    filtered = db.session.query(Bridge.prix_limeaire,Bridge.prix_matiere ).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(id = mt).join(Type, Type.id == Bridge.type_id ).filter_by(id = mt_name).join(Epaisseur,Epaisseur.id==Bridge.epaisseur_id).filter_by(id = epaisseur).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).filter_by(id = type_usinage).first() 
+    filtered = db.session.query(Bridge.prix_limeaire,Bridge.prix_matiere ).join(Matiere, Matiere.id == Bridge.matiere_id ).filter_by(id = mt).join(Type, Type.id == Bridge.type_id ).filter_by(id = mt_name).join(Epaisseur,Bridge.epaisseur_id == Epaisseur.id).filter_by(id = epaisseur).join(Type_usinage, Type_usinage.id == Bridge.usinage_id ).filter_by(id = type_usinage).first() 
     print(filtered)
     # r= Pvc.query.all()
     # bridge_name = matiere+'_briddge'
@@ -973,7 +1045,7 @@ def get_data_matieres (mt_id,type_id, usinage_id):
     return db.session.query(Matiere.name,Type.name, Type_usinage.name,Epaisseur.value, Bridge.prix_matiere, Bridge.prix_limeaire).join(Matiere, Bridge.matiere_id == Matiere.id).join(Type, Bridge.type_id==Type.id).join(Type_usinage, Bridge.usinage_id==Type_usinage.id).join(Epaisseur, Bridge.epaisseur_id==Epaisseur.id).filter(Bridge.matiere_id==mt_id,Bridge.type_id == type_id,Bridge.usinage_id == usinage_id ).all()
 
 def get_all_representants():
-    return User.query.filter_by(role_id=2).all()
+    return db.session.query(User).filter(or_(User.role_id == 1, User.role_id == 2)).all()
 
 def get_cients_by_rep(first_rep_id):
     clients=db.session.query(Client.name,Client.ville,Client.cp,Client.numero,Client.addresse,User.username,Client.email,Client.tel,User.id,Client.id,Client.prix_livr).join(User,Client.user_id== User.id ).filter(Client.user_id == first_rep_id ).all()
@@ -982,6 +1054,8 @@ def get_cients_by_rep(first_rep_id):
         result.append(row._data) 
 
     return result
+def get_plaques(mat_id, type_id, epp_id):
+    return db.session.query(Plaque.value, Plaque.surface,BridgePlaques.prix_plaque).join(BridgePlaques,BridgePlaques.plaque_id== Plaque.id ).filter(BridgePlaques.matiere_id == mat_id, BridgePlaques.type_id == type_id,BridgePlaques.epaisseur_id== epp_id).all()
 
 def edit_client_data(Edit_data):
     print("test")
@@ -1096,3 +1170,24 @@ def  change_lettre_prix(matiere,type_matiere,type_usinage,epaisseur,new_prix,hau
     filtered_row = db.session.query(BridgeLettres).join(Matiere,  BridgeLettres.matiere_id== Matiere.id ).filter(Matiere.name == matiere.strip()).join(Type,BridgeLettres.type_id == Type.id  ).filter(Type.name == type_matiere.strip()).join(Epaisseur,BridgeLettres.epaisseur_id == Epaisseur.id).filter(Epaisseur.value == epaisseur).join(Type_usinage, BridgeLettres.usinage_id ==Type_usinage.id  ).filter(Type_usinage.name == type_usinage.strip()).join(Hauteur, BridgeLettres.hauteur_id ==Hauteur.id  ).filter(Hauteur.value == hauteur).first() 
     filtered_row.prix=new_prix
     db.session.commit()
+
+
+def get_plaque_id(text_plaque):
+
+    try:
+        plaque = (
+            db.session.query(
+                Plaque.id
+            )
+            .join(BridgePlaques, BridgePlaques.plaque_id==  Plaque.id)
+            .filter(Plaque.value == text_plaque)
+            .first()
+        )
+
+        return plaque[0]
+    
+    except Exception as e:
+        # Log the error message if you have a logging system in place
+        # For now, just print the error message
+        print(f"An error occurred: {e}")
+        return None
