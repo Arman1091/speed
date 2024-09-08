@@ -1,7 +1,20 @@
 from flask import Flask,Blueprint, render_template,request,jsonify,flash,send_file, session,redirect,url_for
 
 
-from models.models   import User,Client, Commande,Matiere,Role,BridgeLettres, BridgeCommandePlaques,get_epaisseurs,get_prix,get_prix_pmma_usil, get_clients_by_user,get_en_attentes, get_en_attente_by_id, get_confirmes,get_usinés,get_livré ,get_confirmé_by_id,change_confirmer, change_usiner, change_livré,supprimer_commande_attente,supprimer_commande_confirmé,supprimer_commande_usiné,get_types_by_matiere,get_types_usinage,Matiere,Commande,get_all_attentes,get_all_confirmes,get_all_usinés,get_all_livré,get_types_lettre_by_matiere,get_epaisseurs_lettre,get_usinage_types_lettre,get_hauteurs_lettre,get_users_by_role,get_data_matieres,get_all_representants,get_cients_by_rep,edit_client_data,get_prix_lettre,change_matiere_prix,change_limeaire_prix,get_types_usinage_prix,get_pmma_usil_list,delete_commande_client,delete_bridge_form_row,get_liste_prix_lettre,delete_bridge_lettre_row,change_lettre_prix,get_plaques,get_plaque_id
+from models.models import (
+    User, Client, Commande, Matiere, Role, BridgeLettres, BridgeCommandePlaques,
+    get_epaisseurs, get_prix, get_prix_pmma_usil, get_clients_by_user, get_en_attentes,
+    get_en_attente_by_id, get_confirmes, get_usinés, get_livré, get_confirmé_by_id,
+    change_confirmer, change_usiner, change_livré, supprimer_commande_attente,
+    supprimer_commande_confirmé, supprimer_commande_usiné, get_types_by_matiere,
+    get_types_usinage, Matiere, Commande, get_all_attentes, get_all_confirmes,
+    get_all_usinés, get_all_livré, get_types_lettre_by_matiere, get_epaisseurs_lettre,
+    get_usinage_types_lettre, get_hauteurs_lettre, get_users_by_role, get_data_matieres,
+    get_all_representants, get_cients_by_rep, edit_client_data, get_prix_lettre,
+    change_matiere_prix, change_limeaire_prix, get_types_usinage_prix, get_pmma_usil_list,
+    delete_commande_client, delete_bridge_form_row, get_liste_prix_lettre,
+    delete_bridge_lettre_row, change_lettre_prix, get_plaque_id,get_plaques
+)
 from flask_login import login_user, login_required, logout_user, current_user
 from controllers.functions import get_dimension , create_pdf, create_bl,calculate_perimeter_and_drilling_count
 from werkzeug.utils import secure_filename
@@ -235,10 +248,11 @@ def en_attente_detailles():
 
         # Fetch the data using the provided ID
         data = get_en_attente_by_id(id)
-
+        
         if data is None:
             raise NoResultFound(f"No data found for ID: {id}")
-
+        
+        
         # Fetch the current user's role
         current_client_role = data[24]
         current_client_username = data[15]
@@ -330,201 +344,209 @@ def upload():
        
         file = request.files['file']
         if file:
-            data = request.form.to_dict()
-            mt= data['mt']
-            mt_name = data ['mt_name']
-            epp = data['selectedValue']
-            type_usinage = data['selectedTypeValue']
-            mt_text = data['mt_text']
-            usinage_text = data['usinage_text']
-
-
             filename = secure_filename(file.filename)
-            preferred_name = "current" + os.path.splitext(filename)[1]
-            current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
-            path_folder = "static/members/"+ current_user_role+'/'+current_user.username
-            fulle_path_folder = os.path.dirname(__file__)+"/"+ path_folder
-
-            file_path = os.path.join(fulle_path_folder, preferred_name)
-
-
-            # Check if the folder exists, if not, create it
-            if not os.path.exists(fulle_path_folder):
-                os.makedirs(fulle_path_folder)
-            file.save(file_path)
-            print("sdfdfdfdxxxxxxxxx")
-            print(fulle_path_folder)
-            dimension = get_dimension(fulle_path_folder)
-            print(dimension)
-            plt.rcParams["savefig.facecolor"] = 'black'
-            plt.rcParams['axes.facecolor'] = 'black'
-            dwg = ezdxf.readfile(fulle_path_folder+"/current.dxf")
-            msp = dwg.modelspace()
-            # *******************c********************
-            dwg.layers.new(name='MyLines', dxfattribs={'linetype': 'DASHED', 'color': 8})
-
-            ezdxf.addons.drawing.properties.MODEL_SPACE_BG_COLOR = "#FFFFFF"
-            auditor = dwg.audit()
-
-
-            if len(auditor.errors) == 0:
-               fig = plt.figure()
-               ax = fig.add_axes([0, 0, 1, 1])
-               ctx = RenderContext(dwg)
-               out = MatplotlibBackend(ax)
-               Frontend(ctx, out).draw_layout(msp, finalize=True)
-               fig.savefig(fulle_path_folder+'/current.png', dpi=300, facecolor = 'black', edgecolor = 'black')
-            if mt_text == "Pmma" and usinage_text =="USIL":
-                prix_pmma_usil = get_prix_pmma_usil(mt,mt_name,epp,type_usinage)
+            if os.path.splitext(filename)[1] == '.dxf':
+                
+                data = request.form.to_dict()
+                mt= data['mt']
+                mt_name = data ['mt_name']
+                epp = data['selectedValue']
+                type_usinage = data['selectedTypeValue']
+                mt_text = data['mt_text']
+                usinage_text = data['usinage_text']
+                preferred_name = "current" + os.path.splitext(filename)[1]
+                current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+                path_folder = "static/members/"+ current_user_role+'/'+current_user.username
+                fulle_path_folder = os.path.dirname(__file__)+"/"+ path_folder
+    
+                file_path = os.path.join(fulle_path_folder, preferred_name)
+    
+    
+                # Check if the folder exists, if not, create it
+                if not os.path.exists(fulle_path_folder):
+                    os.makedirs(fulle_path_folder)
+                file.save(file_path)
+                dimension = get_dimension(fulle_path_folder)
+                plt.rcParams["savefig.facecolor"] = 'black'
+                plt.rcParams['axes.facecolor'] = 'black'
+                dwg = ezdxf.readfile(fulle_path_folder+"/current.dxf")
+                msp = dwg.modelspace()
+                # *******************c********************
+                dwg.layers.new(name='MyLines', dxfattribs={'linetype': 'DASHED', 'color': 8})
+    
+                ezdxf.addons.drawing.properties.MODEL_SPACE_BG_COLOR = "#FFFFFF"
+                auditor = dwg.audit()
+    
+    
+                if len(auditor.errors) == 0:
+                   fig = plt.figure()
+                   ax = fig.add_axes([0, 0, 1, 1])
+                   ctx = RenderContext(dwg)
+                   out = MatplotlibBackend(ax)
+                   Frontend(ctx, out).draw_layout(msp, finalize=True)
+                   fig.savefig(fulle_path_folder+'/current.png', dpi=300, facecolor = 'black', edgecolor = 'black')
+                if mt_text == "Pmma" and usinage_text =="USIL":
+                    prix_pmma_usil = get_prix_pmma_usil(mt,mt_name,epp,type_usinage)
+                else:
+                    prix = get_prix(mt,mt_name,epp,type_usinage)
+                    # os.remove('static/img/upload/current.png')
+                data = calculate_perimeter_and_drilling_count(fulle_path_folder)
+                
+                result = {'perimetre': data['perimetre'],'dimension': dimension, 'prix': prix, 'path_folder':path_folder,'nbr_percage':data['nbr_percage']}
+                return jsonify(result)
             else:
-                prix = get_prix(mt,mt_name,epp,type_usinage)
-                # os.remove('static/img/upload/current.png')
-            print("zzzz")
-            data = calculate_perimeter_and_drilling_count(fulle_path_folder)
-            
-            print(data)
-            result = {'perimetre': data['perimetre'],'dimension': dimension, 'prix': prix, 'path_folder':path_folder,'nbr_percage':data['nbr_percage']}
-            return jsonify(result)
-
-
+                result = {'msg': "Merci de sélectionnez .dxf file"}
+                return jsonify(result)
 @app.route('/new_command', methods=['POST'])
 def new_command():
+    try:
+        if request.method == 'POST':
+            # Récupérer les données du formulaire
+            data = request.form.to_dict()
+            required_fields = ['client_id', 'name_matiere', 'type_matiere', 'type_usinage', 
+                               'count', 'statut', 'date_fin', 'epaisseur_id', 
+                               'is_livr', 'prix_ht']
 
+            # Vérifier que tous les champs requis sont présents
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    return jsonify({"error": f"Le champ '{field}' est requis."}), 400
 
-# Replace the following with your ESP file parsing logic
-# Example data (x, y coordinates)
+            # Assigner les valeurs des champs
+            client_id = data['client_id']
+            name_matiere = data['name_matiere']
+            type_matiere = data['type_matiere']
+            type_usinage = data['type_usinage']
+            count = data['count']
+            statut_id = data['statut']
+            description = data['description']
+            date_fin = data['date_fin']
+            epaisseur_id = data['epaisseur_id']
+            is_livr = data['is_livr']
+            prix_ht = data['prix_ht']
+            current_date = datetime.now()
 
-    if request.method == 'POST':
-        # Get other data from the request
-        # current_date = datetime.now().date()
+            # Gérer le fichier s'il est présent
+            is_form = False
+            if 'file' in request.files:
+                file = request.files['file']
+                filename = secure_filename(file.filename)
+                preferred_name = os.path.splitext(filename)[0]
+                last_row = Commande.query.order_by(Commande.id.desc()).first()
+                support_name = 1 if last_row is None else last_row.id + 1
 
-        current_date = datetime.now()
-        data = request.form.to_dict()
-        client_id= data['client_id']
-        name_matiere = data ['name_matiere']
-        type_matiere= data['type_matiere']
-        type_usinage = data ['type_usinage']
-        count= data['count']
-        statut_id = data ['statut']
-        description = data ['description']
-        date_fin = data ['date_fin']
-        epaisseur_id = data['epaisseur_id']
+                current_user_role = Role.query.filter(Role.id == current_user.role_id).first().name
+                path_folder = f"static/members/{current_user_role}/{current_user.username}/DXF/"
+                first_full_name = f"{preferred_name}{support_name}"
+                full_name = f"{preferred_name}{support_name}.dxf"
+                is_form = True
+                file_path = os.path.join(os.path.dirname(__file__), path_folder, full_name)
 
-        is_livr = data ['is_livr']
-        prix_ht = data ['prix_ht']
-        if 'file' in request.files:
-            file = request.files['file']
-            filename = secure_filename(file.filename)
-            preferred_name = os.path.splitext(filename)[0]
-            last_row = Commande.query.order_by(Commande.id.desc()).first()
-            if last_row is None:
-                support_name = 1
-            else:
-                support_name = last_row.id+1
+                # Créer le dossier si nécessaire
+                if not os.path.exists(os.path.dirname(__file__)+'/'+path_folder):
+                    os.makedirs(os.path.dirname(__file__)+'/'+path_folder)
+                file.save(file_path)
 
-            current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+                # Traitement du fichier DXF et sauvegarde de l'image
+                plt.rcParams["savefig.facecolor"] = 'black'
+                plt.rcParams['axes.facecolor'] = 'black'
+                dwg = ezdxf.readfile(file_path)
+                msp = dwg.modelspace()
+                dwg.layers.new(name='MyLines', dxfattribs={'linetype': 'DASHED', 'color': 8})
+                ezdxf.addons.drawing.properties.MODEL_SPACE_BG_COLOR = "#FFFFFF"
+                auditor = dwg.audit()
 
+                if len(auditor.errors) == 0:
+                    fig = plt.figure()
+                    ax = fig.add_axes([0, 0, 1, 1])
+                    ctx = RenderContext(dwg)
+                    out = MatplotlibBackend(ax)
+                    Frontend(ctx, out).draw_layout(msp, finalize=True)
 
-            path_folder = "static/members/"+current_user_role+'/'+current_user.username+'/DXF/'
-            first_full_name = preferred_name+str(support_name)
-            full_name = preferred_name+str(support_name)+'.dxf'
-            is_form = True
-            file_path = os.path.join(os.path.dirname(__file__)+'/'+path_folder, full_name)
-            if not os.path.exists(os.path.dirname(__file__)+'/'+path_folder):
-                os.makedirs(os.path.dirname(__file__)+'/'+path_folder)
-            file.save(file_path)
-            plt.rcParams["savefig.facecolor"] = 'black'
-            plt.rcParams['axes.facecolor'] = 'black'
-            dwg = ezdxf.readfile(file_path)
-            msp = dwg.modelspace()
-            # *******************c********************
-            dwg.layers.new(name='MyLines', dxfattribs={'linetype': 'DASHED', 'color': 8})
+                    path_img = os.path.join(os.path.dirname(__file__), 'static', 'members', current_user_role, current_user.username, 'IMG')
+                    if not os.path.exists(path_img):
+                        os.makedirs(path_img)
 
-            ezdxf.addons.drawing.properties.MODEL_SPACE_BG_COLOR = "#FFFFFF"
-            auditor = dwg.audit()
+                    file_path_img = os.path.join(path_img, f'{first_full_name}.png')
+                    fig.savefig(file_path_img, dpi=300, facecolor='black', edgecolor='black')
 
-
-            if len(auditor.errors) == 0:
-                fig = plt.figure()
-                ax = fig.add_axes([0, 0, 1, 1])
-                ctx = RenderContext(dwg)
-                out = MatplotlibBackend(ax)
-                Frontend(ctx, out).draw_layout(msp, finalize=True)
-
-
-                path_img = os.path.join(os.path.dirname(__file__)+'/static', 'members', current_user_role, current_user.username, 'IMG')
-                print("dsdjsdshds")
-                print(path_img)
-# Check if the path exists, if not, create it
-                if not os.path.exists(path_img):
-                    os.makedirs(path_img)
-
-                # Define the complete file path
-                file_path_img = os.path.join(path_img, f'{first_full_name}.png')
-                # Save the figure
-                fig.savefig(file_path_img, dpi=300, facecolor='black', edgecolor='black')
-        # user_id = current_user.id
+            # Création de la commande
             if is_livr.lower() == 'true':
                 is_livr = True
-                numero_voie_livr = data ['numero_voie_livr']
-                nom_voie_livr = data ['nom_voie_livr']
-                cp_livr = data['cp_livr']
-                ville_livr = data ['ville_livr']
-                prix_livr_ht = data ['prix_livr_ht']
-                new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id, prix_ht=prix_ht, prix_livr_ht = prix_livr_ht, name_dxf = first_full_name  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form,numero_livr= numero_voie_livr ,addresse_livr = nom_voie_livr, cp_livr = cp_livr,ville_livr = ville_livr )
-            elif is_livr.lower() == 'false':
-                is_livr = False
-                new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id, prix_ht=prix_ht, name_dxf= first_full_name  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form)
-           
+                livraison_fields = ['numero_voie_livr', 'nom_voie_livr', 'cp_livr', 'ville_livr', 'prix_livr_ht']
+                for field in livraison_fields:
+                    if field not in data or not data[field]:
+                        return jsonify({"error": f"Le champ '{field}' est requis pour la livraison."}), 400
 
-        else:
+                numero_voie_livr = data['numero_voie_livr']
+                nom_voie_livr = data['nom_voie_livr']
+                cp_livr = data['cp_livr']
+                ville_livr = data['ville_livr']
+                prix_livr_ht = data['prix_livr_ht']
+               
+                new_commande = Commande(
+                    client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere=type_matiere,
+                    usinage_id=type_usinage, count=count, epaisseur_id=epaisseur_id, prix_ht=prix_ht,
+                    prix_livr_ht=prix_livr_ht, name_dxf=first_full_name, description_commercial_responsable=description,
+                    date_envoi=current_date, date_fin=date_fin, is_livr=is_livr, is_form=is_form,
+                    numero_livr=numero_voie_livr, addresse_livr=nom_voie_livr, cp_livr=cp_livr, ville_livr=ville_livr
+                )
+            else:
+
+                is_livr = False
+
+                new_commande = Commande(
+                    client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere=type_matiere,
+                    usinage_id=type_usinage, count=count, epaisseur_id=epaisseur_id, prix_ht=prix_ht,
+                    description_commercial_responsable=description,
+                    date_envoi=current_date, date_fin=date_fin, is_livr=is_livr, is_form=is_form
+                )
+
+            # Traitement pour le texte
             if 'text_input' in data:
                 is_form = False
-                text_input = data ['text_input']
-                height = data ['height']
-                name_police = data ['name_police']
+                text_input = data['text_input']
+                height = data['height']
+                name_police = data['name_police']
 
-                if is_livr.lower() == 'true':
-                    is_livr = True
-                    numero_voie_livr = data ['numero_voie_livr']
-                    nom_voie_livr = data ['nom_voie_livr']
-                    cp_livr = data['cp_livr']
-                    ville_livr = data ['ville_livr']
-                    prix_livr_ht = data ['prix_livr_ht']
-                    new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id,
-                        description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form,numero_livr= numero_voie_livr ,addresse_livr = nom_voie_livr, cp_livr = cp_livr,ville_livr = ville_livr,
-                        text = text_input,hauteur_text = height, name_police = name_police,prix_ht = prix_ht, prix_livr_ht=prix_livr_ht
-                     )
-                elif is_livr.lower() == 'false':
-                    is_livr = False
-                    new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form, text = text_input,hauteur_text = height, name_police = name_police,prix_ht = prix_ht)
-#
-#  User.set_password(new_user, password1)
-            # db.session.add(new_commande)
-            # db.session.commit()
-        Commande.save(new_commande)
-        if 'plaques' in data:
-            last_inserted_id = new_commande.id
-            arr_plaques = plaques = request.form.get('plaques', '')
-            qtePlaques = request.form.get('qte_plaques', '') 
-            if isinstance(arr_plaques, str):
-                # Split the comma-separated string into a list
-                plaques = arr_plaques.split(',')
-                
-                print(plaques)  # ['value1', 'value2', 'value3']
-            if isinstance(qtePlaques, str):
-                # Split the comma-separated string into a list
-                arr_qtePlaques  = qtePlaques.split(',')
-            for index, element in enumerate(plaques):
-                print("abc")
-               
-          
-                current_qte = arr_qtePlaques[index]
-                current_plaque_id = get_plaque_id(element)
+                if is_livr:
+                    new_commande.text = text_input
+                    new_commande.hauteur_text = height
+                    new_commande.name_police = name_police
+                else:
+                    new_commande.text = text_input
+                    new_commande.hauteur_text = height
+                    new_commande.name_police = name_police
 
-                new_plaque_commande =BridgeCommandePlaques(commande_id = last_inserted_id ,plaque_id = current_plaque_id,nbr_plaque =current_qte  )
-                BridgeCommandePlaques.save(new_plaque_commande)
-        return "Super,La commande a été bien enregistrer!"
+            # Enregistrer la commande
+            Commande.save(new_commande)
+
+            # Traitement des plaques
+            if 'plaques' in data:
+                last_inserted_id = new_commande.id
+                arr_plaques = request.form.get('plaques', '')
+                qtePlaques = request.form.get('qte_plaques', '')
+
+                if isinstance(arr_plaques, str):
+                    plaques = arr_plaques.split(',')
+                if isinstance(qtePlaques, str):
+                    arr_qtePlaques = qtePlaques.split(',')
+
+                for index, element in enumerate(plaques):
+                    current_qte = arr_qtePlaques[index]
+                    current_plaque_id = get_plaque_id(element)
+
+                    new_plaque_commande = BridgeCommandePlaques(
+                        commande_id=last_inserted_id,
+                        plaque_id=current_plaque_id,
+                        nbr_plaque=current_qte
+                    )
+                    BridgeCommandePlaques.save(new_plaque_commande)
+                return "success: La commande a été bien enregistrée!"
+            return "success: La commande a été bien enregistrée!"
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/change_statut_confirmer', methods=['POST'])
 def change_statut_confirmer():
@@ -1464,6 +1486,23 @@ def delete_client():
         # Rollback the transaction in case of error
         return (e)
 
+@app.route('/delete_user', methods=['POST'])
+def delete_user():
+    data = request.form.to_dict()
+    delete_user_id = data ['id_user']
+    try:
+        print(delete_user_id)
+        deleted_user = User.get_user_by_id(delete_user_id )
+        print(deleted_user)
+        deleted_clients = Client.get_clients_by_user_id(delete_user_id)
+        for row in  deleted_clients:
+            delete_commande_client(row.id)
+        User.delete_user(deleted_user)
+        return "it's ok"
+    except Exception as e:
+        # Rollback the transaction in case of error
+        return (e)
+
 @app.route('/delete_bridge_row', methods=['POST'])
 def delete_bridge_row():
     data = request.form.to_dict()
@@ -1673,9 +1712,7 @@ def new_user():
 
 # Replace the following with your ESP file parsing logic
 # Example data (x, y coordinates)
-    print("xxxxxxxxx*****11111111")
     if request.method == 'POST':
-        print("99999999999999999999999")
         # Get other data from the request
         # current_date = datetime.now().date()
 
@@ -1719,17 +1756,20 @@ def edit_user():
         role= data ['role']
         username= data['username']
         email= data ['email']
-        password= data['password']
+
         tel = data ['tel']
 
         current_user = User.query.filter(User.id == user_id).first()
-        print("xxxxxxxxxxxx")
+   
         print(current_user.username)
         current_user.email = email
         current_user.role_id = role
         current_user.tel = tel
         current_user.username = username
-
+        if 'new_pwd' in data:
+            new_pwd = data['new_pwd']
+            current_user.password = new_pwd 
+            User.set_password(current_user, new_pwd )
         User.save(current_user)
 
     #    Client.save(edit_client)

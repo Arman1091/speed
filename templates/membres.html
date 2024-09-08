@@ -17,9 +17,11 @@
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
+
 {% endfor %}
 {% endif%}
 {% endwith %}
+
 <div class="mt-4">
     <label for="role_users"><strong>Rôle</strong></label>
     <select id="role_users" class="form-select form-select-lg mb-3"
@@ -59,7 +61,7 @@
                 <output class="set_user_id"  >{{user_row.id}}</output>
                 <i class="bi bi-pencil-square getInfoBtn"  ></i>
                 <i type="button" class="delete_icon bi bi-trash text-danger " 
-                    onclick="delete_user('{{user.id}}')"></i>
+                    onclick="delete_selected_user(this,'{{user_row.id}}')"></i>
 
             </td>
             {% endif %}
@@ -232,9 +234,11 @@
                     <input type="text" id="edit_tel" class="form-control" placeholder="Telephone" name="telp" required>
                 </div>
             </div>
+            <div id ="errMsgMembers" class=" alter-dismissable fade show" style="z-index: 9999999;">
+            </div>
             <output id="edit_user_id" ></output>
             <div class="form-group d-flex justify-content-center align-items-center mt-5">
-                <button type="button" class="btn btn-success btn-sm" name="submit" onclick="SaveEditUser()">Ajouter</button>
+                <button type="button" class="btn btn-success btn-sm" name="submit" onclick="SaveEditUser()">Enregistrer</button>
                 <button type="button" class="btn btn-danger btn-sm " style="margin-left: 5px;"
                     onclick="closeEditUser()">Annuler</button>
             </div>

@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask,redirect,url_for
 from sqlalchemy.types import Boolean, String
 import sqlalchemy
+import os
 
 class Role(db.Model):
     __tablename__ = 'role'
@@ -55,10 +56,22 @@ class User(db.Model, UserMixin):
     
     def save_change (self):
         db.session.commit()
+
+    def get_user_by_id(id):
+        return User.query.filter_by(id=id).first()
+    
+    def delete_user(self):
+        try:
+            db.session.delete(self)
+            db.session.commit()
+            print("sddxxxxxxxxxxxxxxxxxxxxxx")
+            
+        except Exception as e:
+            print(e)
+
     
     def filter_by_email(mail):
         return User.query.filter_by(email=mail).first()
-
     
     def is_password_correct(self, password_plaintext:str):
         if self.password is None:
@@ -106,6 +119,8 @@ class Client(db.Model):
     def save (self):
         db.session.add (self)
         db.session.commit()
+    def get_clients_by_user_id(id):
+        return Client.query.filter_by(user_id=id).all()
 
 class Statut(db.Model):
     __tablename__ = "statut"
@@ -1122,7 +1137,24 @@ def get_pmma_usil_list(mt_id,type_id,type_usinage_id):
 
 def delete_commande_client(id):
     try:
-        db.session.begin()
+        user_data  = db.session.query(User.username,Role.name).join(Client,  User.id== Client.user_id ).join(Role,  User.role_id== Role.id ).first()
+        main_path = os.path.dirname(os.path.dirname(__file__))
+        commands = Commande.query.filter_by(client_id=id).all()
+        print(commands)
+        for row in commands:
+            print(row.name_dxf)
+            path_dxf = 'static/members/'+user_data[1] +'/'+user_data[0]+'/DXF/'+row.name_dxf+'.dxf'
+            path_bl = 'static/members/'+user_data[1] +'/'+user_data[0]+'/BL/'+row.name_dxf+'.pdf'
+            path_img = 'static/members/'+user_data[1] +'/'+user_data[0]+'/IMG/'+row.name_dxf+'.png'
+            print(path_img)
+            if os.path.exists(path_dxf):
+                os.remove(path_dxf)
+            
+            if os.path.exists(path_bl):
+                os.remove(path_bl)
+            
+            if os.path.exists(path_img):
+                os.remove(path_img)
         Commande.query.filter_by(client_id=id).delete()
         Client.query.filter_by(id=id).delete()
         db.session.commit()
@@ -1130,9 +1162,7 @@ def delete_commande_client(id):
         
     except Exception as e:
         print(e)
-    finally:
-        # Close the session
-        db.session.close()
+
 
 def delete_bridge_form_row(matiere,type_mt ,usinage ,epaisseur):
     try:

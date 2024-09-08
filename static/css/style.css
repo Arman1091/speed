@@ -930,7 +930,11 @@ fieldset {
 #msg_simulation ,
 #user_role_div,
 #user_role_div_client,
-#user_role_div_membres{
+#user_role_div_membres,
+#errMsgSimulation,
+#errMsgMembers,
+#msg_div_ouvert
+{
   display: none;
 }
 #msg_simulation {

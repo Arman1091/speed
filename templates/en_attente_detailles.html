@@ -16,7 +16,7 @@
                     </div>
                 </div>
             </div>
-            {% if data[18] %}
+            {% if data[17] %}
             <div class="row border border-success mt-3" style="padding: 10px; border-radius: 5px;">
                 <h3 class=" mt-4 text-center">Adresse de livraison</h3>
                 <h5 class="mt-4 text-dark"><strong> {{data[5]}}</strong></h5>
@@ -270,6 +270,7 @@
             <iframe class="img_usinage_attente_detaille mt-5"
                 src="{{ url_for('static', filename= path_folder +'/IMG/'+data[13]+'.png') }}"></iframe>
             {% else %}
+            
             <div id="text_div_attente_detaille">
                 <h1 id="text_area" style="overflow-wrap:break-word;font-family: '{{ data[19] }}' "> {{data[20]}}</h1>
             </div>

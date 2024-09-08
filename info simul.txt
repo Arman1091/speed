@@ -1,0 +1,123 @@
+ @app.route('/new_command', methods=['POST'])
+def new_command():
+
+    if request.method == 'POST':
+        current_date = datetime.now()
+        data = request.form.to_dict()
+        client_id= data['client_id']
+        name_matiere = data ['name_matiere']
+        type_matiere= data['type_matiere']
+        type_usinage = data ['type_usinage']
+        count= data['count']
+        statut_id = data ['statut']
+        description = data ['description']
+        date_fin = data ['date_fin']
+        epaisseur_id = data['epaisseur_id']
+
+        is_livr = data ['is_livr']
+        prix_ht = data ['prix_ht']
+        if 'file' in request.files:
+            file = request.files['file']
+            filename = secure_filename(file.filename)
+            preferred_name = os.path.splitext(filename)[0]
+            last_row = Commande.query.order_by(Commande.id.desc()).first()
+            if last_row is None:
+                support_name = 1
+            else:
+                support_name = last_row.id+1
+
+            current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+
+
+            path_folder = "static/members/"+current_user_role+'/'+current_user.username+'/DXF/'
+            first_full_name = preferred_name+str(support_name)
+            full_name = preferred_name+str(support_name)+'.dxf'
+            is_form = True
+            file_path = os.path.join(os.path.dirname(__file__)+'/'+path_folder, full_name)
+            if not os.path.exists(os.path.dirname(__file__)+'/'+path_folder):
+                os.makedirs(os.path.dirname(__file__)+'/'+path_folder)
+            file.save(file_path)
+            plt.rcParams["savefig.facecolor"] = 'black'
+            plt.rcParams['axes.facecolor'] = 'black'
+            dwg = ezdxf.readfile(file_path)
+            msp = dwg.modelspace()
+            # *******************c********************
+            dwg.layers.new(name='MyLines', dxfattribs={'linetype': 'DASHED', 'color': 8})
+
+            ezdxf.addons.drawing.properties.MODEL_SPACE_BG_COLOR = "#FFFFFF"
+            auditor = dwg.audit()
+
+
+            if len(auditor.errors) == 0:
+                fig = plt.figure()
+                ax = fig.add_axes([0, 0, 1, 1])
+                ctx = RenderContext(dwg)
+                out = MatplotlibBackend(ax)
+                Frontend(ctx, out).draw_layout(msp, finalize=True)
+
+
+                path_img = os.path.join(os.path.dirname(__file__)+'/static', 'members', current_user_role, current_user.username, 'IMG')
+               # Check if the path exists, if not, create it
+                if not os.path.exists(path_img):
+                    os.makedirs(path_img)
+
+                # Define the complete file path
+                file_path_img = os.path.join(path_img, f'{first_full_name}.png')
+                # Save the figure
+                fig.savefig(file_path_img, dpi=300, facecolor='black', edgecolor='black')
+            # user_id = current_user.id
+            if is_livr.lower() == 'true':
+                is_livr = True
+                numero_voie_livr = data ['numero_voie_livr']
+                nom_voie_livr = data ['nom_voie_livr']
+                cp_livr = data['cp_livr']
+                ville_livr = data ['ville_livr']
+                prix_livr_ht = data ['prix_livr_ht']
+                new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id, prix_ht=prix_ht, prix_livr_ht = prix_livr_ht, name_dxf = first_full_name  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form,numero_livr= numero_voie_livr ,addresse_livr = nom_voie_livr, cp_livr = cp_livr,ville_livr = ville_livr )
+            elif is_livr.lower() == 'false':
+                is_livr = False
+                new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id, prix_ht=prix_ht, name_dxf= first_full_name  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form)
+           
+
+        else:
+            if 'text_input' in data:
+                is_form = False
+                text_input = data ['text_input']
+                height = data ['height']
+                name_police = data ['name_police']
+
+                if is_livr.lower() == 'true':
+                    is_livr = True
+                    numero_voie_livr = data ['numero_voie_livr']
+                    nom_voie_livr = data ['nom_voie_livr']
+                    cp_livr = data['cp_livr']
+                    ville_livr = data ['ville_livr']
+                    prix_livr_ht = data ['prix_livr_ht']
+                    new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id,
+                        description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form,numero_livr= numero_voie_livr ,addresse_livr = nom_voie_livr, cp_livr = cp_livr,ville_livr = ville_livr,
+                        text = text_input,hauteur_text = height, name_police = name_police,prix_ht = prix_ht, prix_livr_ht=prix_livr_ht
+                     )
+                elif is_livr.lower() == 'false':
+                    is_livr = False
+                    new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form, text = text_input,hauteur_text = height, name_police = name_police,prix_ht = prix_ht)
+        # enregistrer  la commande 
+        Commande.save(new_commande)
+        if 'plaques' in data:
+            last_inserted_id = new_commande.id
+            arr_plaques = plaques = request.form.get('plaques', '')
+            qtePlaques = request.form.get('qte_plaques', '') 
+            if isinstance(arr_plaques, str):
+                # Split the comma-separated string into a list
+                plaques = arr_plaques.split(',')
+                
+                print(plaques)  # ['value1', 'value2', 'value3']
+            if isinstance(qtePlaques, str):
+                # Split the comma-separated string into a list
+                arr_qtePlaques  = qtePlaques.split(',')
+            for index, element in enumerate(plaques):     
+                current_qte = arr_qtePlaques[index]
+                current_plaque_id = get_plaque_id(element)
+
+                new_plaque_commande =BridgeCommandePlaques(commande_id = last_inserted_id ,plaque_id = current_plaque_id,nbr_plaque =current_qte  )
+                BridgeCommandePlaques.save(new_plaque_commande)
+        return "Super,La commande a été bien enregistrer!" ilme faut

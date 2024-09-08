@@ -462,11 +462,23 @@
       let prix_mat_ttc = document.getElementById("prix_mat_ttc").innerText;
       let frais_decoup_ht = document.getElementById("frais_decoup_ht").innerText;
       let frais_decoup_ttc = document.getElementById("frais_decoup_ttc").innerText;
-      console.log(parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht));
-      document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht))).toFixed(2);
-      document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc))).toFixed(2);
+      let qte_percages = parseFloat(document.getElementById("qte_percage").innerText);
+      let prix_percages_ht = 0;
+      if (qte_percages) {
+        prix_percages_ht = qte_percages * 0.3;
+      }
+      let prix_percages_ttc = 1.2 * prix_percages_ht;
+      document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht) + prix_percages_ht)).toFixed(2);
+      document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc) + prix_percages_ttc)).toFixed(2);
       document.getElementById("qte_structure").innerHTML = count;
-    }
+    }else if(text_input.value){
+      let prix_lettre_ht= document.getElementById("prix_lettre_ht").innerText;
+      let prix_lettre_ttc = document.getElementById("prix_lettre_ttc").innerText;
+      let nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
+      document.getElementById("prix_lin_ht").innerHTML = count * (parseFloat(prix_lettre_ht)* parseFloat(nbr_lettres) );
+      document.getElementById("prix_lin_ttc").innerHTML = count * (parseFloat(prix_lettre_ttc) *parseFloat(nbr_lettres));
+      document.getElementById("qte_text").innerHTML = count;
+    } 
   }
 
 
@@ -484,17 +496,27 @@
       let prix_mat_ttc = document.getElementById("prix_mat_ttc").innerText;
       let frais_decoup_ht = document.getElementById("frais_decoup_ht").innerText;
       let frais_decoup_ttc = document.getElementById("frais_decoup_ttc").innerText;
-      console.log("sd")
-      console.log(parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht));
-      document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht))).toFixed(2);;
-      document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc))).toFixed(2);;
+      let qte_percages = parseFloat(document.getElementById("qte_percage").innerText);
+      let prix_percages_ht = 0;
+      if (qte_percages) {
+        prix_percages_ht = qte_percages * 0.3;
+      }
+      let prix_percages_ttc = 1.2 * prix_percages_ht;
+      document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht) + prix_percages_ht)).toFixed(2);;
+      document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc) + prix_percages_ttc)).toFixed(2);;
       document.getElementById("qte_structure").innerHTML = count;
-    }
+    }else if(text_input.value){
+      let prix_lettre_ht= document.getElementById("prix_lettre_ht").innerText;
+      let prix_lettre_ttc = document.getElementById("prix_lettre_ttc").innerText;
+      let nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
+      document.getElementById("prix_lin_ht").innerHTML = count * (parseFloat(prix_lettre_ht)* parseFloat(nbr_lettres) );
+      document.getElementById("prix_lin_ttc").innerHTML = count * (parseFloat(prix_lettre_ttc) *parseFloat(nbr_lettres));
+      document.getElementById("qte_text").innerHTML = count;
+    } 
   }
 
 
   function incrementPlaque() {
-    alert("sd");
     const counterElement = document.getElementById('qte_plaque');
     let count = counterElement.value;
     count++;
@@ -524,7 +546,7 @@
       // var elementBefore = currentElement.previousElementSibling;
       // Perform some action on each element (e.g., change its style)
       if (currentElement) {
-        alert("ddd");
+
         currentElement.addEventListener('click', incrementPlaque);
       }
     }
@@ -1660,7 +1682,7 @@
         }
         var nbr = 1;
         for (var i = 0; i < data['users_by_role'].length; i++) {
-         
+          let current_user_id = data['users_by_role'][i]['id'];
           var row = table.insertRow();
           var cell0 = row.insertCell(0);
           var cell1 = row.insertCell();
@@ -1673,13 +1695,13 @@
           cell2.innerHTML = data['users_by_role'][i]['email'];
           cell3.innerHTML = `+33<span class="user_pure_tel">` + data['users_by_role'][i]['tel'] + `</span>`;
           cell4.innerHTML = "************";
-        
-            cell5.innerHTML = `
+
+          cell5.innerHTML = `
             <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
-                      <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_bridge_row(this)"></i>
+                      <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_selected_user(this,`+ current_user_id + `)"></i>
             `;
-     
- 
+
+
         };
       },
       error: function () {
@@ -2062,7 +2084,7 @@
   //change representant
   $("#representant").on('change', function () {
     var current_user_role = document.getElementById("output_user_client_role").innerHTML;
-   
+
 
     let formData = new FormData();
     var selectRepresentantElement = document.getElementById("representant");
@@ -2299,24 +2321,23 @@
     });
 
     function handleFiles(files) {
-      // let x = document.getElementById("div_test");
-      // var imagejavascript = document.createElement("svg");
-      // var im = document.createElement("img");
-      // im.src = "images.png";
-      // // imagejavascript.src = "arman.svg";
-      // imagejavascript.appendChild(im);
-      // x.appendChild(im);
-
       if (files.length > 0) {
         let file = files[0];
-        uploadFile(file);
-        // if (file.type === 'dxf') {
-        //     uploadFile(file);
-        // } else {
-        //     alert('Veuillez sélectionner un fichier DXF valide.');
-        // }
+        if (file.name.toLowerCase().endsWith('.dxf')) {
+          uploadFile(file);
+        } else {
+          let errMsg = document.getElementById("errMsgSimulation");
+          errMsg.innerHTML = "Merci de sélectionnez .dxf file";
+          errMsg.style.display = "block";
+          setTimeout(() => {
+            errMsg.innerHTML = "";
+            errMsg.style.display = 'none';
+          }, 1500);
+
+        }
       }
     }
+
     dropAreaBl.on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -2359,7 +2380,6 @@
     }
 
     function uploadFile(file) {
-      console.log(file);
       let formData = new FormData();
       formData.append('file', file);
       let imageElement = document.getElementById("img_usinage");
@@ -2411,125 +2431,135 @@
           contentType: false,
           processData: false,
           success: function (data) {
-            console.log(data['path_folder'])
-            var nbr_percage = data['nbr_percage'];
-            var path_folder = data['path_folder'];
-            let long = data['dimension']['larg'] / 1000;
-            let larg = data['dimension']['long'] / 1000;
-            console.log("chaper");
-            console.log(larg);
-            console.log(long);
-
-            let surface = 0, perimetre = 0;
-            if (larg && long) {
-              surface = (larg * long);
-            }
-            if (data['perimetre']) {
-              let prix_decoup_mtr = data['prix'][0][0];
-              let prix_matiere_mtr = data['prix'][0][1];
-              console.log(prix_matiere_mtr);
-
-              perimetre = data['perimetre'];
-              let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
-
-              let formattedNumber_decoup = prix_decoup;
-              let prix_decoup_ttc = formattedNumber_decoup * 1.2;
-              let prix_matiere_ht = prix_matiere_mtr * surface;
-
-              let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
-              let total_prix_ht = qte * (prix_matiere_ht + formattedNumber_decoup + nbr_percage * 0.3);
-              let total_prix_ttc = qte * (prix_decoup_ttc + prix_matiere_ttc + nbr_percage * 0.36);
-
-              document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
-              document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
-              document.getElementById("prix_lin_ht").innerHTML = total_prix_ht.toFixed(2);
-              document.getElementById("prix_lin_ttc").innerHTML = total_prix_ttc.toFixed(2);
-              document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
-              document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
-              document.getElementById("qte_structure").innerHTML = qte;
-              document.getElementById("qte_percage").innerHTML = nbr_percage;
-              document.getElementById("prix_percage").innerHTML = (1.2 * 0.3 * nbr_percage).toFixed(2);
-              document.getElementById("scructure_livraison_form").style.display = "none";
-              document.getElementById("mode_emp").checked = true;
-              document.getElementById("height_label").innerHTML = larg.toFixed(2);
-              document.getElementById("width_label").innerHTML = long.toFixed(2);
-              if (document.getElementById("devis_mode_reception_div").style.display !== "none") {
-                document.getElementById("devis_mode_reception_div").style.display = "none";
-              }
-              if (mt_text === "Newbond") {
-                document.getElementById("section_surface_usinage").style.display = "block";
-                document.getElementById("prix_matiere_hidden").innerHTML = prix_matiere_mtr;
-
-              }
-
-              let labels = document.getElementsByClassName("label");
-
-              // Iterate through each element and set the display property to "block"
-              for (let i = 0; i < labels.length; i++) {
-                labels[i].style.display = "block";
-              }
-              var selectElement = document.getElementById('cients_devis_pro');
-              // Set the value of the select element to -1
-              selectElement.value = "-1";
-
-              document.getElementById("perimetre_totale").innerHTML = perimetre;
-
-              var prix_material_div = document.getElementById("prix_material_div");
-              var frais_decoup_div = document.getElementById("frais_decoup_div");
-              if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
-                prix_material_div.style.display = 'flex'
-                frais_decoup_div.style.display = 'flex'
-              }
-
-
+            if (data["msg"]) {
+              let errMsg = document.getElementById("errMsgSimulation");
+              errMsg.innerHTML = data["msg"];
+              errMsg.style.display = "block";
+              setTimeout(() => {
+                errMsg.innerHTML = "";
+                errMsg.style.display = 'none';
+              }, 2000);
             } else {
+              var nbr_percage = data['nbr_percage'];
+              var path_folder = data['path_folder'];
+              let long = data['dimension']['larg'] / 1000;
+              let larg = data['dimension']['long'] / 1000;
+              console.log("chaper");
+              console.log(larg);
+              console.log(long);
 
-              surface = surface.toFixed(2);
-              if (surface < 0.1) {
+              let surface = 0, perimetre = 0;
+              if (larg && long) {
+                surface = (larg * long);
+              }
+              if (data['perimetre']) {
+                let prix_decoup_mtr = data['prix'][0][0];
+                let prix_matiere_mtr = data['prix'][0][1];
+                console.log(prix_matiere_mtr);
 
-                var prix_ht_entity = data['prix'][0][0];
-              } else if (surface >= 0.1 && surface <= 0.25) {
-                var prix_ht_entity = data['prix'][0][1];
+                perimetre = data['perimetre'];
+                let prix_decoup = (perimetre * prix_decoup_mtr) / 1000;
+
+                let formattedNumber_decoup = prix_decoup;
+                let prix_decoup_ttc = formattedNumber_decoup * 1.2;
+                let prix_matiere_ht = prix_matiere_mtr * surface;
+
+                let prix_matiere_ttc = 1.2 * prix_matiere_mtr * surface;
+                let total_prix_ht = qte * (prix_matiere_ht + formattedNumber_decoup + nbr_percage * 0.3);
+                let total_prix_ttc = qte * (prix_decoup_ttc + prix_matiere_ttc + nbr_percage * 0.36);
+
+                document.getElementById("frais_decoup_ht").innerHTML = formattedNumber_decoup.toFixed(2);
+                document.getElementById("frais_decoup_ttc").innerHTML = prix_decoup_ttc.toFixed(2);
+                document.getElementById("prix_lin_ht").innerHTML = total_prix_ht.toFixed(2);
+                document.getElementById("prix_lin_ttc").innerHTML = total_prix_ttc.toFixed(2);
+                document.getElementById("prix_mat_ht").innerHTML = prix_matiere_ht.toFixed(2);
+                document.getElementById("prix_mat_ttc").innerHTML = prix_matiere_ttc.toFixed(2);
+                document.getElementById("qte_structure").innerHTML = qte;
+                document.getElementById("qte_percage").innerHTML = nbr_percage;
+                document.getElementById("prix_percage").innerHTML = (1.2 * 0.3 * nbr_percage).toFixed(2);
+                document.getElementById("scructure_livraison_form").style.display = "none";
+                document.getElementById("mode_emp").checked = true;
+                document.getElementById("height_label").innerHTML = larg.toFixed(2);
+                document.getElementById("width_label").innerHTML = long.toFixed(2);
+                if (document.getElementById("devis_mode_reception_div").style.display !== "none") {
+                  document.getElementById("devis_mode_reception_div").style.display = "none";
+                }
+                if (mt_text === "Newbond") {
+                  document.getElementById("section_surface_usinage").style.display = "block";
+                  document.getElementById("prix_matiere_hidden").innerHTML = prix_matiere_mtr;
+
+                }
+
+                let labels = document.getElementsByClassName("label");
+
+                // Iterate through each element and set the display property to "block"
+                for (let i = 0; i < labels.length; i++) {
+                  labels[i].style.display = "block";
+                }
+                var selectElement = document.getElementById('cients_devis_pro');
+                // Set the value of the select element to -1
+                selectElement.value = "-1";
+
+                document.getElementById("perimetre_totale").innerHTML = perimetre;
+
+                var prix_material_div = document.getElementById("prix_material_div");
+                var frais_decoup_div = document.getElementById("frais_decoup_div");
+                if (prix_material_div.style.display == 'none' && frais_decoup_div.style.display == 'none') {
+                  prix_material_div.style.display = 'flex'
+                  frais_decoup_div.style.display = 'flex'
+                }
+
+
               } else {
-                var prix_ht_entity = data['prix'][0][2];
+
+                surface = surface.toFixed(2);
+                if (surface < 0.1) {
+
+                  var prix_ht_entity = data['prix'][0][0];
+                } else if (surface >= 0.1 && surface <= 0.25) {
+                  var prix_ht_entity = data['prix'][0][1];
+                } else {
+                  var prix_ht_entity = data['prix'][0][2];
+                }
+                var prix_ht = (qte * prix_ht_entity).toFixed(2);
+                var prix_ttc = (1.2 * prix_ht).toFixed(2);
+
+                document.getElementById("prix_lin_ht").innerHTML = prix_ht;
+                document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
+                document.getElementById("qte_structure").innerHTML = qte;
+                var prix_material_div = document.getElementById("prix_material_div");
+                var frais_decoup_div = document.getElementById("frais_decoup_div");
+                if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
+                  prix_material_div.style.display = 'none'
+                  frais_decoup_div.style.display = 'none'
+                }
+
+
               }
-              var prix_ht = (qte * prix_ht_entity).toFixed(2);
-              var prix_ttc = (1.2 * prix_ht).toFixed(2);
+              // Change the image source
 
-              document.getElementById("prix_lin_ht").innerHTML = prix_ht;
-              document.getElementById("prix_lin_ttc").innerHTML = prix_ttc;
-              document.getElementById("qte_structure").innerHTML = qte;
-              var prix_material_div = document.getElementById("prix_material_div");
-              var frais_decoup_div = document.getElementById("frais_decoup_div");
-              if (prix_material_div.style.display != 'none' || frais_decoup_div.style.display != 'none') {
-                prix_material_div.style.display = 'none'
-                frais_decoup_div.style.display = 'none'
+              let timestamp = new Date().getTime();
+              imageElement.src = `${path_folder}/current.png?${timestamp}`;
+              let myDiv = document.getElementById("accordionExample");
+              myDiv.style.display = "block";
+              let devis_pro = document.getElementById("acardion_format_pro");
+              devis_pro.style.display = "block";
+              let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
+              if (form_envoyer_usinage_btn) {
+                form_envoyer_usinage_btn.style.display = "block";
               }
 
 
-            }
-            // Change the image source
-
-            let timestamp = new Date().getTime();
-            imageElement.src = `${path_folder}/current.png?${timestamp}`;
-            let myDiv = document.getElementById("accordionExample");
-            myDiv.style.display = "block";
-            let devis_pro = document.getElementById("acardion_format_pro");
-            devis_pro.style.display = "block";
-            let form_envoyer_usinage_btn = document.getElementById("form_envoyer_usinage_btn");
-            if (form_envoyer_usinage_btn) {
-              form_envoyer_usinage_btn.style.display = "block";
+              let total_prix_detailles = document.getElementById("total_prix_detailles");
+              total_prix_detailles.style.display = "flex";
+              document.getElementById("height_img").innerHTML = larg.toFixed(2);
+              document.getElementById("width_img").innerHTML = long.toFixed(2);
+              document.getElementById("prix_detailles").style.display = "block";
+              document.getElementById("text_prix_detailles").style.display = "none";
+              document.getElementById("surface_usinage").innerHTML = surface.toFixed(2)
+              document.getElementById("surface_usinage_hidden").innerHTML = surface.toFixed(2)
             }
 
-
-            let total_prix_detailles = document.getElementById("total_prix_detailles");
-            total_prix_detailles.style.display = "flex";
-            document.getElementById("height_img").innerHTML = larg.toFixed(2);
-            document.getElementById("width_img").innerHTML = long.toFixed(2);
-            document.getElementById("prix_detailles").style.display = "block";
-            document.getElementById("text_prix_detailles").style.display = "none";
-            document.getElementById("surface_usinage").innerHTML = surface.toFixed(2)
-            document.getElementById("surface_usinage_hidden").innerHTML = surface.toFixed(2)
           },
           error: function () {
             alert('Une erreur s\'est produite lors de l\'envoi du fichier.');
@@ -2556,18 +2586,30 @@
     }
     document.getElementById("qte_structure").innerHTML = qte;
     let verif_file = document.getElementById("fileInput").value;
+    let text_input = document.getElementById("text_input");
     if (verif_file) {
       let prix_mat_ht = document.getElementById("prix_mat_ht").innerText;
 
       let prix_mat_ttc = document.getElementById("prix_mat_ttc").innerText;
       let frais_decoup_ht = document.getElementById("frais_decoup_ht").innerText;
       let frais_decoup_ttc = document.getElementById("frais_decoup_ttc").innerText;
-      console.log("sd")
-      console.log(parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht));
-      document.getElementById("prix_lin_ht").innerHTML = qte * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht));
-      document.getElementById("prix_lin_ttc").innerHTML = qte * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc));
+      let qte_percages = parseFloat(document.getElementById("qte_percage").innerText);
+      let prix_percages_ht = 0;
+      if (qte_percages) {
+        prix_percages_ht = qte_percages * 0.3;
+      }
+      let prix_percages_ttc = 1.2 * prix_percages_ht;
+      document.getElementById("prix_lin_ht").innerHTML = qte * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht) + prix_percages_ht);
+      document.getElementById("prix_lin_ttc").innerHTML = qte * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc) + prix_percages_ttc);
 
-    }
+    }else if(text_input.value){
+      let prix_lettre_ht= document.getElementById("prix_lettre_ht").innerText;
+      let prix_lettre_ttc = document.getElementById("prix_lettre_ttc").innerText;
+      let nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
+      document.getElementById("prix_lin_ht").innerHTML = qte * (parseFloat(prix_lettre_ht)* parseFloat(nbr_lettres) );
+      document.getElementById("prix_lin_ttc").innerHTML = qte * (parseFloat(prix_lettre_ttc) *parseFloat(nbr_lettres));
+      document.getElementById("qte_text").innerHTML = qte;
+    } 
   });
 
   // **************
@@ -2708,114 +2750,136 @@ function envoyer_command() {
   const selectedRadio = document.querySelector('input[name="mode_livr"]:checked');
 
   const selectedValue = selectedRadio.value;
-  var is_livr = false;
+  let is_livr = false;
+  let numero_voie_livr = document.getElementById("numero_voie_livr").value;
+  let nom_voie_livr = document.getElementById("nom_voie_livr").value;
+  let cp_livr = document.getElementById("cp_livr").value;
+  let ville_livr = document.getElementById("ville_livr").value;
   if (selectedValue == "livraison") {
-    var is_livr = true
-    let numero_voie_livr = document.getElementById("numero_voie_livr").value;
-    let nom_voie_livr = document.getElementById("nom_voie_livr").value;
-    let cp_livr = document.getElementById("cp_livr").value;
-    let ville_livr = document.getElementById("ville_livr").value;
     formData.append('numero_voie_livr', numero_voie_livr);
     formData.append('nom_voie_livr', nom_voie_livr);
     formData.append('cp_livr', cp_livr);
     formData.append('ville_livr', ville_livr);
   }
+  if (!date_livraison) {
+    let msg = document.getElementById("msg_div_ouvert");
+    let dateInput = document.getElementById("dateInput");
+    msg.style.display = "block";
+    msg.style.color = "red";
+    dateInput.style.border = '1px solid red';
+    msg.textContent = " veuillez ajouter la date la production souhaité";
+    setTimeout(function () {
+      msg.style.display = "none";
+      msg.style.color = "green";
+      dateInput.style.border = '0';
+    }, 2000);
+  } else if (selectedValue == "livraison" && (!numero_voie_livr || !nom_voie_livr || !cp_livr || !ville_livr)) {
+    let msg = document.getElementById("msg_div_ouvert");
+    msg.style.display = "block";
+    msg.style.color = "red";
+    msg.textContent = " Veuillez remplir tous les champs obligatoires";
+    setTimeout(function () {
+      msg.style.display = "none";
+      msg.style.color = "green";
+    }, 2000);
+  } else {
+    var file_btn = document.getElementById("file_btn");
+    var text_bn = document.getElementById("text_btn");
+    var prix_ht = document.getElementById("prix_lin_ht").innerHTML;
+    formData.append('prix_ht', prix_ht);
+    if (file_btn.classList.contains("active-case")) {
 
-  var file_btn = document.getElementById("file_btn");
-  var text_bn = document.getElementById("text_btn");
-  var prix_ht = document.getElementById("prix_lin_ht").innerHTML;
-  formData.append('prix_ht', prix_ht);
-  if (file_btn.classList.contains("active-case")) {
-
-    if (selectedValue == "livraison") {
-      prix_livr_ht = document.getElementById("prix_livr_ht").innerHTML;
-      formData.append('prix_livr_ht', prix_livr_ht);
-    }
-    let file = $('#fileInput')[0].files[0];
-    formData.append('file', file);
-    if (name_matiere === "Newbond") {
-      var selects = document.querySelectorAll('#plaque_div select');
-      var selectedValues = [];
-      var selectedQte = [];
-      var input = "";
-      let i = 0;
-      var qte = parseFloat(document.getElementById("qte").value);
-      selects.forEach(function (select) {
-
-        let text = select.selectedOptions[0].text;
-        selectedValues[i] = text;
-        input = select.nextElementSibling;
-        selectedQte[i] = input.querySelector('input.qte_plaque').value;
-        i++;
-      });
-      if (selectedValues.length) {
-        formData.append('plaques', selectedValues);
-        formData.append('qte_plaques', selectedQte);
+      if (selectedValue == "livraison") {
+        prix_livr_ht = document.getElementById("prix_livr_ht").innerHTML;
+        formData.append('prix_livr_ht', prix_livr_ht);
       }
+      let file = $('#fileInput')[0].files[0];
+      formData.append('file', file);
+      if (name_matiere === "Newbond") {
+        var selects = document.querySelectorAll('#plaque_div select');
+        var selectedValues = [];
+        var selectedQte = [];
+        var input = "";
+        let i = 0;
+        var qte = parseFloat(document.getElementById("qte").value);
+        selects.forEach(function (select) {
+
+          let text = select.selectedOptions[0].text;
+          selectedValues[i] = text;
+          input = select.nextElementSibling;
+          selectedQte[i] = input.querySelector('input.qte_plaque').value;
+          i++;
+        });
+        if (selectedValues.length) {
+          formData.append('plaques', selectedValues);
+          formData.append('qte_plaques', selectedQte);
+        }
+      }
+
+
+
+
+    } else if (text_bn.classList.contains("active-case")) {
+      if (selectedValue == "livraison") {
+        var prix_text_livr_ht = document.getElementById("prix_livr_text_ht").innerHTML;
+        formData.append('prix_livr_ht', prix_text_livr_ht);
+      }
+      var text_input = document.getElementById("text_input").value;
+      var selectHeightElement = document.getElementById("height");
+      var selectedHeightOption = selectHeightElement.options[selectHeightElement.selectedIndex];
+      var height = selectedHeightOption.innerHTML;
+      var selectFontElement = document.getElementById("fontSelect");
+      var selectedFontOption = selectFontElement.options[selectFontElement.selectedIndex];
+      var selectedFontValue = selectedFontOption.value;
+      var selectedFontText = selectedFontOption.innerText;
+
+      formData.append('height', height);
+      formData.append('text_input', text_input);
+      formData.append('name_police', selectedFontText);
+
+
     }
 
+    // prix_livraison_ttc = document.getElementById("prix_livr_text").innerHTML;
+    // prix_livraison_ht = (prix_livraison_ttc/1.2).toFixed(2);
+    formData.append('client_id', selectedClientValue);
+    formData.append('statut', statut);
+    formData.append('name_matiere', name_matiere);
+    formData.append('type_matiere', type_matiere);
+
+    formData.append('type_usinage', selectedTypeValue);
+    formData.append('count', qte);
 
 
+    formData.append('description', description);
+    formData.append('date_fin', date_livraison);
+    formData.append('epaisseur_id', selectedEpesseurValue);
+    formData.append('is_livr', is_livr);
 
-  } else if (text_bn.classList.contains("active-case")) {
-    if (selectedValue == "livraison") {
-      var prix_text_livr_ht = document.getElementById("prix_livr_text_ht").innerHTML;
-      formData.append('prix_livr_ht', prix_text_livr_ht);
-    }
-    var text_input = document.getElementById("text_input").value;
-    var selectHeightElement = document.getElementById("height");
-    var selectedHeightOption = selectHeightElement.options[selectHeightElement.selectedIndex];
-    var height = selectedHeightOption.innerHTML;
-    var selectFontElement = document.getElementById("fontSelect");
-    var selectedFontOption = selectFontElement.options[selectFontElement.selectedIndex];
-    var selectedFontValue = selectedFontOption.value;
-    var selectedFontText = selectedFontOption.innerText;
+    $.ajax({
+      url: '/new_command',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
 
-    formData.append('height', height);
-    formData.append('text_input', text_input);
-    formData.append('name_police', selectedFontText);
+        let myDiv = document.getElementById("envoi_div");
+        myDiv.style.display = "none";
 
-
+        var msg_simulation = document.getElementById("msg_simulation");
+        msg_simulation.textContent = msg;
+        msg_simulation.style.display = "block";
+        setTimeout(function () {
+          window.location.href = "/simulation";
+        }, 500);
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
+      }
+    });
   }
 
-  // prix_livraison_ttc = document.getElementById("prix_livr_text").innerHTML;
-  // prix_livraison_ht = (prix_livraison_ttc/1.2).toFixed(2);
-  formData.append('client_id', selectedClientValue);
-  formData.append('statut', statut);
-  formData.append('name_matiere', name_matiere);
-  formData.append('type_matiere', type_matiere);
-
-  formData.append('type_usinage', selectedTypeValue);
-  formData.append('count', qte);
-
-
-  formData.append('description', description);
-  formData.append('date_fin', date_livraison);
-  formData.append('epaisseur_id', selectedEpesseurValue);
-  formData.append('is_livr', is_livr);
-
-  $.ajax({
-    url: '/new_command',
-    type: 'POST',
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function (msg) {
-
-      let myDiv = document.getElementById("envoi_div");
-      myDiv.style.display = "none";
-
-      var msg_simulation = document.getElementById("msg_simulation");
-      msg_simulation.textContent = msg;
-      msg_simulation.style.display = "block";
-      setTimeout(function () {
-        window.location.href = "/simulation";
-      }, 300);
-    },
-    error: function () {
-      alert('Une erreur s\'est produite lors de fare l\'operation.');
-    }
-  });
 }
 function confirmation(id) {
   let formData = new FormData();
@@ -3025,7 +3089,31 @@ function telecharger_pdf(user) {
 
   var prix_ht = parseFloat(document.getElementById("prix_lin_ht").innerHTML);
   // var prix_limeaire = document.getElementById("frais_decoup_ttc").innerHTML;
+  if (file_btn.classList.contains("active-case")) {
+    if (matiere == "Newbond") {
 
+      let selects = document.querySelectorAll('#plaque_div select');
+      if (selects.length) {
+        let selectedValues = [];
+        let selectedQte = [];
+        let input = "";
+        let value = 0;
+        selects.forEach(function (select) {
+          value = select.value;
+          let text = select.selectedOptions[0].text;
+
+          selectedValues.push(text);
+          input = select.nextElementSibling;
+          selectedQte.push(input.querySelector('input.qte_plaque').value);
+
+        });
+
+        formData.append('plaques', selectedValues);
+        formData.append('qte_plaques', selectedQte);
+      }
+    }
+
+  }
   var qte = parseInt(document.getElementById("qte").value);
   console.log(prix_ht);
   formData.append('name_matiere', matiere);
@@ -3194,7 +3282,7 @@ function text_btn_active() {
       document.getElementById("section_surface_usinage").style.display = "none";
     }
     let labels = document.getElementsByClassName("label");
-
+    document.getElementById("qte").value = 1;
     // Iterate through each element and set the display property to "block"
     for (let i = 0; i < labels.length; i++) {
       labels[i].style.display = "none";
@@ -3310,7 +3398,7 @@ function upload_btn_active() {
     file_btn.classList.add("active-case");
     drop_area = document.getElementById("drop-area");
     drop_area.style.display = "block"
-
+    document.getElementById("qte").value = 1;
 
     if (text_bn.classList.contains("active-case")) {
       text_bn.classList.remove("active-case");
@@ -3668,12 +3756,12 @@ function addNewClient() {
   formData.append('email', emailText);
   formData.append('prix_clent_livr', prix_clent_livr);
   formData.append('tel', telpText);
-//  else if (!validateEmail(email)) {
-//     msg = "Respecter les règles  pour rédiger un mail!"
+  //  else if (!validateEmail(email)) {
+  //     msg = "Respecter les règles  pour rédiger un mail!"
   var msg = "";
   if (isAnyFormDataEmpty(formData)) {
     msg = "Un ou plusieurs champs du formulaire sont vides";
-  }  else if (isNumber(numeroVoie) || numeroVoie <= 0) {
+  } else if (isNumber(numeroVoie) || numeroVoie <= 0) {
     msg = "Numéro de voie doit être supérieur à 0";
   } else if (isNumber(cp) || cp <= 0) {
     msg = "CP  doit être supérieur à 0";
@@ -3965,6 +4053,35 @@ function delete_client(current_row, id) {
   }
 }
 
+function delete_selected_user(current_row, id) {
+  let text = "Attention!En supprimant cette user ,ca va supprimer automatiquement tous les  clients et les commandes en cours de lies avec  cette client.Voulez vous supprimer la cliente?";
+  alert(id);
+  if (confirm(text)) {
+    console.log("ttttttttttttt");
+    console.log(id);
+    alert("sd");
+    let formData = new FormData();
+    formData.append('id_user', id);
+    $.ajax({
+      url: '/delete_user',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
+        var row = current_row.parentNode.parentNode; // Get the parent row of the button
+        row.parentNode.removeChild(row); // Remove the row from the table
+        // var liste_clients_section = document.getElementById("edit_client_section");
+        // liste_clients_section.style.display = "none";
+        // window.location.href = "/clients";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
+      }
+    });
+  }
+}
 
 function delete_bridge_row(current_bridge_row) {
   let text = "Attention!En supprimant cette client ,ca va supprimer automatiquement tous les commandes en cours de  ces informations.Voulez vous supprimer la cliente?";
@@ -4803,6 +4920,7 @@ function closeNewPasswordSpace() {
 }
 
 function SaveEditUser() {
+  alert("sd");
   var edit_user_id = document.getElementById("edit_user_id").innerHTML;
 
   var selectRoleElement = document.getElementById("role_edit_user");
@@ -4821,25 +4939,61 @@ function SaveEditUser() {
   formData.append('role', selectedRoleValue);
   formData.append('username', name_edit_user);
   formData.append('email', edit_email);
-  formData.append('password', new_pwd);
   formData.append('tel', edit_tel);
   console.log(formData);
-
-  $.ajax({
-    url: '/edit_user',
-    type: 'POST',
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: function (msg) {
+  if (new_pwd_div.style.display == "block" && new_pwd !== new_confirm_pwd) {
 
 
-    },
-    error: function () {
-      alert('Une erreur s\'est produite lors de fare l\'operation.');
+    let errMsg = document.getElementById("errMsgMembers");
+    errMsg.innerHTML = "Vérifier que les mdp sont identiques";
+    console.log(errMsg);
+    errMsg.classList.add('bg-danger');
+    errMsg.style.display = "block";
+    document.getElementById("new_pwd").style.border = '1px solid red';
+    document.getElementById("new_confirm_pwd").style.border = '1px solid red';
+    setTimeout(() => {
+      errMsg.innerHTML = "";
+      errMsg.style.display = 'none';
+      document.getElementById("new_pwd").style.border = '0';
+      document.getElementById("new_confirm_pwd").style.border = '0';
+    }, 2500);
+  } else if (new_pwd_div.style.display == "block" && (!new_pwd || !new_confirm_pwd)) {
+    let errMsg = document.getElementById("errMsgMembers");
+    errMsg.innerHTML = "Vérifier que les mdp sont pas vide";
+    console.log(errMsg);
+    errMsg.classList.add('bg-danger');
+    errMsg.style.display = "block";
+    document.getElementById("new_pwd").style.border = '1px solid red';
+    document.getElementById("new_confirm_pwd").style.border = '1px solid red';
+    setTimeout(() => {
+      errMsg.innerHTML = "";
+      errMsg.style.display = 'none';
+      document.getElementById("new_pwd").style.border = '0';
+      document.getElementById("new_confirm_pwd").style.border = '0';
+    }, 2500);
+  } else {
+    if (new_pwd) {
+      formData.append('new_pwd', new_pwd);
     }
-  });
+    $.ajax({
+      url: '/edit_user',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (msg) {
+        window.location.href = "/membres";
+
+      },
+      error: function () {
+        alert('Une erreur s\'est produite lors de fare l\'operation.');
+      }
+    });
+  }
 }
+
+
+
 
 
 const validateEmail = (email) => {

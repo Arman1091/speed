@@ -9,7 +9,7 @@ import math
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from PyPDF2 import PdfReader, PdfWriter
+# from PyPDF2 import PdfReader, PdfWriter
 # from io import BytesIO
 from datetime import datetime
 from io import BytesIO
@@ -98,8 +98,6 @@ def create_pdf( data , path, dir_name):
     type_usinage = data ['type_usinage']
     qte= int(data['qte'])
     prix_ht = float(data ['prix_ht'])
-
-    print(prix_ht )
     epaisseur = data['epaisseur']
     user = data["user"]
     montant_total_ht = prix_ht
@@ -124,6 +122,22 @@ def create_pdf( data , path, dir_name):
 
     if devisVide_path:
         c.drawInlineImage(devisVide_path, 0, 0, c._pagesize[0], height=c._pagesize[1])
+    
+    if 'plaques' in data:
+        arr_plaques = plaques = request.form.get('plaques', '')
+        qtePlaques = request.form.get('qte_plaques', '') 
+        if isinstance(arr_plaques, str):
+            # Split the comma-separated string into a list
+            plaques = arr_plaques.split(',')
+        if isinstance(qtePlaques, str):
+            # Split the comma-separated string into a list
+            arr_qtePlaques  = qtePlaques.split(',')
+        c.setFont("Helvetica", 9)
+        c.drawString(130, 480, name_matiere+" "+ type_matiere+" "+ str(epaisseur)+" mm")
+        vertical_space = 15
+        for index, element in enumerate(plaques):
+            c.setFont("Helvetica-Bold", 9)
+            c.drawString(150, 460-index*vertical_space , element+"x"+ arr_qtePlaques[index])
     # Ajouter le titre
 
     c.setFont("Helvetica-Bold", 9)
