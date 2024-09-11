@@ -29,17 +29,18 @@
     <div class="commande_div_body">
       <ul id="en_attents_list" style="list-style: none;">
         {% for item in data %}
-        {{item[12]}}
-
+       
         <li value={{item[12]}} class="commande_li">
-          <a href="{{ url_for('en_attente_detailles', id=item[10] ) }}" onclick="setisvu()">
-            <div class="commande">
+          <a href="{{ url_for('en_attente_detailles', id=item[10] ) }}" onclick="setVuAttente(' {{item[10]}}')">
+            <div class="commande {% if item[12] == True %}vu{% else %}no_vu{% endif %}">
+
               <div class=" commande_avatar border border-success rounded-circle" style="background-color: #cde2ef">
                 <h5 class="text-center text-primary">{{item[11][0]}}</h5>
+                <h5 class="representantNameHidden">{{item[11]}}</h5>
               </div>
               <!-- <img class="commande_avatar" src="https://randomuser.me/api/portraits/men/32.jpg"> -->
               <div class="commande_info d-flex justify-content-start">
-                <div class="contact_name"> {{item[6]}}</div>
+                <div class="contact_name"> {{item[4]}}</div>
                 <div class="contact_msg" style="margin-left: 10px;">{{item[4]}}:{{item[0]}} {{item[1]}} {{item[7]}} mm </div>
               </div>
               <div class="commande_status">

@@ -131,57 +131,60 @@
 
 
   window.addEventListener('load', () => {
-    const modal = document.getElementById('myModal');
-    const img = document.getElementById('img_usinage');
-    const modalImg = document.getElementById('modalImage');
-    const closeBtn = document.getElementsByClassName('close')[0];
-    const zoomInBtn = document.getElementById('zoomIn');
-    const zoomOutBtn = document.getElementById('zoomOut');
-    let scale = 1;
-    let originX = 0;
-    let originY = 0;
+    if (document.getElementById('img_usinage')) {
+      const modal = document.getElementById('myModal');
+      const img = document.getElementById('img_usinage');
+      const modalImg = document.getElementById('modalImage');
+      const closeBtn = document.getElementsByClassName('close')[0];
+      const zoomInBtn = document.getElementById('zoomIn');
+      const zoomOutBtn = document.getElementById('zoomOut');
+      let scale = 1;
+      let originX = 0;
+      let originY = 0;
 
-    img.onclick = function () {
-      modal.style.display = 'block';
-      modalImg.src = this.src;
-      scale = 1;
-      modalImg.style.transform = `scale(${scale})`;
-      modalImg.style.transformOrigin = `center center`;
-    }
-
-    closeBtn.onclick = function () {
-      modal.style.display = 'none';
-    }
-
-    zoomInBtn.onclick = function () {
-      scale += 0.1;
-      modalImg.style.transform = `scale(${scale})`;
-    }
-
-    zoomOutBtn.onclick = function () {
-      if (scale > 0.1) {
-        scale -= 0.1;
+      img.onclick = function () {
+        modal.style.display = 'block';
+        modalImg.src = this.src;
+        scale = 1;
         modalImg.style.transform = `scale(${scale})`;
+        modalImg.style.transformOrigin = `center center`;
       }
-    }
 
-    modalImg.onclick = function (event) {
-      const rect = modalImg.getBoundingClientRect();
-      originX = ((event.clientX - rect.left) / rect.width) * 100;
-      originY = ((event.clientY - rect.top) / rect.height) * 100;
-
-      modalImg.style.transformOrigin = `${originX}% ${originY}%`;
-
-      scale += 0.1;
-      modalImg.style.transform = `scale(${scale})`;
-    }
-
-    // Close the modal when clicking outside of the image
-    window.onclick = function (event) {
-      if (event.target == modal) {
+      closeBtn.onclick = function () {
         modal.style.display = 'none';
       }
+
+      zoomInBtn.onclick = function () {
+        scale += 0.1;
+        modalImg.style.transform = `scale(${scale})`;
+      }
+
+      zoomOutBtn.onclick = function () {
+        if (scale > 0.1) {
+          scale -= 0.1;
+          modalImg.style.transform = `scale(${scale})`;
+        }
+      }
+
+      modalImg.onclick = function (event) {
+        const rect = modalImg.getBoundingClientRect();
+        originX = ((event.clientX - rect.left) / rect.width) * 100;
+        originY = ((event.clientY - rect.top) / rect.height) * 100;
+
+        modalImg.style.transformOrigin = `${originX}% ${originY}%`;
+
+        scale += 0.1;
+        modalImg.style.transform = `scale(${scale})`;
+      }
+
+      // Close the modal when clicking outside of the image
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = 'none';
+        }
+      }
     }
+
 
     $(".prix_ttc_value").each(function (index, element) {
       let value = parseFloat($(element).text()).toFixed(2);
@@ -471,14 +474,14 @@
       document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht) + prix_percages_ht)).toFixed(2);
       document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc) + prix_percages_ttc)).toFixed(2);
       document.getElementById("qte_structure").innerHTML = count;
-    }else if(text_input.value){
-      let prix_lettre_ht= document.getElementById("prix_lettre_ht").innerText;
+    } else if (text_input.value) {
+      let prix_lettre_ht = document.getElementById("prix_lettre_ht").innerText;
       let prix_lettre_ttc = document.getElementById("prix_lettre_ttc").innerText;
       let nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
-      document.getElementById("prix_lin_ht").innerHTML = count * (parseFloat(prix_lettre_ht)* parseFloat(nbr_lettres) );
-      document.getElementById("prix_lin_ttc").innerHTML = count * (parseFloat(prix_lettre_ttc) *parseFloat(nbr_lettres));
+      document.getElementById("prix_lin_ht").innerHTML = count * (parseFloat(prix_lettre_ht) * parseFloat(nbr_lettres));
+      document.getElementById("prix_lin_ttc").innerHTML = count * (parseFloat(prix_lettre_ttc) * parseFloat(nbr_lettres));
       document.getElementById("qte_text").innerHTML = count;
-    } 
+    }
   }
 
 
@@ -505,14 +508,14 @@
       document.getElementById("prix_lin_ht").innerHTML = (count * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht) + prix_percages_ht)).toFixed(2);;
       document.getElementById("prix_lin_ttc").innerHTML = (count * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc) + prix_percages_ttc)).toFixed(2);;
       document.getElementById("qte_structure").innerHTML = count;
-    }else if(text_input.value){
-      let prix_lettre_ht= document.getElementById("prix_lettre_ht").innerText;
+    } else if (text_input.value) {
+      let prix_lettre_ht = document.getElementById("prix_lettre_ht").innerText;
       let prix_lettre_ttc = document.getElementById("prix_lettre_ttc").innerText;
       let nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
-      document.getElementById("prix_lin_ht").innerHTML = count * (parseFloat(prix_lettre_ht)* parseFloat(nbr_lettres) );
-      document.getElementById("prix_lin_ttc").innerHTML = count * (parseFloat(prix_lettre_ttc) *parseFloat(nbr_lettres));
+      document.getElementById("prix_lin_ht").innerHTML = count * (parseFloat(prix_lettre_ht) * parseFloat(nbr_lettres));
+      document.getElementById("prix_lin_ttc").innerHTML = count * (parseFloat(prix_lettre_ttc) * parseFloat(nbr_lettres));
       document.getElementById("qte_text").innerHTML = count;
-    } 
+    }
   }
 
 
@@ -1058,24 +1061,22 @@
     filter = input.value.toLowerCase();
     ul = document.getElementById('en_attents_list');
     li = ul.getElementsByTagName('li');
-    var elements = document.querySelectorAll('.contact_name');
-    elements.forEach(function (element) {
+    Array.from(li).forEach(function (listItem) {
+      // Get the '.contact_name' and '.representantNameHidden' inside the current 'li'
+      let contactName = listItem.querySelector('.contact_name');
+      let representantNameHidden = listItem.querySelector('.representantNameHidden');
 
-      let text = element.innerText;
-      let current_li = element.closest('li');
-      console.log(text.toLowerCase());
-      if (text.toLowerCase().indexOf(filter) === -1) {
+      // Get their text values
+      let contactNameText = contactName ? contactName.innerText.toLowerCase() : '';
+      let representantNameText = representantNameHidden ? representantNameHidden.innerText.toLowerCase() : '';
 
-        // Hide the row if the search text is not found
-
-        current_li.style.display = 'none';
-
+      // Check if the filter matches either the contact name or the representant name
+      if (contactNameText.indexOf(filter) === -1 && representantNameText.indexOf(filter) === -1) {
+        // Hide the row if the search text is not found in either name
+        listItem.style.display = 'none';
       } else {
-
-        // Show the row if the search text is found
-
-        current_li.style.display = 'block';
-
+        // Show the row if the search text is found in either name
+        listItem.style.display = 'block';
       }
     });
     // });
@@ -1672,7 +1673,9 @@
       contentType: false,
       processData: false,
       success: function (data) {
-        console.log(data);
+
+        let output_user_membres_role= document.getElementById("output_user_membres_role").innerHTML;
+
         var table = document.getElementById("users_table");
         var rowCount = table.rows.length;
 
@@ -1682,6 +1685,7 @@
         }
         var nbr = 1;
         for (var i = 0; i < data['users_by_role'].length; i++) {
+          
           let current_user_id = data['users_by_role'][i]['id'];
           var row = table.insertRow();
           var cell0 = row.insertCell(0);
@@ -1689,17 +1693,23 @@
           var cell2 = row.insertCell();
           var cell3 = row.insertCell();
           var cell4 = row.insertCell();
-          var cell5 = row.insertCell();
+          if(output_user_membres_role === "admin"){
+            var cell5 = row.insertCell();
+          }
+          
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data['users_by_role'][i]['username'];
           cell2.innerHTML = data['users_by_role'][i]['email'];
           cell3.innerHTML = `+33<span class="user_pure_tel">` + data['users_by_role'][i]['tel'] + `</span>`;
           cell4.innerHTML = "************";
-
-          cell5.innerHTML = `
+          if (output_user_membres_role === "admin") {
+            cell5.innerHTML = `
+            <output class="set_user_id"> `+ data['users_by_role'][i]['id'] + `</output>
             <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;" ></i>
                       <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_selected_user(this,`+ current_user_id + `)"></i>
             `;
+          }
+         
 
 
         };
@@ -2129,6 +2139,7 @@
           var cell6 = row.insertCell();
           var cell7 = row.insertCell();
           var cell8 = row.insertCell();
+          var cell9 = row.insertCell();
           cell0.innerHTML = nbr++;
           cell1.innerHTML = data['clients'][i][5];
           cell2.innerHTML = data['clients'][i][0];
@@ -2136,13 +2147,14 @@
           cell4.innerHTML = data['clients'][i][2];
           cell5.innerHTML = data['clients'][i][1];
           cell6.innerHTML = data['clients'][i][6];
-          cell7.innerHTML = data['clients'][i][7];
+          cell7.innerHTML = data['clients'][i][10];
+          cell8.innerHTML = data['clients'][i][7];
           if (current_user_role == "admin") {
-            cell8.innerHTML = `
+            cell9.innerHTML = `
             <output class="rec_client_id" style="visibility: hidden;">`+ data['clients'][i][9] + `</output>
             <output class="rec_user_id" style="visibility: hidden;">`+ data['clients'][i][8] + `</output>
             <i class="bi bi-pencil-square getInfoBtn" style="font-size: 20px;"></i>
-            <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_user('{{user.id}}')"></i>
+            <i type="button" class="delete_icon bi bi-trash text-danger " style="font-size: 20px;" onclick="delete_client(this,`+ data['clients'][i][9] + `)"></i>
           `;
           };
         }
@@ -2355,31 +2367,27 @@
 
     $("#fileInputBl").on('change', function () {
       let files = this.files;
-      // handleFilesBl(files);
+      handleFilesBl(files);
     });
 
     function handleFilesBl(files) {
 
-      // let x = document.getElementById("div_test");
-      // var imagejavascript = document.createElement("svg");
-      // var im = document.createElement("img");
-      // im.src = "images.png";
-      // // imagejavascript.src = "arman.svg";
-      // imagejavascript.appendChild(im);
-      // x.appendChild(im);
-
       if (files.length > 0) {
         let file = files[0];
-        uploadFileBl(file);
-        // if (file.type === 'dxf') {
-        //     uploadFile(file);
-        // } else {
-        //     alert('Veuillez sélectionner un fichier DXF valide.');
-        // }
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+          let errMsg = document.getElementById("errMsg");
+          errMsg.innerHTML = "Merci de sélectionnez .pdf file";
+          errMsg.style.display = "block";
+          setTimeout(() => {
+            errMsg.innerHTML = "";
+            errMsg.style.display = 'none';
+          }, 1500);
+        }
       }
     }
 
     function uploadFile(file) {
+
       let formData = new FormData();
       formData.append('file', file);
       let imageElement = document.getElementById("img_usinage");
@@ -2602,14 +2610,14 @@
       document.getElementById("prix_lin_ht").innerHTML = qte * (parseFloat(prix_mat_ht) + parseFloat(frais_decoup_ht) + prix_percages_ht);
       document.getElementById("prix_lin_ttc").innerHTML = qte * (parseFloat(prix_mat_ttc) + parseFloat(frais_decoup_ttc) + prix_percages_ttc);
 
-    }else if(text_input.value){
-      let prix_lettre_ht= document.getElementById("prix_lettre_ht").innerText;
+    } else if (text_input.value) {
+      let prix_lettre_ht = document.getElementById("prix_lettre_ht").innerText;
       let prix_lettre_ttc = document.getElementById("prix_lettre_ttc").innerText;
       let nbr_lettres = document.getElementById("nbr_lettres").innerHTML;
-      document.getElementById("prix_lin_ht").innerHTML = qte * (parseFloat(prix_lettre_ht)* parseFloat(nbr_lettres) );
-      document.getElementById("prix_lin_ttc").innerHTML = qte * (parseFloat(prix_lettre_ttc) *parseFloat(nbr_lettres));
+      document.getElementById("prix_lin_ht").innerHTML = qte * (parseFloat(prix_lettre_ht) * parseFloat(nbr_lettres));
+      document.getElementById("prix_lin_ttc").innerHTML = qte * (parseFloat(prix_lettre_ttc) * parseFloat(nbr_lettres));
       document.getElementById("qte_text").innerHTML = qte;
-    } 
+    }
   });
 
   // **************
@@ -2760,6 +2768,7 @@ function envoyer_command() {
     formData.append('nom_voie_livr', nom_voie_livr);
     formData.append('cp_livr', cp_livr);
     formData.append('ville_livr', ville_livr);
+    is_livr = true;
   }
   if (!date_livraison) {
     let msg = document.getElementById("msg_div_ouvert");
@@ -2794,6 +2803,8 @@ function envoyer_command() {
         formData.append('prix_livr_ht', prix_livr_ht);
       }
       let file = $('#fileInput')[0].files[0];
+      console.log("qqsqqsq");
+
       formData.append('file', file);
       if (name_matiere === "Newbond") {
         var selects = document.querySelectorAll('#plaque_div select');
@@ -3692,22 +3703,23 @@ function checkPlaquesValues() {
 function newClientForm() {
   var liste_clients_section = document.getElementById("liste_clients_section");
   liste_clients_section.style.display = "flex";
-  // var selectRepresentant = document.getElementById("representant");
-  // var selectedRepresentantValue= selectRepresentant.value;
-  // var selectedRepresentantText = selectRepresentant.innerHTML;
-  // var selectEpaisseurElement = document.getElementById("epp");
-  // var selectRepresentantOption = selectRepresentant.options[selectRepresentant.selectedIndex];
-  // var selectedRepresentantValue = selectRepresentantOption.value;
-  // var selectedRepresentantText = selectRepresentantOption.innerHTML;
+  var selectElement = document.getElementById("representant");
+  var selectOption = selectElement.options[selectElement.selectedIndex];
+  var selectedValue = selectOption.value;
+  var selectedText = selectOption.innerText;
 
-  // var rep_new_client = document.getElementById("rep_new_client");
-  // rep_new_client.options[0].value=selectedRepresentantValue;
-  // rep_new_client.options[0].innerHTML=selectedRepresentantText;
+  var selectRepresentant = document.getElementById("rep_new_client");
+  // Loop through options to find the one with the desired value
+  for (var i = 0; i < selectRepresentant.options.length; i++) {
+    if (selectRepresentant.options[i].selected == true) {
+      // Set the selected property to true for the found option
+      selectRepresentant.options[i].innerHTML = selectedText;
+      selectRepresentant.options[i].value = selectedValue;
 
-  // var opp = rep_new_client.options[rep_new_client.selectedIndex];
-  // var testValue = opp.value;
-  // var testText = opp.innerHTML;
-  // console.log(testText);
+      break;
+    }
+  }
+
 }
 
 // fermer Form
@@ -3791,7 +3803,7 @@ function addNewClient() {
     });
 
   } else {
-    alert("é");
+   
     var errorMessage = document.getElementById('msg_div');
     errorMessage.style.display = 'block';
     document.getElementById("msg_div").innerHTML = "Respecter les règles  pour rédiger un mail!"
@@ -4029,6 +4041,7 @@ $('#matieres_table').on('change', function (event) {
 
 function delete_client(current_row, id) {
   let text = "Attention!En supprimant cette client ,ca va supprimer automatiquement tous les commandes en cours de  cette client.Voulez vous supprimer la cliente?";
+
   if (confirm(text)) {
     let formData = new FormData();
     formData.append('id_client', id);
@@ -4055,11 +4068,9 @@ function delete_client(current_row, id) {
 
 function delete_selected_user(current_row, id) {
   let text = "Attention!En supprimant cette user ,ca va supprimer automatiquement tous les  clients et les commandes en cours de lies avec  cette client.Voulez vous supprimer la cliente?";
-  alert(id);
+ 
   if (confirm(text)) {
-    console.log("ttttttttttttt");
-    console.log(id);
-    alert("sd");
+
     let formData = new FormData();
     formData.append('id_user', id);
     $.ajax({
@@ -4724,6 +4735,23 @@ $('#matieres_text_table').on('change', function (event) {
 function newUserForm() {
   var new_users_section = document.getElementById("new_users_section");
   new_users_section.style.display = "block";
+  var selectRoleElement = document.getElementById("role_users");
+  var selectRoleOption = selectRoleElement.options[selectRoleElement.selectedIndex];
+  var selectedRoleValue = selectRoleOption.value;
+  var selectedRoleText = selectRoleOption.innerText;
+
+  var selectRole = document.getElementById("role_new_user");
+  // Loop through options to find the one with the desired value
+  for (var i = 0; i < selectRole.options.length; i++) {
+    if (selectRole.options[i].selected == true) {
+      // Set the selected property to true for the found option
+      selectRole.options[i].innerHTML = selectedRoleText;
+      selectRole.options[i].value = selectedRoleValue;
+
+      break;
+    }
+  }
+
 }
 
 function closeFormUser() {
@@ -4813,17 +4841,22 @@ $('#users_table').on('click', function (event) {
 
   // Check if the clicked element is a button with the class 'getInfoBtn'
   if (event.target.classList.contains('getInfoBtn')) {
+
     var edit_user_section = document.getElementById("edit_user_section");
     edit_user_section.style.display = "flex";
+    edit_user_section.style.zIndex = 99999;
     // Find the parent row (tr) of the clicked button
     const row = event.target.closest('tr');
+
     var username = row.cells[1].innerHTML;
     var email = row.cells[2].innerHTML;
+    var user_output = row.querySelector('.set_user_id');
+    var user_output_id = user_output.textContent.trim();
+
     var tel_span = row.querySelector('.user_pure_tel');
     var tel = tel_span.textContent.trim();
 
-    var user_output = row.querySelector('.set_user_id');
-    var user_output_id = user_output.textContent.trim();
+
 
 
     document.getElementById("name_edit_user").value = username;
@@ -4920,7 +4953,6 @@ function closeNewPasswordSpace() {
 }
 
 function SaveEditUser() {
-  alert("sd");
   var edit_user_id = document.getElementById("edit_user_id").innerHTML;
 
   var selectRoleElement = document.getElementById("role_edit_user");
@@ -4940,7 +4972,7 @@ function SaveEditUser() {
   formData.append('username', name_edit_user);
   formData.append('email', edit_email);
   formData.append('tel', edit_tel);
-  console.log(formData);
+
   if (new_pwd_div.style.display == "block" && new_pwd !== new_confirm_pwd) {
 
 
@@ -5222,3 +5254,19 @@ function change_input_plaque_surface(current) {
     current.value = 1;
   }
 };
+
+function setVuAttente(id) {
+
+  $.ajax({
+    url: '/setVuAttente',  // L'URL de l'endpoint Flask
+    type: 'POST',
+    data: { id: id },
+
+    success: function (response) {
+      console.log('Succès:', response);
+    },
+    error: function (xhr, status, error) {
+      console.log('Erreur:', error);
+    }
+  });
+}

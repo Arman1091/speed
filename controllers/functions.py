@@ -32,6 +32,8 @@ def get_dimension( path_folder):
     for entity in dxf.entities:
         # Obtenir le type de l'entité (CIRCLE, LINE, LWPOLYLINE, etc.)
         entity_type = entity.dxftype
+
+        print(entity_type)
         # Obtenir les coordonnées de l'entité
         if entity_type == "CIRCLE":
             # Pour un cercle, les coordonnées sont le centre et le rayon
@@ -40,13 +42,18 @@ def get_dimension( path_folder):
             # Calculer les points minimaux et maximaux
             min_point = (center[0] - radius, center[1] - radius, center[2])
             max_point = (center[0] + radius, center[1] + radius, center[2])
-        elif entity_type == "LINE":
-            # Pour une ligne, les coordonnées sont les points de départ et de fin
+        if entity_type == "LINE":
+    # Pour une ligne, les coordonnées sont les points de départ et de fin
             start = entity.start
             end = entity.end
-            # Calculer les points minimaux et maximaux
-            min_point = (min(start[0], end[0]), min(start[1], end[1]), min(start[2], end[2]))
-            max_point = (max(start[0], end[0]), max(start[1], end[1]), max(start[2], end[2]))
+        
+            # Vérifier si les points ont une troisième coordonnée (z), sinon définir z=0
+            start_z = start[2] if len(start) > 2 else 0
+            end_z = end[2] if len(end) > 2 else 0
+        
+            # Calculer les points minimaux et maximaux en tenant compte des coordonnées 2D et 3D
+            min_point = (min(start[0], end[0]), min(start[1], end[1]), min(start_z, end_z))
+            max_point = (max(start[0], end[0]), max(start[1], end[1]), max(start_z, end_z))
         elif entity_type == "LWPOLYLINE" or entity_type == "POLYLINE":
             # Pour une polyligne, les coordonnées sont une liste de points
             points = entity.points
@@ -59,8 +66,9 @@ def get_dimension( path_folder):
             insert_point = entity.insert
             block_name = entity.name
             block = dxf.blocks.get(block_name)
-
+            print("test_insert")
             if block:
+                print("test_insert_block")
                 block_min_x = min(ent.start[0] if hasattr(ent, 'start') else ent.center[0] - ent.radius for ent in block if hasattr(ent, 'start') or hasattr(ent, 'center'))
                 block_max_x = max(ent.end[0] if hasattr(ent, 'end') else ent.center[0] + ent.radius for ent in block if hasattr(ent, 'end') or hasattr(ent, 'center'))
                 block_min_y = min(ent.start[1] if hasattr(ent, 'start') else ent.center[1] - ent.radius for ent in block if hasattr(ent, 'start') or hasattr(ent, 'center'))
@@ -71,6 +79,7 @@ def get_dimension( path_folder):
             else:
                 continue
         # Calculer la distance entre les points minimaux et maximaux
+        print(max_point[0])
         if max_point[0] > max_x:
             max_x = max_point[0]
         if min_point[0] < min_x:

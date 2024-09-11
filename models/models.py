@@ -554,7 +554,8 @@ def get_en_attentes(current_user):
                 Commande.count,
                 Commande.name_dxf,
                 Commande.id,
-                User.username
+                User.username,
+                Commande.is_vu_attente,
             )
             .join(Client, Commande.client_id == Client.id)
             .filter(Client.user_id == current_user.id)
@@ -593,7 +594,8 @@ def get_all_attentes():
                 Commande.count,
                 Commande.name_dxf,
                 Commande.id,
-                User.username
+                User.username,
+                Commande.is_vu_attente
             )
             .join(Client, Commande.client_id == Client.id)
             .join(User, Client.user_id == User.id)
@@ -601,6 +603,7 @@ def get_all_attentes():
             .filter(Statut.name == "en_attente")
             .join(Type_usinage, Commande.usinage_id == Type_usinage.id)
             .join(Epaisseur, Commande.epaisseur_id == Epaisseur.id)
+            .order_by(desc(Commande.date_envoi))
             .all()
         )
         
@@ -1142,19 +1145,19 @@ def delete_commande_client(id):
         commands = Commande.query.filter_by(client_id=id).all()
         print(commands)
         for row in commands:
-            print(row.name_dxf)
-            path_dxf = 'static/members/'+user_data[1] +'/'+user_data[0]+'/DXF/'+row.name_dxf+'.dxf'
-            path_bl = 'static/members/'+user_data[1] +'/'+user_data[0]+'/BL/'+row.name_dxf+'.pdf'
-            path_img = 'static/members/'+user_data[1] +'/'+user_data[0]+'/IMG/'+row.name_dxf+'.png'
-            print(path_img)
-            if os.path.exists(path_dxf):
-                os.remove(path_dxf)
-            
-            if os.path.exists(path_bl):
-                os.remove(path_bl)
-            
-            if os.path.exists(path_img):
-                os.remove(path_img)
+            if row.name_dxf is not None:
+                path_dxf = 'static/members/'+user_data[1] +'/'+user_data[0]+'/DXF/'+row.name_dxf+'.dxf'
+                path_bl = 'static/members/'+user_data[1] +'/'+user_data[0]+'/BL/'+row.name_dxf+'.pdf'
+                path_img = 'static/members/'+user_data[1] +'/'+user_data[0]+'/IMG/'+row.name_dxf+'.png'
+                print(path_img)
+                if os.path.exists(path_dxf):
+                    os.remove(path_dxf)
+                
+                if os.path.exists(path_bl):
+                    os.remove(path_bl)
+                
+                if os.path.exists(path_img):
+                    os.remove(path_img)
         Commande.query.filter_by(client_id=id).delete()
         Client.query.filter_by(id=id).delete()
         db.session.commit()
@@ -1192,11 +1195,7 @@ def delete_bridge_lettre_row(matiere,type_mt ,usinage ,epaisseur):
         # Close the session
         db.session.close()
 def  change_lettre_prix(matiere,type_matiere,type_usinage,epaisseur,new_prix,hauteur ):
-    print(matiere)
-    print(type_matiere)
-    print(type_usinage)
-    print(epaisseur)
-    print(hauteur)
+
     filtered_row = db.session.query(BridgeLettres).join(Matiere,  BridgeLettres.matiere_id== Matiere.id ).filter(Matiere.name == matiere.strip()).join(Type,BridgeLettres.type_id == Type.id  ).filter(Type.name == type_matiere.strip()).join(Epaisseur,BridgeLettres.epaisseur_id == Epaisseur.id).filter(Epaisseur.value == epaisseur).join(Type_usinage, BridgeLettres.usinage_id ==Type_usinage.id  ).filter(Type_usinage.name == type_usinage.strip()).join(Hauteur, BridgeLettres.hauteur_id ==Hauteur.id  ).filter(Hauteur.value == hauteur).first() 
     filtered_row.prix=new_prix
     db.session.commit()
@@ -1221,3 +1220,9 @@ def get_plaque_id(text_plaque):
         # For now, just print the error message
         print(f"An error occurred: {e}")
         return None
+
+def changeAttanteToVu(id):
+
+    current_commande = Commande.query.filter_by(id=id).first()
+    current_commande.is_vu_attente = 1
+    db.session.commit()

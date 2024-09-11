@@ -13,7 +13,7 @@ from models.models import (
     get_all_representants, get_cients_by_rep, edit_client_data, get_prix_lettre,
     change_matiere_prix, change_limeaire_prix, get_types_usinage_prix, get_pmma_usil_list,
     delete_commande_client, delete_bridge_form_row, get_liste_prix_lettre,
-    delete_bridge_lettre_row, change_lettre_prix, get_plaque_id,get_plaques
+    delete_bridge_lettre_row, change_lettre_prix, get_plaque_id,get_plaques,changeAttanteToVu
 )
 from flask_login import login_user, login_required, logout_user, current_user
 from controllers.functions import get_dimension , create_pdf, create_bl,calculate_perimeter_and_drilling_count
@@ -247,34 +247,29 @@ def en_attente_detailles():
             raise ValueError("ID is required")
 
         # Fetch the data using the provided ID
+        
         data = get_en_attente_by_id(id)
-        
+ 
+
         if data is None:
-            raise NoResultFound(f"No data found for ID: {id}")
-        
-        
+
+            raise NoResultFound("No data found for ID")
+        prix_ttc = "{:.2f}".format(data[2]*1.2)
         # Fetch the current user's role
         current_client_role = data[24]
         current_client_username = data[15]
+        if current_client_role is None or current_client_username is None:
+    
+            raise ValueError("Role or username is missing in the data")
         # Construct the path folder
         path_folder = "/members/" + current_client_role + '/' + current_client_username
-        try:
-            current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
-        except Exception as e:
-            return f"Error fetching current user role: {str(e)}"
+      
+        current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
+   
         # Render the template with the data
-        return render_template("en_attente_detailles.html", user=current_user,current_user_role = current_user_role, data=data, path_folder=path_folder)
-
-    except NoResultFound as e:
-        # Log the error message if you have a logging system in place
-        # For now, just print the error message
-        print(f"An error occurred: {e}")
-        return render_template("error.html", message=str(e)), 404
-
-    except ValueError as e:
-        # Handle missing ID or other value errors
-        print(f"An error occurred: {e}")
-        return render_template("error.html", message=str(e)), 400
+        return render_template("en_attente_detailles.html", user=current_user,current_user_role = current_user_role, data=data, path_folder=path_folder ,  prix_ttc = prix_ttc)
+        
+   
 
     except Exception as e:
         # Log the error message if you have a logging system in place
@@ -345,8 +340,8 @@ def upload():
         file = request.files['file']
         if file:
             filename = secure_filename(file.filename)
-            if os.path.splitext(filename)[1] == '.dxf':
-                
+            if os.path.splitext(filename)[1] == '.dxf' or os.path.splitext(filename)[1] == '.DXF' :
+   
                 data = request.form.to_dict()
                 mt= data['mt']
                 mt_name = data ['mt_name']
@@ -361,12 +356,14 @@ def upload():
     
                 file_path = os.path.join(fulle_path_folder, preferred_name)
     
-    
+                
                 # Check if the folder exists, if not, create it
                 if not os.path.exists(fulle_path_folder):
                     os.makedirs(fulle_path_folder)
                 file.save(file_path)
+     
                 dimension = get_dimension(fulle_path_folder)
+          
                 plt.rcParams["savefig.facecolor"] = 'black'
                 plt.rcParams['axes.facecolor'] = 'black'
                 dwg = ezdxf.readfile(fulle_path_folder+"/current.dxf")
@@ -425,9 +422,10 @@ def new_command():
             is_livr = data['is_livr']
             prix_ht = data['prix_ht']
             current_date = datetime.now()
-
+            print(is_livr)
             # Gérer le fichier s'il est présent
             is_form = False
+            print("testttttttttt1")
             if 'file' in request.files:
                 file = request.files['file']
                 filename = secure_filename(file.filename)
@@ -437,11 +435,12 @@ def new_command():
 
                 current_user_role = Role.query.filter(Role.id == current_user.role_id).first().name
                 path_folder = f"static/members/{current_user_role}/{current_user.username}/DXF/"
+                
                 first_full_name = f"{preferred_name}{support_name}"
                 full_name = f"{preferred_name}{support_name}.dxf"
                 is_form = True
                 file_path = os.path.join(os.path.dirname(__file__), path_folder, full_name)
-
+                print(file_path)
                 # Créer le dossier si nécessaire
                 if not os.path.exists(os.path.dirname(__file__)+'/'+path_folder):
                     os.makedirs(os.path.dirname(__file__)+'/'+path_folder)
@@ -470,53 +469,59 @@ def new_command():
                     file_path_img = os.path.join(path_img, f'{first_full_name}.png')
                     fig.savefig(file_path_img, dpi=300, facecolor='black', edgecolor='black')
 
-            # Création de la commande
-            if is_livr.lower() == 'true':
-                is_livr = True
-                livraison_fields = ['numero_voie_livr', 'nom_voie_livr', 'cp_livr', 'ville_livr', 'prix_livr_ht']
-                for field in livraison_fields:
-                    if field not in data or not data[field]:
-                        return jsonify({"error": f"Le champ '{field}' est requis pour la livraison."}), 400
-
-                numero_voie_livr = data['numero_voie_livr']
-                nom_voie_livr = data['nom_voie_livr']
-                cp_livr = data['cp_livr']
-                ville_livr = data['ville_livr']
-                prix_livr_ht = data['prix_livr_ht']
-               
-                new_commande = Commande(
-                    client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere=type_matiere,
-                    usinage_id=type_usinage, count=count, epaisseur_id=epaisseur_id, prix_ht=prix_ht,
-                    prix_livr_ht=prix_livr_ht, name_dxf=first_full_name, description_commercial_responsable=description,
-                    date_envoi=current_date, date_fin=date_fin, is_livr=is_livr, is_form=is_form,
-                    numero_livr=numero_voie_livr, addresse_livr=nom_voie_livr, cp_livr=cp_livr, ville_livr=ville_livr
-                )
-            else:
-
-                is_livr = False
-
-                new_commande = Commande(
-                    client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere=type_matiere,
-                    usinage_id=type_usinage, count=count, epaisseur_id=epaisseur_id, prix_ht=prix_ht,
-                    description_commercial_responsable=description,
-                    date_envoi=current_date, date_fin=date_fin, is_livr=is_livr, is_form=is_form
-                )
-
+                # Création de la commande
+                if is_livr.lower() == 'true':
+                    is_livr = True
+                    livraison_fields = ['numero_voie_livr', 'nom_voie_livr', 'cp_livr', 'ville_livr', 'prix_livr_ht']
+                    for field in livraison_fields:
+                        if field not in data or not data[field]:
+                            return jsonify({"error": f"Le champ '{field}' est requis pour la livraison."}), 400
+    
+                    numero_voie_livr = data['numero_voie_livr']
+                    nom_voie_livr = data['nom_voie_livr']
+                    cp_livr = data['cp_livr']
+                    ville_livr = data['ville_livr']
+                    prix_livr_ht = data['prix_livr_ht']
+                   
+                    new_commande = Commande(
+                        client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere=type_matiere,
+                        usinage_id=type_usinage, count=count, epaisseur_id=epaisseur_id, prix_ht=prix_ht,  
+                        prix_livr_ht=prix_livr_ht, description_commercial_responsable=description,
+                        date_envoi=current_date, date_fin=date_fin, is_livr=is_livr, is_form=is_form,name_dxf = first_full_name,
+                        numero_livr=numero_voie_livr, addresse_livr=nom_voie_livr, cp_livr=cp_livr, ville_livr=ville_livr
+                    )
+                else:
+    
+                    is_livr = False
+    
+                    new_commande = Commande(
+                        client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere=type_matiere,
+                        usinage_id=type_usinage, count=count, epaisseur_id=epaisseur_id, prix_ht=prix_ht,
+                        description_commercial_responsable=description,
+                        date_envoi=current_date, date_fin=date_fin, is_livr=is_livr, is_form=is_form,name_dxf=first_full_name
+                    )
+    
             # Traitement pour le texte
             if 'text_input' in data:
                 is_form = False
-                text_input = data['text_input']
-                height = data['height']
-                name_police = data['name_police']
+                text_input = data ['text_input']
+                height = data ['height']
+                name_police = data ['name_police']
 
-                if is_livr:
-                    new_commande.text = text_input
-                    new_commande.hauteur_text = height
-                    new_commande.name_police = name_police
-                else:
-                    new_commande.text = text_input
-                    new_commande.hauteur_text = height
-                    new_commande.name_police = name_police
+                if is_livr.lower() == 'true':
+                    is_livr = True
+                    numero_voie_livr = data ['numero_voie_livr']
+                    nom_voie_livr = data ['nom_voie_livr']
+                    cp_livr = data['cp_livr']
+                    ville_livr = data ['ville_livr']
+                    prix_livr_ht = data ['prix_livr_ht']
+                    new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id,
+                        description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form,numero_livr= numero_voie_livr ,addresse_livr = nom_voie_livr, cp_livr = cp_livr,ville_livr = ville_livr,
+                        text = text_input,hauteur_text = height, name_police = name_police,prix_ht = prix_ht, prix_livr_ht=prix_livr_ht
+                     )
+                elif is_livr.lower() == 'false':
+                    is_livr = False
+                    new_commande = Commande(client_id=client_id, statut_id=1, name_matiere=name_matiere, type_matiere= type_matiere ,usinage_id = type_usinage,count=count,epaisseur_id = epaisseur_id  ,description_commercial_responsable=description, date_envoi=current_date, date_fin = date_fin, is_livr = is_livr,is_form = is_form, text = text_input,hauteur_text = height, name_police = name_police,prix_ht = prix_ht)
 
             # Enregistrer la commande
             Commande.save(new_commande)
@@ -1148,18 +1153,16 @@ def clients():
         current_user_role = (Role.query.filter(Role.id == current_user.role_id).first()).name
     except Exception as e:
         return f"Error fetching current user role: {str(e)}"
-    if current_user_role == "admin" :
-        representants = get_all_representants()
-        print(representants)
-        first_rep = representants[0].id
-        clients= get_cients_by_rep(first_rep)
-    elif current_user_role == "comercial":
+    
+    if current_user_role == "comercial":
         representants = []
         representants.append(current_user)
 
         clients= get_cients_by_rep(current_user.id)
-        print("xxxxxxxxxxx")
-        print(current_user.username)
+    else:
+        representants = get_all_representants()
+        first_rep = representants[0].id
+        clients= get_cients_by_rep(first_rep)
 
     return render_template('clients.html', user = current_user,current_user_role = current_user_role,representants = representants, clients=clients, page ="Clients")
 
@@ -1718,20 +1721,22 @@ def new_user():
 
         data = request.form.to_dict()
         role= data['role']
-        print ("eeee")
-        print(data)
+   
         email = data ['email']
         username = data ['username']
         password= data['password']
 
         tel = data ['tel']
-        new_user = User(username=username, email=email, password=password, tel=tel,role_id = role)
-        User.set_password(new_user, password)
-#  User.set_password(new_user, password1)
-        # db.session.add(new_commande)
-        # db.session.commit()
+        user = User.filter_by_email(email)
 
-        User.save(new_user)
+        if user:
+            flash('Cette adresse e-mail est déjà utilisée.', category='error')
+        else:
+
+            new_user = User(username=username, email=email, password=password, tel=tel,role_id = role)
+            User.set_password(new_user, password)
+    
+            User.save(new_user)
 
 
         # user_id = current_user.id
@@ -1817,5 +1822,19 @@ def get_client_data():
 
 
 
-
+@app.route('/setVuAttente', methods=['POST'])
+def setVuAttente():
+    try:
+        vu_commande_id = request.form.get('id')  # Récupérer l'ID envoyé via POST
+        if not vu_commande_id:
+            raise ValueError("L'ID est manquant ou invalide")  # Vérification des données
+        
+        # Appel de la fonction pour changer le statut
+        changeAttanteToVu(vu_commande_id)
+        
+        # Retourne un message de succès si tout s'est bien passé
+        return jsonify({'message': 'Statut changé avec succès', 'id': vu_commande_id}), 200
+    except Exception as e:
+        # Gère toute exception qui pourrait survenir
+        return jsonify({'error': str(e)}), 500 
 

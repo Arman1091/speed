@@ -118,7 +118,7 @@
                                                             <td id="epp_detailles">{{data[11]}} mm</td>
                                                             <td id="qte_detailles">{{data[12]}}</td>
                                                             <td class="d-flex justify-content-center align-content-center">
-                                                                {% if current_user_role =="comercial" %}
+                                                                {% if current_user_role =="responsable" %}
                                                                 <input type="date" value={{data[4]}}
                                                                     class="form-control" id="dateeInput" name="date">
                                                                 {% else %}
@@ -188,7 +188,7 @@
                                                     <div class="col-4 d-flex justify-content-center align-items-center"
                                                         style="width: 100%;">
                                                         <output class="text-center"
-                                                            id="prix_detaille_ttc">{{data[2]*1.2}}<span>€</span></output>
+                                                            id="prix_detaille_ttc">{{prix_ttc}}<span>€</span></output>
                                                     </div>
 
 
@@ -260,13 +260,16 @@
                     <h3 class="drop-text">Glissez et déposez le BL </h3>
                     <input type="file" id="fileInputBl" accept=".pdf" />
                     <div id="result-container"></div>
+                    <div id ="errMsg"  class="text-danger">
+                    </div>
                 </div>
             {% endif %}
         </div>
 
         <div class="col-md-6">
-            {% if data[13] is not none %}
-
+           
+            {% if  data[18]==True %}
+         
             <iframe class="img_usinage_attente_detaille mt-5"
                 src="{{ url_for('static', filename= path_folder +'/IMG/'+data[13]+'.png') }}"></iframe>
             {% else %}
@@ -301,7 +304,7 @@
             </div>
 
         </div>
-        {{current_user_role}}
+     
         {% if current_user_role =="responsable" %}
         <div class="d-flex justify-content-center align-items-center mt-5">
             <button type="button" class="btn btn-success" onclick="confirmation(' {{data[14]}}')">Confirmer</button>

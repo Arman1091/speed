@@ -7,10 +7,8 @@
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for message in messages %}
-{{current_user_role}}
-<div id ="user_role_div_membres">
-    <output id="output_user_membres_role">{{current_user_role}}</output>
-</div>
+
+
 <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between" role="alert">
     <strong>!{{ message }}</strong> 
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -31,6 +29,9 @@
         <option value='{{ role.id}}'>{{ role.name}}</option>
         {% endfor %}
     </select>
+</div>
+<div id ="user_role_div_membres"></div>
+    <output id="output_user_membres_role">{{current_user_role}}</output>
 </div>
 <table id="users_table" class="table">
     
@@ -56,6 +57,7 @@
             <td>+33<span class="user_pure_tel">{{user_row.tel}}</span></td>
             <td>*********
             </td>
+
             {% if current_user_role =="admin" %}
             <td>
                 <output class="set_user_id"  >{{user_row.id}}</output>
